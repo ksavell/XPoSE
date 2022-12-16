@@ -1,0 +1,184 @@
+---
+title: "QC and creating seurat object with all metadata, Exp1 aligned to mm10-liftoff"
+author: "Hope Lab snRNA team"
+date: "09/30/2022"
+output:
+  word_document: default
+  fig_width: 6
+  fig_height: 4
+---
+## Set knitting settings
+
+```{r Setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Load packages
+
+```{r LoadPackages}
+library(Seurat)
+library(ggplot2)
+```
+
+## Set working directory. Import data, create Seurat object, and assign sample tag call to each nuclei.
+
+```{r import}
+# set working directory where the raw data files are found
+setwd("/Users/savellke/Documents/Analysis/mm10_exp1") 
+
+# Read gene count data tables in 
+counts.C1 <- read.table("Combined_cart1-good-only_RSEC_MolsPerCell.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+counts.C2 <- read.table("Combined_cart2-good-only_RSEC_MolsPerCell.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+
+# Import and add sample tag identification and format to one column
+tags.C1 <- read.table("cart1-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags.C1 <- subset(tags.C1, select = -c(2))
+tags.C2 <- read.table("cart2-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags.C2 <- subset(tags.C2, select = -c(2))
+
+#create Seurat objects for each cartridge while transposing since BD output is opposite of Seurat input
+data.C1 <- CreateSeuratObject(counts = t(counts.C1), project = "C1")
+data.C2 <- CreateSeuratObject(counts = t(counts.C2), project = "C2")
+
+#Add Sample_tags as metadata to the Seurat object
+data.C1$Sample_tag <- cbind(tags.C1)
+data.C2$Sample_tag <- cbind(tags.C2)
+
+#find mitochondrial percentages: use pattern "^Mt." for rat, “^mt.” for mouse, “^MT.” for human
+data.C1$percent_mt <- PercentageFeatureSet(data.C1, pattern = "^mt.")
+data.C2$percent_mt <- PercentageFeatureSet(data.C2, pattern = "^mt.")
+
+#filter out mitochondrial genes for downstream analysis
+#data.C1 <- data.C1[!grepl("^mt\\.", rownames(data.C1)), ]
+#data.C2 <- data.C2[!grepl("^mt\\.", rownames(data.C2)), ]
+```
+
+## Cartridge QC plots, looking at number of genes and transcripts detected
+
+```{r QCplots}
+#Plots of how many genes detected etc
+VlnPlot(data.C1, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart1 genes")
+VlnPlot(data.C2, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart2 genes")
+
+VlnPlot(data.C1, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart1 transcripts")
+VlnPlot(data.C2, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart2 transcripts")
+```
+
+## Break each sample tag into an individual object and assign meta data. Combine back together as single object
+
+```{r AssignAndCombine}
+# Break each cartridge into the biological groups you want to look at by sample tag subset
+data.C1.5 <- subset(data.C1, subset = Sample_tag == 'SampleTag05_mm')
+data.C1.9 <- subset(data.C1, subset = Sample_tag == 'SampleTag09_mm')
+data.C1.3 <- subset(data.C1, subset = Sample_tag == 'SampleTag03_mm')
+data.C1.7 <- subset(data.C1, subset = Sample_tag == 'SampleTag07_mm')
+data.C2.3 <- subset(data.C2, subset = Sample_tag == 'SampleTag03_mm')
+data.C2.7 <- subset(data.C2, subset = Sample_tag == 'SampleTag07_mm')
+data.C2.5 <- subset(data.C2, subset = Sample_tag == 'SampleTag05_mm')
+data.C2.9 <- subset(data.C2, subset = Sample_tag == 'SampleTag09_mm')
+data.C1.2 <- subset(data.C1, subset = Sample_tag == 'SampleTag02_mm')
+data.C1.4 <- subset(data.C1, subset = Sample_tag == 'SampleTag04_mm')
+data.C1.6 <- subset(data.C1, subset = Sample_tag == 'SampleTag06_mm')
+data.C1.8 <- subset(data.C1, subset = Sample_tag == 'SampleTag08_mm')
+data.C2.2 <- subset(data.C2, subset = Sample_tag == 'SampleTag02_mm')
+data.C2.4 <- subset(data.C2, subset = Sample_tag == 'SampleTag04_mm')
+data.C2.6 <- subset(data.C2, subset = Sample_tag == 'SampleTag06_mm')
+data.C2.8 <- subset(data.C2, subset = Sample_tag == 'SampleTag08_mm')
+
+# Assign metadata to each Cartridge/ Sample tag combo
+data.C1.2$group <- "homecage"
+data.C1.2$ratID <- "KES029R7"
+data.C1.2$sex <- "male"
+
+data.C1.3$group <- "negative"
+data.C1.3$ratID <- "KES029R1"
+data.C1.3$sex <- "male"
+
+data.C1.4$group <- "homecage"
+data.C1.4$ratID <- "KES029R6"
+data.C1.4$sex <- "female"
+
+data.C1.5$group <- "positive"
+data.C1.5$ratID <- "KES029R5"
+data.C1.5$sex <- "female"
+
+data.C1.6$group <- "homecage"
+data.C1.6$ratID <- "KES029R8"
+data.C1.6$sex <- "male"
+
+data.C1.7$group <- "negative"
+data.C1.7$ratID <- "KES029R2"
+data.C1.7$sex <- "male"
+
+data.C1.8$group <- "homecage"
+data.C1.8$ratID <- "KES016R12"
+data.C1.8$sex <- "female"
+
+data.C1.9$group <- "positive"
+data.C1.9$ratID <- "KES016R10"
+data.C1.9$sex <- "female"
+
+data.C2.2$group <- "homecage"
+data.C2.2$ratID <- "KES029R7"
+data.C2.2$sex <- "male"
+
+data.C2.3$group <- "positive"
+data.C2.3$ratID <- "KES029R1"
+data.C2.3$sex <- "male"
+
+data.C2.4$group <- "homecage"
+data.C2.4$ratID <- "KES029R6"
+data.C2.4$sex <- "female"
+
+data.C2.5$group <- "negative"
+data.C2.5$ratID <- "KES029R5"
+data.C2.5$sex <- "female"
+
+data.C2.6$group <- "homecage"
+data.C2.6$ratID <- "KES029R8"
+data.C2.6$sex <- "male"
+
+data.C2.7$group <- "positive"
+data.C2.7$ratID <- "KES029R2"
+data.C2.7$sex <- "male"
+
+data.C2.8$group <- "homecage"
+data.C2.8$ratID <- "KES016R12"
+data.C2.8$sex <- "female"
+
+data.C2.9$group <- "negative"
+data.C2.9$ratID <- "KES016R10"
+data.C2.9$sex <- "female"
+
+#combine into a single object
+combined <- merge(
+  x = data.C1.2,
+  y = list(data.C1.3, data.C1.5, data.C1.7, data.C1.9, data.C2.3, data.C2.5, data.C2.7, data.C2.9, data.C1.4, data.C1.6, data.C1.8, data.C2.2, data.C2.4, data.C2.6, data.C2.8))
+
+# Filter nuclei with low number of detected genes
+combined <- subset(combined, subset = nFeature_RNA > 50 )
+
+# clean up environment
+rm(counts.C1,
+   counts.C2,
+   tags.C1,
+   tags.C2,
+   data.C1,
+   data.C2,
+   data.C1.5,
+   data.C1.9,
+   data.C1.3,
+   data.C1.7,
+   data.C2.3,
+   data.C2.7,
+   data.C2.5,
+   data.C2.9,
+   data.C1.2,
+   data.C1.4,
+   data.C1.6,
+   data.C1.8,
+   data.C2.2,
+   data.C2.4,
+   data.C2.6,
+   data.C2.8)
+```
