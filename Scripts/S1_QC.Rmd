@@ -24,14 +24,13 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023
 #GLUT SUBSET
 #Glut Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutVln_Gene_ExpV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_ExpV3.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
         features = c("nFeature_RNA"), 
         pt.size = 0, 
         ncol = 1,
-        y.max = 4000, 
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
@@ -41,14 +40,13 @@ dev.off()
 
 #Glut Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutVln_transcriptsV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcriptsV3.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
         features = c("nCount_RNA"), 
         pt.size = 0, 
         ncol = 1,
-        y.max = 6000,  
         flip = T) + 
   coord_flip() +
   theme(legend.position = "none") + 
@@ -119,14 +117,13 @@ dev.off()
 #GABA SUBSET
 #Gaba Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_Exp.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_ExpV2.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
         features = c("nFeature_RNA"), 
         pt.size = 0, 
         ncol = 1, 
-        y.max = 4000, 
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
@@ -136,14 +133,13 @@ dev.off()
 
 #Gaba Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcripts.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcriptsV2.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
         features = c("nCount_RNA"), 
         pt.size = 0, 
         ncol = 1, 
-        y.max = 6000, 
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
