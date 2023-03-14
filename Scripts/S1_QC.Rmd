@@ -31,7 +31,8 @@ VlnPlot(glut.subset2,
         features = c("nFeature_RNA"), 
         pt.size = 0, 
         ncol = 1,
-        y.max = 4000, flip = T) + 
+        y.max = 4000, 
+        flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
   ggtitle(NULL)
@@ -45,8 +46,10 @@ pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPo
     height = 2)
 VlnPlot(glut.subset2, 
         features = c("nCount_RNA"), 
-        pt.size = 0, ncol = 1,
-        y.max = 6000,  flip = T) + 
+        pt.size = 0, 
+        ncol = 1,
+        y.max = 6000,  
+        flip = T) + 
   coord_flip() +
   theme(legend.position = "none") + 
   ggtitle(NULL)
@@ -140,7 +143,8 @@ VlnPlot(gaba.subset2,
         features = c("nCount_RNA"), 
         pt.size = 0, 
         ncol = 1, 
-        y.max = 6000, flip = T) + 
+        y.max = 6000, 
+        flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
   ggtitle(NULL)
