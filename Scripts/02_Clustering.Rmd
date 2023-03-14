@@ -5,4 +5,78 @@ date: "2023-03-14"
 output: html_document
 ---
 
+## Set knitting settings
 
+```{r Setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Load packages
+
+```{r message = FALSE}
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(clustree)
+library(harmony)
+library(tidyverse)
+library(future)
+
+#set parallel conditions, do 1/2 or n - 2 the number of cores you have
+plan('multisession', 
+     workers = 3)
+```
+
+## Load combined Seurat object
+
+The combined object has all metadata assigned and filtered out:
+- multiplex and undefined Sample tag calls
+- nuclei with < 50 features
+```{r message=FALSE}
+load("/Users/savellke/Documents/Analysis/mm10_exp1/mm10-LO_combined_09302022.RData")
+```
+
+## QC plots of imported Seurat object
+
+```{r}
+Idents(combined) <- "orig.ident"
+VlnPlot(combined, 
+        features = c("nFeature_RNA", "nCount_RNA"), 
+        ncol = 2)
+
+Idents(combined) <- "Sample_tag"
+VlnPlot(combined, 
+        features = c("nFeature_RNA", "nCount_RNA"), 
+        ncol = 2)
+
+Idents(combined) <- "group"
+VlnPlot(combined, 
+        features = c("nFeature_RNA", "nCount_RNA"), 
+        ncol = 2)
+
+Idents(combined) <- "sex"
+VlnPlot(combined, 
+        features = c("nFeature_RNA", "nCount_RNA"), 
+        ncol = 2)
+```
+## First clustering iteration
+```{r}
+combined <- combined %>%
+  NormalizeData() %>%
+  FindVariableFeatures(selection.method = "vst", 
+                       nfeatures = 2000) %>%
+  ScaleData(verbose = FALSE) %>%
+  RunPCA(ndims.print = 1:50, 
+         nfeatures.print = 50) %>%
+  FindNeighbors(dims = 1:50) %>% 
+  RunUMAP(reduction = "pca", 
+          dims = 1:50)
+```
+```{r}
+combined <- FindClusters(combined, 
+                         resolution = 5)
+DimPlot(combined, 
+        reduction = "umap", 
+        label = TRUE, 
+        repel = TRUE)
+```
