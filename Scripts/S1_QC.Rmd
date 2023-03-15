@@ -24,7 +24,7 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023
 #GLUT SUBSET
 #Glut Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_ExpV3.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_ExpV4.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
@@ -34,13 +34,14 @@ VlnPlot(glut.subset2,
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
   ggtitle(NULL)
 dev.off()
 ```
 
 #Glut Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcriptsV3.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcriptsV4.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
@@ -50,6 +51,7 @@ VlnPlot(glut.subset2,
         flip = T) + 
   coord_flip() +
   theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
   ggtitle(NULL)
 dev.off()
 ```
@@ -57,9 +59,9 @@ dev.off()
 
 #UMAP Glut Group by Cartridge
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_CartV2.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_CartV3.pdf",
+    width = 10,
+    height = 10)
 DimPlot(glut.subset2, 
         group.by = "orig.ident", 
         shuffle = T) + 
@@ -71,9 +73,9 @@ dev.off()
 
 #UMAP Glut Group by Group
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_Group.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_GroupV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(glut.subset2, 
         group.by = "group", 
         shuffle = T) + 
@@ -85,9 +87,9 @@ dev.off()
 
 #UMAP Glut Group by Sex
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_Sex.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_SexV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(glut.subset2,
         group.by = "sex", 
         cols = c("skyblue2", "violetred3"), 
@@ -100,9 +102,9 @@ dev.off()
 
 #UMAP Glut Group by RatID
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_RatID.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_RatIDV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(glut.subset2, 
         group.by = "ratID", 
         shuffle = T) + 
@@ -117,7 +119,7 @@ dev.off()
 #GABA SUBSET
 #Gaba Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_ExpV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_ExpV3.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
@@ -127,13 +129,14 @@ VlnPlot(gaba.subset2,
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
   ggtitle(NULL)
 dev.off()
 ```
 
 #Gaba Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcriptsV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcriptsV3.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
@@ -143,15 +146,16 @@ VlnPlot(gaba.subset2,
         flip = T) + 
   coord_flip() + 
   theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
   ggtitle(NULL)
 dev.off()
 ```
 
 #UMAP Gaba Group by Cartridge
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_CartV2.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_CartV3.pdf",
+    width = 10,
+    height = 10)
 DimPlot(gaba.subset2, 
         group.by = "orig.ident", 
         shuffle = T) + 
@@ -163,9 +167,9 @@ dev.off()
 
 #UMAP Gaba Group by Group
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_Group.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_GroupV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(gaba.subset2, 
         group.by = "group", 
         shuffle = T) + 
@@ -177,9 +181,9 @@ dev.off()
 
 #UMAP Gaba Group by Sex
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_Sex.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_SexV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(gaba.subset2, 
         group.by = "sex", 
         cols = c("skyblue2", "violetred3"), 
@@ -192,9 +196,9 @@ dev.off()
 
 #UMAP Gaba Group by RatID
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_RatID.pdf",
-    width = 4,
-    height = 4)
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_RatIDV2.pdf",
+    width = 10,
+    height = 10)
 DimPlot(gaba.subset2, 
         group.by = "ratID", 
         shuffle = T) + 
@@ -224,3 +228,43 @@ pdf(file = "/Users/savellke/XPoSE/Output/glut_deg_dotplot_scale.pdf",
 
 dev.off()
 ```
+
+#Glut Heatmap 
+#Find Glut Markers
+```{r}
+glut.markers <- FindAllMarkers(glut.subset2, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+glut.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 10, wt = avg_log2FC) -> top10.glut
+```
+#Create Heatmap
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Heatmaps/glut_top10genes_heatmap.pdf",
+    width = 10,
+    height = 10)
+glut.heatmap <- DoHeatmap(glut.subset2, features = top10.glut$gene) 
+glut.heatmap
+
+dev.off()
+```
+
+
+#Gaba Heatmap 
+#Find Gaba Markers
+```{r}
+gaba.markers <- FindAllMarkers(gaba.subset2, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25) 
+gaba.markers %>% 
+  group_by(cluster) %>% 
+top_n(n = 10, wt = avg_log2FC) -> top10.gaba
+```
+#Create Heatmap
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Heatmaps/gaba_top10genes_heatmap.pdf",
+    width = 10,
+    height = 10)
+gaba.heatmap <- DoHeatmap(gaba.subset2, features = top10.gaba$gene) 
+gaba.heatmap
+
+dev.off()
+```
+
