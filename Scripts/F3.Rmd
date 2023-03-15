@@ -1,0 +1,55 @@
+---
+title: "F3"
+author: "Kareem"
+date: "2023-03-15"
+output: html_document
+---
+
+#Load Packages
+```{r}
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(clustree)
+library(harmony)
+library(tidyverse)
+library(future)
+```
+#Load Objects
+```{r}
+setwd("/Users/woodskad/Desktop/Analysis/F3/")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023.RData")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
+```
+
+#Make Glut Table 
+```{r}
+glut.subset2$cluster_group <- paste(glut.subset2$seurat_clusters, glut.subset2$group, sep = "_")
+table(glut.subset2$cluster_group)
+table(glut.subset2$group)
+```
+#Make Dataframe for Glut
+```{r}
+Cluster <- c(0, 1, 2, 3, 4, 5)
+Homecage <- c(2957/10550, 2733/10550, 2806/10550, 1306/10550, 463/10550, 285/10550)
+Negative <- c(1286/4530, 1251/4530, 1114/4530, 605/4530, 178/4530, 96/4530)
+Postive <- c(744/1854, 516/1854, 332/1854, 231/1854, 26/1854, 5/1854)
+df <- data.frame(Cluster, Homecage, Negative, Postive)
+print(df)
+```
+
+#Make Gaba Table 
+```{r}
+gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, gaba.subset2$group, sep = "_")
+table(gaba.subset2$cluster_group)
+table(gaba.subset2$group)
+```
+#Make Dataframe for Gaba
+```{r}
+Cluster <- c(0, 1, 2, 3, 4, 5,6)
+Homecage <- c(682/1904, 358/1904, 401/1904, 233/1904, 76/1904, 112/1904, 42/1904 )
+Negative <- c(278/1036 , 141/1036 , 328/1036 , 85/1036 , 137/1036 , 52/1036, 15/1036)
+Postive <- c(297/779 , 398/779 , 21/779 , 11/779 , 51/779 , 1/779, 0/779)
+df.gaba <- data.frame(Cluster, Homecage, Negative, Postive)
+print(df.gaba)
+```
