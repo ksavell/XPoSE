@@ -10,9 +10,7 @@ library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(clustree)
-library(harmony)
 library(tidyverse)
-library(future)
 ```
 #Load Object
 ```{r}
@@ -205,27 +203,6 @@ DimPlot(gaba.subset2,
   theme_void() + 
   theme(legend.position = "none") + 
   ggtitle(NULL)
-dev.off()
-```
-
-
-#PDF Save space
-```{r}
-pdf(file = "/Users/savellke/XPoSE/Output/glut_deg_dotplot_scale.pdf",
-    width = 4,
-    height = 4)
-#DimPlots 10x10 + theme_void() + theme(legend.position = "none") + ggtitle(NULL)
-
-#VlnPlots -reference the github for this paper
-
-
-#DimPlot(glut.subset2.en, group.by = "group", cols = c("#bfbfbf", "violetred3"), shuffle = T) + theme_void() + theme(legend.position = "none") + ggtitle(NULL)
-#DimPlot(glut.subset2, group.by = "sex", cols = c("#00BE67", "#F665E3"), shuffle = T) + theme_void() + theme(legend.position = "none") + ggtitle(NULL)
-
-#this might be helpful for the VlnPlot
-#DotPlot(glut.subset2,features = glut.features, dot.min = .1, scale = F) + coord_flip() + theme_bw() + theme(legend.position = "none", axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
-#DotPlot(glut.subset2,features = glut.features, dot.min = .1, scale = F) + coord_flip() + theme_bw() + theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
-
 dev.off()
 ```
 

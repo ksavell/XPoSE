@@ -11,9 +11,7 @@ library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(clustree)
-library(harmony)
 library(tidyverse)
-library(future)
 ```
 #Load Objects
 ```{r}
@@ -29,6 +27,7 @@ table(glut.subset2$cluster_group)
 table(glut.subset2$group)
 ```
 #Make Dataframe for Glut
+-KS: Can you make this dataframe from the tables generated above? 
 ```{r}
 Cluster <- c(0, 1, 2, 3, 4, 5)
 Homecage <- c(2957/10550, 2733/10550, 2806/10550, 1306/10550, 463/10550, 285/10550)
@@ -45,6 +44,7 @@ table(gaba.subset2$cluster_group)
 table(gaba.subset2$group)
 ```
 #Make Dataframe for Gaba
+-KS: Same here
 ```{r}
 Cluster <- c(0, 1, 2, 3, 4, 5,6)
 Homecage <- c(682/1904, 358/1904, 401/1904, 233/1904, 76/1904, 112/1904, 42/1904 )
