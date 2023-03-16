@@ -23,9 +23,26 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022
 
 #Make Glut Table 
 ```{r}
-glut.subset2$cluster_group <- paste(glut.subset2$seurat_clusters, glut.subset2$group, sep = "_")
+glut.subset2$cluster_group <- paste(glut.subset2$seurat_clusters, 
+                                    glut.subset2$group, 
+                                    sep = "_")
 df.glut1 <- data.frame(table(glut.subset2$cluster_group))
 df.glut2 <- data.frame(table(glut.subset2$group))
+```
+#KS workspace
+```{r}
+df.glut1$group.freq <- insert_value(df.glut1,df.glut2, df.glut2$group.freq)
+
+insert_value <- function(table1, table2, col_name) {
+  # Identify rows in table1 that contain part of the name in table2
+  match_rows <- grepl(paste0(df.glut2$Var1, collapse = "|"), df.glut1$Var1)
+  
+  # Insert the value from table2 into table1
+  df.glut1[match_rows, col_name] <- df.glut2$Freq
+  
+  # Return the updated table1
+  return(df.glut1)
+}
 ```
 
 #Subset out groups 
