@@ -31,75 +31,15 @@ df.glut2 <- data.frame(table(glut.subset2$group))
 df.glut1$group.total <- (df.glut2$Freq)
 df.glut1$fract <- (df.glut1$Freq/df.glut1$group.total)
 ```
-#KS workspace
-```{r}
-
-```
-
-#Subset out groups 
-```{r}
-glut.homecage <-subset(df.glut1, Var1 %in% c("0_homecage", "1_homecage","2_homecage", "3_homecage", "4_homecage", "5_homecage"))
-glut.negative <-subset(df.glut1, Var1 %in% c("0_negative", "1_negative","2_negative", "3_negative", "4_negative", "5_negative"))
-glut.positive <-subset(df.glut1, Var1 %in% c("0_positive", "1_positive","2_positive", "3_positive", "4_positive", "5_positive"))
-```
-
-#Divide subsets by total to get fractions
-```{r}
-df.glut3 <- data.frame(clusters=0:5,
-                    homecage = c(glut.homecage/df.glut2[1,2]),
-                      negative = c(glut.negative/df.glut2[2,2]),
-                      positive = c(glut.positive/df.glut2[3,2]))
-
-```
-
-
-#Make Dataframe for Glut
--KS: Can you make this dataframe from the tables generated above? 
-```{r}
-Cluster <- c(0, 1, 2, 3, 4, 5)
-Homecage <- c(2957/10550, 2733/10550, 2806/10550, 1306/10550, 463/10550, 285/10550)
-Negative <- c(1286/4530, 1251/4530, 1114/4530, 605/4530, 178/4530, 96/4530)
-Postive <- c(744/1854, 516/1854, 332/1854, 231/1854, 26/1854, 5/1854)
-df <- data.frame(Cluster, Homecage, Negative, Postive)
-print(df)
-```
 
 #GABA
 #Make Gaba Table 
 ```{r}
-gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, gaba.subset2$group, sep = "_")
+gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, 
+                                    gaba.subset2$group, 
+                                    sep = "_")
 df.gaba1 <- data.frame(table(gaba.subset2$cluster_group))
 df.gaba2 <- data.frame(table(gaba.subset2$group))
-
-df.gaba1[nrow(df.gaba1) + 1,] <- "N/A"
-
-
-```
-
-#Subset out groups 
-```{r}
-gaba.homecage <-subset(df.gaba1, Var1 %in% c("0_homecage", "1_homecage","2_homecage", "3_homecage", "4_homecage", "5_homecage", "6_homecage"))
-gaba.negative <-subset(df.gaba1, Var1 %in% c("0_negative", "1_negative","2_negative", "3_negative", "4_negative", "5_negative", "6_negative"))
-gaba.positive <-subset(df.gaba1, Var1 %in% c("0_positive", "1_positive","2_positive", "3_positive", "4_positive", "5_positive"))
-```
-
-#Divide subsets by total to get fractions
-```{r}
-df.gaba3 <-data.frame(clusters=0:6,
-                      homecage = c(gaba.homecage/df.gaba2[1,2]),
-                         neagative = c(gaba.negative/df.gaba2[2,2]),
-                         positive = c(gaba.positive/df.gaba2[3,2]))
-
-```
-
-
-#Make Dataframe for Gaba
--KS: Same here
-```{r}
-Cluster <- c(0, 1, 2, 3, 4, 5,6)
-Homecage <- c(682/1904, 358/1904, 401/1904, 233/1904, 76/1904, 112/1904, 42/1904 )
-Negative <- c(278/1036 , 141/1036 , 328/1036 , 85/1036 , 137/1036 , 52/1036, 15/1036)
-Postive <- c(297/779 , 398/779 , 21/779 , 11/779 , 51/779 , 1/779, 0/779)
-df.gaba <- data.frame(Cluster, Homecage, Negative, Postive)
-print(df.gaba)
+df.gaba1$group.total <- (df.gaba2$Freq)
+df.gaba1$fract <- (df.gaba$Freq/df.gaba$group.total)
 ```
