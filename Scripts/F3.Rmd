@@ -37,9 +37,11 @@ glut.positive <-subset(df.glut1, Var1 %in% c("0_positive", "1_positive","2_posit
 
 #Divide subsets by total to get fractions
 ```{r}
-glut.homecage/df.glut2[1,2]
-glut.negative/df.glut2[2,2]
-glut.positive/df.glut2[3,2]
+df.glut3 <- data.frame(clusters=0:5,
+                    homecage = c(glut.homecage/df.glut2[1,2]),
+                      negative = c(glut.negative/df.glut2[2,2]),
+                      positive = c(glut.positive/df.glut2[3,2]))
+
 ```
 
 
@@ -60,6 +62,10 @@ print(df)
 gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, gaba.subset2$group, sep = "_")
 df.gaba1 <- data.frame(table(gaba.subset2$cluster_group))
 df.gaba2 <- data.frame(table(gaba.subset2$group))
+
+df.gaba1[nrow(df.gaba1) + 1,] <- "N/A"
+
+
 ```
 
 #Subset out groups 
@@ -71,9 +77,11 @@ gaba.positive <-subset(df.gaba1, Var1 %in% c("0_positive", "1_positive","2_posit
 
 #Divide subsets by total to get fractions
 ```{r}
-gaba.homecage/df.gaba2[1,2]
-gaba.negative/df.gaba2[2,2]
-gaba.positive/df.gaba2[3,2]
+df.gaba3 <-data.frame(clusters=0:6,
+                      homecage = c(gaba.homecage/df.gaba2[1,2]),
+                         neagative = c(gaba.negative/df.gaba2[2,2]),
+                         positive = c(gaba.positive/df.gaba2[3,2]))
+
 ```
 
 
