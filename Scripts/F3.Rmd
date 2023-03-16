@@ -38,8 +38,19 @@ df.glut1$fract <- (df.glut1$Freq/df.glut1$group.total)
 gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, 
                                     gaba.subset2$group, 
                                     sep = "_")
+
 df.gaba1 <- data.frame(table(gaba.subset2$cluster_group))
 df.gaba2 <- data.frame(table(gaba.subset2$group))
+#add row to add group totals correctly 
+df.gaba1[nrow(df.gaba1) +1,] <- list('6_positive', '0')
 df.gaba1$group.total <- (df.gaba2$Freq)
-df.gaba1$fract <- (df.gaba$Freq/df.gaba$group.total)
+
+#then delete after to find fractions
+df.gaba1 <- df.gaba1[-21,]
+#Change Freq from character to numeric values to divide by group total
+df.gaba1$Freq <- as.numeric(df.gaba1$Freq)
+
+df.gaba1$fract <- (df.gaba1$Freq/df.gaba1$group.total)
+
+
 ```
