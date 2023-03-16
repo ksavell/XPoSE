@@ -19,13 +19,30 @@ setwd("/Users/woodskad/Desktop/Analysis/F3/")
 load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023.RData")
 load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
 ```
+#GLUT
 
 #Make Glut Table 
 ```{r}
 glut.subset2$cluster_group <- paste(glut.subset2$seurat_clusters, glut.subset2$group, sep = "_")
-table(glut.subset2$cluster_group)
-table(glut.subset2$group)
+df.glut1 <- data.frame(table(glut.subset2$cluster_group))
+df.glut2 <- data.frame(table(glut.subset2$group))
 ```
+
+#Subset out groups 
+```{r}
+glut.homecage <-subset(df.glut1, Var1 %in% c("0_homecage", "1_homecage","2_homecage", "3_homecage", "4_homecage", "5_homecage"))
+glut.negative <-subset(df.glut1, Var1 %in% c("0_negative", "1_negative","2_negative", "3_negative", "4_negative", "5_negative"))
+glut.positive <-subset(df.glut1, Var1 %in% c("0_positive", "1_positive","2_positive", "3_positive", "4_positive", "5_positive"))
+```
+
+#Divide subsets by total to get fractions
+```{r}
+glut.homecage/df.glut2[1,2]
+glut.negative/df.glut2[2,2]
+glut.positive/df.glut2[3,2]
+```
+
+
 #Make Dataframe for Glut
 -KS: Can you make this dataframe from the tables generated above? 
 ```{r}
@@ -37,12 +54,29 @@ df <- data.frame(Cluster, Homecage, Negative, Postive)
 print(df)
 ```
 
+#GABA
 #Make Gaba Table 
 ```{r}
 gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, gaba.subset2$group, sep = "_")
-table(gaba.subset2$cluster_group)
-table(gaba.subset2$group)
+df.gaba1 <- data.frame(table(gaba.subset2$cluster_group))
+df.gaba2 <- data.frame(table(gaba.subset2$group))
 ```
+
+#Subset out groups 
+```{r}
+gaba.homecage <-subset(df.gaba1, Var1 %in% c("0_homecage", "1_homecage","2_homecage", "3_homecage", "4_homecage", "5_homecage", "6_homecage"))
+gaba.negative <-subset(df.gaba1, Var1 %in% c("0_negative", "1_negative","2_negative", "3_negative", "4_negative", "5_negative", "6_negative"))
+gaba.positive <-subset(df.gaba1, Var1 %in% c("0_positive", "1_positive","2_positive", "3_positive", "4_positive", "5_positive"))
+```
+
+#Divide subsets by total to get fractions
+```{r}
+gaba.homecage/df.gaba2[1,2]
+gaba.negative/df.gaba2[2,2]
+gaba.positive/df.gaba2[3,2]
+```
+
+
 #Make Dataframe for Gaba
 -KS: Same here
 ```{r}
