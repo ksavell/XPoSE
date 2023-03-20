@@ -1,0 +1,139 @@
+---
+title: "F3_DEG"
+author: "Katherine Savell"
+date: "2023-03-20"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(purrr)
+library(magrittr)
+library(tester)
+library(Matrix)
+library(pbmcapply)
+library(lmtest)
+library(tidyselect)
+library(DESeq2)
+library(Seurat)
+library(blme)
+library(edgeR)
+library(glmmTMB)
+library(limma)
+library(lme4)
+library(lmerTest)
+library(matrixStats)
+library(methods)
+library(stats)
+library(Rdpack)
+library(Libra)
+library(pheatmap)
+library(tibble)
+```
+
+##Use Libra to generate count tables for DESeq2
+Thank you @jordansquair! 
+```{r}
+#Collapse into 1 cluster to run 'all glut' together
+all.glut <- FindClusters(glut.subset2, resolution = 0)
+Idents(all.glut) <- 'group'
+all.glut <- subset(all.glut, idents = c("negative","positive"))
+
+pb <- to_pseudobulk(
+  all.glut,
+  replicate_col = "ratID",
+  cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
+  label_col = "group"
+)
+#subset the cluster to test, here they are combined into one called "0"
+counts <- pb[["0"]]
+
+#generate metadata table ##FIX THIS
+metadata <- read.csv("/Users/savellke/Documents/Analysis/mm10_exp1/March2023/metadata.csv", row.names = 1)
+
+#check that the metadata is set up correctly
+all(rownames(metadata) == colnames(counts))  
+```
+
+##DESeq2 
+```{r}
+dds <- DESeqDataSetFromMatrix(counts, 
+                              colData = metadata, 
+                              design = ~ group)
+
+dds <- DESeq(dds)
+
+plotDispEsts(dds)
+
+# Output results of Wald test for contrast for stim vs ctrl
+# Name the groups you want to compare here. Names should match the condition names outlined in colData.
+# By design, the first group (Group_1) is the "control" condition. 
+contrast <- c("group", "positive", "negative")
+
+# resultsNames(dds)
+res.none <- results(dds, 
+               contrast = contrast,
+               alpha = 0.001,
+               pAdjustMethod = "none")
+
+#res <- lfcShrink(dds, 
+                # contrast =  contrast,
+                # res=res)
+
+# Turn the results object into a tibble for use with tidyverse functions
+res_tbl.none <- res %>%
+        data.frame() %>%
+        rownames_to_column(var="gene") %>%
+        as_tibble()
+
+# Check results output
+res_tbl
+
+# Write all results to file
+write.csv(res_tbl, '/Users/savellke/Documents/Analysis/mm10_exp1/bulkDESeqGlut_03202023.csv')
+```
+#QC
+```{r}
+# Transform counts for data visualization
+rld <- rlog(dds, blind=TRUE)
+
+# Plot PCA
+
+DESeq2::plotPCA(rld, intgroup = "group")
+
+# Extract the rlog matrix from the object and compute pairwise correlation values
+rld_mat <- assay(rld)
+rld_cor <- cor(rld_mat)
+
+# Plot heatmap
+pheatmap(rld_cor, annotation = metadata[, c("group", "sex"), drop=F])
+```
+##heatmap not working
+```{r}
+# Set thresholds
+padj_cutoff <- 0.05
+
+# Subset the significant results
+sig_res <- dplyr::filter(res_tbl, padj < padj_cutoff) %>%
+        dplyr::arrange(padj)
+
+# Check significant genes output
+sig_res
+
+# Extract normalized counts for only the significant genes
+sig_norm <- data.frame(normalized_counts) %>%
+        rownames_to_column(var = "gene") %>%
+        dplyr::filter(gene %in% sig_res$gene)
+        
+# Set a color palette
+heat_colors <- brewer.pal(6, "YlOrRd")
+
+# Run pheatmap using the metadata data frame for the annotation
+pheatmap(sig_norm[, 2:length(colnames(sig_norm))],
+    cluster_rows = T, 
+    show_rownames = F,
+    annotation = metadata[, c("group", "sex")], 
+    scale = "row", 
+    height = 20)   
+```
+
