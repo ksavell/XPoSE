@@ -23,6 +23,7 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022
 
 #Make Glut Table 
 ```{r}
+#glut table for cluster and group
 glut.subset2$cluster_group <- paste(glut.subset2$seurat_clusters, 
                                     glut.subset2$group, 
                                     sep = "_")
@@ -32,9 +33,36 @@ df.glut1$group.total <- (df.glut2$Freq)
 df.glut1$fract <- (df.glut1$Freq/df.glut1$group.total)
 ```
 
-#GABA
-#Make Gaba Table 
+#glut table for RatID and group
 ```{r}
+glut.subset2$ratID_group <- paste(glut.subset2$ratID, 
+                                  glut.subset2$group, 
+                                  sep = "_")
+df.glut.ID.group <- data.frame(table(glut.subset2$ratID_group))
+#Reorder df rows to input group total correctly
+df.glut.ID.group <- df.glut.ID.group[c(3, 1, 2, 10, 4, 5, 11, 6, 7, 12, 8, 9),]
+df.glut.ID.group$group.total <- (df.glut2$Freq)
+df.glut.ID.group$fract <- (df.glut.ID.group$Freq/df.glut.ID.group$group.total)
+```
+
+#glut table for RatID and sex
+```{r}
+glut.subset2$ratID_sex <- paste(glut.subset2$ratID, 
+                                  glut.subset2$sex, 
+                                  sep = "_")
+df.glut.ID.sex <- data.frame(table(glut.subset2$ratID_sex))
+df.glut3 <- data.frame(table(glut.subset2$sex))
+#Reorder rows to input sex total correctly
+df.glut.ID.sex <- df.glut.ID.sex[c(1, 3, 2, 4, 5, 7, 6, 8),]
+df.glut.ID.sex$sex.total <- (df.glut3$Freq)
+df.glut.ID.sex$fract <- (df.glut.ID.sex$Freq/df.glut.ID.sex$sex.total)
+```
+
+
+#GABA
+#Make GABA Table 
+```{r}
+#Gaba table for cluster and group
 gaba.subset2$cluster_group <- paste(gaba.subset2$seurat_clusters, 
                                     gaba.subset2$group, 
                                     sep = "_")
@@ -51,7 +79,40 @@ df.gaba1 <- df.gaba1[-21,]
 df.gaba1$Freq <- as.numeric(df.gaba1$Freq)
 
 df.gaba1$fract <- (df.gaba1$Freq/df.gaba1$group.total)
+```
 
+#GABA table for ratID and group
+```{r}
+gaba.subset2$ratID_group <- paste(gaba.subset2$ratID, 
+                                    gaba.subset2$group, 
+                                    sep = "_")
+df.gaba.ID.group <- data.frame(table(gaba.subset2$ratID_group))
 
+#Reorder rows to add group totals correctly
+df.gaba.ID.group <- df.gaba.ID.group[c(3, 1, 2, 10, 4, 5, 11, 6, 7, 12, 8, 9),]
+df.gaba.ID.group$group.total <- (df.gaba2$Freq)
+df.gaba.ID.group$fract <- (df.gaba.ID.group$Freq/df.gaba.ID.group$group.total)
 
 ```
+
+#GABA table for ratID and sex
+```{r}
+gaba.subset2$ratID_sex <- paste(gaba.subset2$ratID, 
+                                    gaba.subset2$sex, 
+                                    sep = "_")
+df.gaba.ID.sex <- data.frame(table(gaba.subset2$ratID_sex))
+df.gaba3 <- data.frame(table(gaba.subset2$sex))
+#Reorder rows to input sex total correctly
+df.gaba.ID.sex <- df.gaba.ID.sex[c(1, 3, 2, 4, 5, 7, 6, 8),]
+df.gaba.ID.sex$sex.total <- (df.gaba3$Freq)
+df.gaba.ID.sex$fract <- (df.gaba.ID.sex$Freq/df.gaba.ID.sex$sex.total)
+```
+
+#Save tables as CSV files
+```{r}
+write_csv(df.gaba.ID.group, file = "/Users/woodskad/Desktop/Analysis/F3/df.gaba.ID.group.csv")
+write_csv(df.gaba.ID.sex, file = "/Users/woodskad/Desktop/Analysis/F3/df.gaba.ID.sex.csv")
+write_csv(df.glut.ID.group, file = "/Users/woodskad/Desktop/Analysis/F3/df.glut.ID.group.csv")
+write_csv(df.glut.ID.sex, file = "/Users/woodskad/Desktop/Analysis/F3/df.glut.ID.sex.csv")
+```
+
