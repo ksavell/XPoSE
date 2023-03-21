@@ -38,7 +38,7 @@ df.glut1$fract <- (df.glut1$Freq/df.glut1$group.total)
 glut.subset2$ratID_group <- paste(glut.subset2$ratID, 
                                   glut.subset2$group, 
                                   sep = "_")
-df.glut.ID.group <- data.frame(table(glut.subset2$ratID_group))
+df.glut.group.ID <- data.frame(table(glut.subset2$ratID_group))
 #Reorder df rows to input group total correctly
 df.glut.ID.group <- df.glut.ID.group[c(3, 1, 2, 10, 4, 5, 11, 6, 7, 12, 8, 9),]
 df.glut.ID.group$group.total <- (df.glut2$Freq)
@@ -58,6 +58,36 @@ df.glut.ID.sex$sex.total <- (df.glut3$Freq)
 df.glut.ID.sex$fract <- (df.glut.ID.sex$Freq/df.glut.ID.sex$sex.total)
 ```
 
+#F3 Glut Fractions for cluster group and ratID
+```{r}
+glut.subset2$cluster_group_ratID <- paste(glut.subset2$seurat_clusters, 
+                                    glut.subset2$ratID, glut.subset2$group,
+                                    sep = "_")
+glut.subset2$ratID_group <- paste(glut.subset2$ratID, 
+                                  glut.subset2$group, 
+                                  sep = "_")
+#Regenerate the original data frame to check for errors
+df.glut.CGI1 <- data.frame(table(glut.subset2$cluster_group_ratID))
+df.glut.IG <- data.frame(table(glut.subset2$ratID_group))
+
+#Separate Var1 into 3 or 2 columns
+df.glut.CGI <- separate(df.glut.CGI1, 
+                        col = Var1, into = c('cluster', 'ID', 'group'), 
+                        sep = '_')
+
+df.glut.IG <- separate(df.glut.IG, 
+                       col = Var1, into = c('ID', 'group'), 
+                       sep = '_')
+
+#Merge data frames
+df.glut.CGI <- merge.data.frame(df.glut.CGI, 
+                                df.glut.IG, 
+                                by.x = c("ID", "group"), 
+                                by.y = c("ID", "group"), 
+                                all = TRUE)
+df.glut.CGI$Fract <- (df.glut.CGI$Freq.x/df.glut.CGI$Freq.y)
+df.glut.CGI$Percent <- (df.glut.CGI$Fract * 100)
+```
 
 #GABA
 #Make GABA Table 
@@ -108,11 +138,42 @@ df.gaba.ID.sex$sex.total <- (df.gaba3$Freq)
 df.gaba.ID.sex$fract <- (df.gaba.ID.sex$Freq/df.gaba.ID.sex$sex.total)
 ```
 
-#Save tables as CSV files
+
+
+#F3 GABA Fractions for cluster group and ratID
 ```{r}
-write_csv(df.gaba.ID.group, file = "/Users/woodskad/Desktop/Analysis/F3/df.gaba.ID.group.csv")
-write_csv(df.gaba.ID.sex, file = "/Users/woodskad/Desktop/Analysis/F3/df.gaba.ID.sex.csv")
-write_csv(df.glut.ID.group, file = "/Users/woodskad/Desktop/Analysis/F3/df.glut.ID.group.csv")
-write_csv(df.glut.ID.sex, file = "/Users/woodskad/Desktop/Analysis/F3/df.glut.ID.sex.csv")
+gaba.subset2$cluster_group_ratID <- paste(gaba.subset2$seurat_clusters, 
+                                    gaba.subset2$ratID, gaba.subset2$group,
+                                    sep = "_")
+gaba.subset2$ratID_group <- paste(gaba.subset2$ratID, 
+                                  gaba.subset2$group, 
+                                  sep = "_")
+#Regenerate the original data frame to check for errors
+df.gaba.CGI1 <- data.frame(table(gaba.subset2$cluster_group_ratID))
+df.gaba.IG <- data.frame(table(gaba.subset2$ratID_group))
+
+#Separate Var1 into 3 or 2 columns
+df.gaba.CGI <- separate(df.gaba.CGI, 
+                        col = Var1, into = c('cluster', 'ID', 'group'), 
+                        sep = '_')
+
+df.gaba.IG <- separate(df.gaba.IG, 
+                       col = Var1, into = c('ID', 'group'), 
+                       sep = '_')
+
+#Merge data frames
+df.gaba.CGI <- merge.data.frame(df.gaba.CGI, 
+                                df.gaba.IG, 
+                                by.x = c("ID", "group"), 
+                                by.y = c("ID", "group"), 
+                                all = TRUE)
+df.gaba.CGI$Fract <- (df.gaba.CGI$Freq.x/df.gaba.CGI$Freq.y)
+df.gaba.CGI$Percent <- (df.gaba.CGI$Fract * 100)
 ```
 
+#Save tables as CSV files
+```{r}
+write_csv(df.gaba.CGI, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.gaba.CGI.csv")
+write_csv(df.glut.CGI, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.glut.CGI.csv")
+
+```
