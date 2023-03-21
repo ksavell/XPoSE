@@ -245,3 +245,58 @@ gaba.heatmap
 dev.off()
 ```
 
+#Glut: create Fraction/Percent Totals for Cluster_Sex_ratID for 
+```{r}
+glut.subset2$Cluster_ratID_Sex <- paste(glut.subset2$seurat_clusters,
+                                        glut.subset2$ratID,
+                                        glut.subset2$sex,
+                                        sep = "_")
+glut.subset2$ratID_Sex <- paste(glut.subset2$ratID,
+                                glut.subset2$sex,
+                                sep = "_")
+df.glut.CRS <- data.frame(table(glut.subset2$Cluster_ratID_Sex))
+df.glut.RS <- data.frame(table(glut.subset2$ratID_Sex))
+
+df.glut.CRS <- separate(df.glut.CRS, col = Var1, into = c("Cluster", "ratID", "Sex"), sep = "_")
+df.glut.RS <- separate(df.glut.RS, col = Var1, into = c("ratID", "Sex"), sep = "_")
+
+df.glut.CRS <- merge.data.frame(df.glut.CRS, 
+                                df.glut.RS, 
+                                by.x = c("ratID", "Sex"), 
+                                by.y = c("ratID", "Sex"), 
+                                all = TRUE)
+df.glut.CRS$Fraction <- (df.glut.CRS$Freq.x/df.glut.CRS$Freq.y)
+df.glut.CRS$Percent <- (df.glut.CRS$Fract * 100)
+```
+#GABA: create Fraction/Percent Totals for Cluster_Sex_ratID for 
+```{r}
+gaba.subset2$Cluster_ratID_Sex <- paste(gaba.subset2$seurat_clusters,
+                                        gaba.subset2$ratID,
+                                        gaba.subset2$sex,
+                                        sep = "_")
+gaba.subset2$ratID_Sex <- paste(gaba.subset2$ratID,
+                                gaba.subset2$sex,
+                                sep = "_")
+df.gaba.CRS <- data.frame(table(gaba.subset2$Cluster_ratID_Sex))
+df.gaba.RS <- data.frame(table(gaba.subset2$ratID_Sex))
+
+df.gaba.CRS <- separate(df.gaba.CRS, col = Var1, into = c("Cluster", "ratID", "Sex"), sep = "_")
+df.gaba.RS <- separate(df.gaba.RS, col = Var1, into = c("ratID", "Sex"), sep = "_")
+
+df.gaba.CRS <- merge.data.frame(df.gaba.CRS, 
+                                df.gaba.RS, 
+                                by.x = c("ratID", "Sex"), 
+                                by.y = c("ratID", "Sex"), 
+                                all = TRUE)
+df.gaba.CRS$Fraction <- (df.gaba.CRS$Freq.x/df.gaba.CRS$Freq.y)
+df.gaba.CRS$Percent <- (df.gaba.CRS$Fract * 100)
+```
+
+
+#Save tables as CSV files
+```{r}
+write_csv(df.gaba.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.CRS.csv")
+write_csv(df.glut.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.CRS.csv")
+
+```
+
