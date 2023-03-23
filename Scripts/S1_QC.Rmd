@@ -269,7 +269,7 @@ df.glut.CRS <- merge.data.frame(df.glut.CRS,
 df.glut.CRS$Fraction <- (df.glut.CRS$Freq.x/df.glut.CRS$Freq.y)
 df.glut.CRS$Percent <- (df.glut.CRS$Fract * 100)
 ```
-#GABA: create Fraction/Percent Totals for Cluster_Sex_ratID for 
+#GABA: create Fraction/Percent Totals for Cluster_Sex_ratID 
 ```{r}
 gaba.subset2$Cluster_ratID_Sex <- paste(gaba.subset2$seurat_clusters,
                                         gaba.subset2$ratID,
@@ -294,11 +294,102 @@ df.gaba.CRS$Fraction <- (df.gaba.CRS$Freq.x/df.gaba.CRS$Freq.y)
 df.gaba.CRS$Percent <- (df.gaba.CRS$Fract * 100)
 ```
 
+#Glut:Fraction/Percent totals for Cart1/Cart2 
+```{r}
+glut.subset2$cluster_cart <- paste(glut.subset2$seurat_clusters,
+                                   glut.subset2$orig.ident,
+                                   sep = "_")
+glut.subset2$cluster <- paste(glut.subset2$seurat_clusters)
+
+df.glut.carts <- data.frame(table(glut.subset2$cluster_cart))
+df.glut.clusters <- data.frame(table(glut.subset2$cluster))
+
+df.glut.carts <- separate(df.glut.carts, col = Var1, into = c("cluster", "cart"), sep = "_")
+
+df.glut.carts <- merge.data.frame(df.glut.carts, 
+                                  df.glut.clusters,
+                                  by.x = "cluster",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.glut.carts$Fraction <- (df.glut.carts$Freq.x/df.glut.carts$Freq.y)
+df.glut.carts$Percent <- (df.glut.carts$Fraction * 100)
+
+```
+
+#GABA:Fraction/Percent totals for Cart1/Cart2 
+```{r}
+gaba.subset2$cluster_cart <- paste(gaba.subset2$seurat_clusters,
+                                   gaba.subset2$orig.ident,
+                                   sep = "_")
+gaba.subset2$cluster <- paste(gaba.subset2$seurat_clusters)
+
+df.gaba.carts <- data.frame(table(gaba.subset2$cluster_cart))
+df.gaba.clusters <- data.frame(table(gaba.subset2$cluster))
+
+df.gaba.carts <- separate(df.gaba.carts, col = Var1, into = c("cluster", "cart"), sep = "_")
+
+df.gaba.carts <- merge.data.frame(df.gaba.carts, 
+                                  df.gaba.clusters,
+                                  by.x = "cluster",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.gaba.carts$Fraction <- (df.gaba.carts$Freq.x/df.gaba.carts$Freq.y)
+df.gaba.carts$Percent <- (df.gaba.carts$Fraction * 100)
+```
+
+#Glut: Fraction/Percent totals for Rat in each cluster
+```{r}
+glut.subset2$cluster_ratID <- paste(glut.subset2$seurat_clusters,
+                                   glut.subset2$ratID,
+                                   sep = "_")
+glut.subset2$cluster <- paste(glut.subset2$seurat_clusters)
+
+df.glut.cluster.rat <- data.frame(table(glut.subset2$cluster_ratID))
+df.glut.clusters <- data.frame(table(glut.subset2$cluster))
+
+df.glut.cluster.rat <- separate(df.glut.cluster.rat, col = Var1, into = c("cluster", "rat"), sep = "_")
+
+df.glut.cluster.rat <- merge.data.frame(df.glut.cluster.rat, 
+                                  df.glut.clusters,
+                                  by.x = "cluster",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.glut.cluster.rat$Fraction <- (df.glut.cluster.rat$Freq.x/df.glut.cluster.rat$Freq.y)
+df.glut.cluster.rat$Percent <- (df.glut.cluster.rat$Fraction * 100)
+```
+
+#GABA: Fraction/Percent totals for Rat in each cluster
+```{r}
+gaba.subset2$cluster_ratID <- paste(gaba.subset2$seurat_clusters,
+                                   gaba.subset2$ratID,
+                                   sep = "_")
+gaba.subset2$cluster <- paste(gaba.subset2$seurat_clusters)
+
+df.gaba.cluster.rat <- data.frame(table(gaba.subset2$cluster_ratID))
+df.gaba.clusters <- data.frame(table(gaba.subset2$cluster))
+
+df.gaba.cluster.rat <- separate(df.gaba.cluster.rat, col = Var1, into = c("cluster", "rat"), sep = "_")
+
+df.gaba.cluster.rat <- merge.data.frame(df.gaba.cluster.rat, 
+                                  df.gaba.clusters,
+                                  by.x = "cluster",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.gaba.cluster.rat$Fraction <- (df.gaba.cluster.rat$Freq.x/df.gaba.cluster.rat$Freq.y)
+df.gaba.cluster.rat$Percent <- (df.gaba.cluster.rat$Fraction * 100)
+```
+
+
 
 #Save tables as CSV files
 ```{r}
 write_csv(df.gaba.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.CRS w Group.csv")
 write_csv(df.glut.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.CRS w Group.csv")
 
+write_csv(df.gaba.cluster.rat, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.cluster.rat.csv")
+write_csv(df.gaba.carts, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.carts.csv")
+
+write_csv(df.glut.cluster.rat, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.cluster.rat.csv")
+write_csv(df.glut.carts, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.carts.csv")
 ```
 
