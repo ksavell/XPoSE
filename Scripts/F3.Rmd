@@ -171,6 +171,58 @@ df.gaba.CGI$Fract <- (df.gaba.CGI$Freq.x/df.gaba.CGI$Freq.y)
 df.gaba.CGI$Percent <- (df.gaba.CGI$Fract * 100)
 ```
 
+#Glut: Fraction/Percent totals for Rat in each cluster
+```{r}
+glut.subset2$cluster_ratID <- paste(glut.subset2$seurat_clusters,
+                                   glut.subset2$ratID,
+                                   glut.subset2$sex,
+                                   glut.subset2$group,
+                                   sep = "_")
+glut.subset2$cluster <- paste(glut.subset2$seurat_clusters,
+                              glut.subset2$group,
+                              sep = "_")
+
+df.glut.cluster.rat <- data.frame(table(glut.subset2$cluster_ratID))
+df.glut.clusters <- data.frame(table(glut.subset2$cluster))
+
+df.glut.cluster.rat <- separate(df.glut.cluster.rat, col = Var1, into = c("cluster", "rat", "sex", "group"), sep = "_")
+df.glut.clusters <- separate(df.glut.clusters, col = Var1, into = c("cluster", "group"))
+
+df.glut.cluster.rat <- merge.data.frame(df.glut.cluster.rat, 
+                                  df.glut.clusters,
+                                  by.x = c("cluster","group"), 
+                                  by.y = c("cluster","group"),
+                                  all = TRUE)
+df.glut.cluster.rat$Fraction <- (df.glut.cluster.rat$Freq.x/df.glut.cluster.rat$Freq.y)
+df.glut.cluster.rat$Percent <- (df.glut.cluster.rat$Fraction * 100)
+```
+
+#GABA: Fraction/Percent totals for Rat in each cluster
+```{r}
+gaba.subset2$cluster_ratID <- paste(gaba.subset2$seurat_clusters,
+                                   gaba.subset2$ratID,
+                                    gaba.subset2$sex,
+                                   gaba.subset2$group,
+                                   sep = "_")
+gaba.subset2$cluster <- paste(gaba.subset2$seurat_clusters,
+                              gaba.subset2$group,
+                              sep = "_")
+
+df.gaba.cluster.rat <- data.frame(table(gaba.subset2$cluster_ratID))
+df.gaba.clusters <- data.frame(table(gaba.subset2$cluster))
+
+df.gaba.cluster.rat <- separate(df.gaba.cluster.rat, col = Var1, into = c("cluster", "rat", "sex", "group"), sep = "_")
+df.gaba.clusters <- separate(df.gaba.clusters, col = Var1, into = c("cluster", "group"))
+
+df.gaba.cluster.rat <- merge.data.frame(df.gaba.cluster.rat, 
+                                  df.gaba.clusters,
+                                  by.x = c("cluster","group"), 
+                                  by.y = c("cluster","group"),
+                                  all = TRUE)
+df.gaba.cluster.rat$Fraction <- (df.gaba.cluster.rat$Freq.x/df.gaba.cluster.rat$Freq.y)
+df.gaba.cluster.rat$Percent <- (df.gaba.cluster.rat$Fraction * 100)
+```
+
 #Save tables as CSV files
 ```{r}
 write_csv(df.gaba.CGI, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.gaba.CGI.csv")
