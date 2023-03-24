@@ -223,9 +223,109 @@ df.gaba.cluster.rat$Fraction <- (df.gaba.cluster.rat$Freq.x/df.gaba.cluster.rat$
 df.gaba.cluster.rat$Percent <- (df.gaba.cluster.rat$Fraction * 100)
 ```
 
+#Glut: Fraction/Percent totals for cluster in each rat
+```{r}
+glut.subset2$ratID_cluster_group_sex <- paste(glut.subset2$ratID,
+                                  glut.subset2$seurat_clusters,
+                                  glut.subset2$group,
+                                  glut.subset2$sex,
+                                  sep = "_")
+
+glut.subset2$ratID.group <- paste(glut.subset2$ratID,
+                              glut.subset2$group,
+                              sep = "_")
+
+df.glut.RCGS <- data.frame(table(glut.subset2$ratID_cluster_group_sex))
+df.glut.ratID.group <- data.frame(table(glut.subset2$ratID.group))
+df.glut.rat.total <- data.frame(table(glut.subset2$ratID))
+
+df.glut.ratID.group <- df.glut.ratID.group[-c(1, 3, 4, 6, 8, 10, 11, 12),]
+
+df.glut.RCGS <- separate(df.glut.RCGS, col = Var1, into = c("rat", "cluster", "group", "sex"), sep = "_")
+df.glut.ratID.group <- separate(df.glut.ratID.group, col = Var1, into = c("rat", "group"))
+colnames(df.glut.rat.total)[1] = "rat"
+
+df.glut.RCGS <- merge.data.frame(df.glut.RCGS, 
+                                  df.glut.rat.total,
+                                  by.x = ("rat"), 
+                                  by.y = ("rat"),
+                                  all = TRUE)
+
+df.glut.RCGS <- merge.data.frame(df.glut.RCGS, 
+                                  df.glut.ratID.group,
+                                  by.x = ("rat"), 
+                                  by.y = ("rat"),
+                                  all = TRUE)
+
+
+
+df.glut.RCGS$NegOnly <- (df.glut.RCGS$Freq.y - df.glut.RCGS$Freq)
+df.glut.RCGS$NegOnlyFract <- (df.glut.RCGS$Freq.x/df.glut.RCGS$NegOnly)
+
+
+df.glut.RCGS$Fraction <- df.glut.RCGS$Freq.x/df.glut.RCGS$Freq.y
+
+
+
+
+
+df.glut.RCGS$NegOnlyPer <- (df.glut.RCGS$NegOnlyFract * 100)                     
+df.glut.RCGS$Percent <- (df.glut.RCGS$Fraction * 100)
+```
+
+#GABA: Fraction/Percent totals for cluster in each rat
+```{r}
+gaba.subset2$ratID_cluster_group_sex <- paste(gaba.subset2$ratID,
+                                  gaba.subset2$seurat_clusters,
+                                  gaba.subset2$group,
+                                  gaba.subset2$sex,
+                                  sep = "_")
+
+gaba.subset2$ratID.group <- paste(gaba.subset2$ratID,
+                              gaba.subset2$group,
+                              sep = "_")
+
+df.gaba.RCGS <- data.frame(table(gaba.subset2$ratID_cluster_group_sex))
+df.gaba.ratID.group <- data.frame(table(gaba.subset2$ratID.group))
+df.gaba.rat.total <- data.frame(table(gaba.subset2$ratID))
+
+df.gaba.ratID.group <- df.gaba.ratID.group[-c(1, 3, 4, 6, 8, 10, 11, 12),]
+
+df.gaba.RCGS <- separate(df.gaba.RCGS, col = Var1, into = c("rat", "cluster", "group", "sex"), sep = "_")
+df.gaba.ratID.group <- separate(df.gaba.ratID.group, col = Var1, into = c("rat", "group"))
+colnames(df.gaba.rat.total)[1] = "rat"
+
+df.gaba.RCGS <- merge.data.frame(df.gaba.RCGS, 
+                                  df.gaba.rat.total,
+                                  by.x = ("rat"), 
+                                  by.y = ("rat"),
+                                  all = TRUE)
+
+df.gaba.RCGS <- merge.data.frame(df.gaba.RCGS, 
+                                  df.gaba.ratID.group,
+                                  by.x = ("rat"), 
+                                  by.y = ("rat"),
+                                  all = TRUE)
+
+
+
+df.gaba.RCGS$NegOnly <- (df.gaba.RCGS$Freq.y - df.gaba.RCGS$Freq)
+df.gaba.RCGS$NegOnlyFract <- (df.gaba.RCGS$Freq.x/df.gaba.RCGS$NegOnly)
+
+
+df.gaba.RCGS$Fraction <- df.gaba.RCGS$Freq.x/df.gaba.RCGS$Freq.y
+
+
+
+
+
+df.gaba.RCGS$NegOnlyPer <- (df.gaba.RCGS$NegOnlyFract * 100)                     
+df.gaba.RCGS$Percent <- (df.gaba.RCGS$Fraction * 100)
+```
+
 #Save tables as CSV files
 ```{r}
-write_csv(df.gaba.CGI, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.gaba.CGI.csv")
-write_csv(df.glut.CGI, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.glut.CGI.csv")
+write_csv(df.gaba.RCGS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.gaba.RCGS.csv")
+write_csv(df.glut.RCGS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F3_panels/Tables for F3 Panels/df.glut.RCGS.csv")
 
 ```
