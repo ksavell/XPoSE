@@ -64,13 +64,13 @@ all.glut <- subset(all.glut, idents = c("negative","positive"))
 
 ```{r}
 pb <- to_pseudobulk(
-  glut5, ##change here
+  glut0, ##change here
   replicate_col = "ratID",
   cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts <- pb[["5"]] ##change this too
+counts <- pb[["0"]] ##change this too
 
 #generate metadata table ##FIX THIS
 metadata <- read.csv("/Users/savellke/Documents/Analysis/mm10_exp1/March2023/metadata.csv", row.names = 1)
@@ -96,21 +96,21 @@ plotDispEsts(dds)
 contrast <- c("group", "positive", "negative")
 
 # resultsNames(dds)
-res <- results(dds, 
+res0 <- results(dds, ##change here
                contrast = contrast,
                alpha = 0.05,
                pAdjustMethod = "fdr")
 
 # Turn the results object into a tibble for use with tidyverse functions
-res_tbl <- res %>%
+res_tbl0 <- res0 %>% ##change here
         data.frame() %>%
         rownames_to_column(var="gene") %>%
         as_tibble()
 
 # Check results output
-res_tbl
+res_tbl0 ##change here
 
-res_tbl <- subset(res_tbl, (res_tbl$baseMean > 10))
+#res_tbl <- subset(res_tbl0, (res_tbl0$baseMean > 10))
 
 # Write all results to file
 write.csv(res_tbl, '/Users/savellke/Documents/Analysis/mm10_exp1/March2023/DESeqGlut5_PosNegDEGs_03232023.csv')
@@ -157,28 +157,9 @@ metadata <- read.csv("/Users/savellke/Documents/Analysis/mm10_exp1/March2023/met
 #check that the metadata is set up correctly
 all(rownames(metadata) == colnames(counts))  
 ```
-```{r}
-#Collapse into 1 cluster to run 'all gaba' together
-all.gaba <- FindClusters(gaba.subset2, resolution = 0)
-Idents(all.gaba) <- 'group'
-all.gaba <- subset(all.gaba, idents = c("negative","homecage"))
 
-pb <- to_pseudobulk(
-  all.gaba,
-  replicate_col = "ratID",
-  cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
-  label_col = "group"
-)
-#subset the cluster to test, here they are combined into one called "0"
-counts <- pb[["0"]]
-
-#generate metadata table ##FIX THIS
-metadata <- read.csv("/Users/savellke/Documents/Analysis/mm10_exp1/March2023/metadataC.csv", row.names = 1)
-
-#check that the metadata is set up correctly
-all(rownames(metadata) == colnames(counts))  
-```
 ##Coexpression
+glut v gaba
 ```{r}
 coexp <- merge(res.glut, res.gaba, by='gene', all=TRUE, suffixes=c('_glut', '_gaba'))
 
@@ -194,6 +175,22 @@ coexp$sig[(coexp$padj_glut <0.05 & coexp$padj_gaba <0.05)] <- .3
 
 
 write.csv(coexp, '/Users/savellke/Documents/Analysis/mm10_exp1/coexp.csv')
+```
+all glut vs cluster 0
+```{r}
+coexp <- merge(res_tbl, res_tbl0, by='gene', all=TRUE, suffixes=c('_a', '_0'))
+
+
+coexp$keep[coexp$padj_a < 0.05 | coexp$padj_0 < 0.05] <- 1
+coexp <- subset(coexp, coexp$keep == 1)
+
+#0.1 glut, 0.2 gaba, both
+coexp$sig[(coexp$padj_a <0.05)] <- .1
+coexp$sig[(coexp$padj_0 <0.05)] <- .2
+coexp$sig[(coexp$padj_a <0.05 & coexp$padj_0 <0.05)] <- .3
+
+
+write.csv(coexp, '/Users/savellke/Documents/Analysis/mm10_exp1/coexp_alland0.csv')
 ```
 
 #Dot Plots for caption
