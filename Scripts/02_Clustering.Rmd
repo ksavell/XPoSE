@@ -92,14 +92,31 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023
 
 #UMAP Glut Subset. 
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GlutUMAP.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GlutUMAPV2.pdf",
     width = 10,
     height = 10)
 DimPlot(glut.subset2, 
-        group.by = "group", 
-        cols = "#009999", "#00CC66", "#0080FF", "#0066CC", "#00994C" "#003366"
+        group.by = "seurat_clusters", 
+        cols = c( "#64C7C8","#41B75F",  "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"),
         shuffle = T) + 
   theme_void() + 
   theme(legend.position = "none") + 
   ggtitle(NULL)
 dev.off()
+```
+
+#UMAP GABA Subset. 
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GABAUMAP.pdf",
+    width = 10,
+    height = 10)
+DimPlot(gaba.subset2, 
+        group.by = "seurat_clusters", 
+        cols = c( "#E66027","#F8991D","#C03C82", "#A669AB", "#C52126",  "#DB808C", "#B0B235"),
+        shuffle = T) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
+DimPlot(gaba.subset2, group.by = "seurat_clusters")
+```
