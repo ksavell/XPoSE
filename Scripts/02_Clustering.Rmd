@@ -80,3 +80,26 @@ DimPlot(combined,
         label = TRUE, 
         repel = TRUE)
 ```
+
+#Changing UMAP Colors to Allen Atlas Cluster Colors 
+#Load Subsets 
+```{r}
+setwd("/Users/woodskad/Desktop/Analysis/S1/")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023.RData")
+```
+
+
+#UMAP Glut Subset. 
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GlutUMAP.pdf",
+    width = 10,
+    height = 10)
+DimPlot(glut.subset2, 
+        group.by = "group", 
+        cols = "#009999", "#00CC66", "#0080FF", "#0066CC", "#00994C" "#003366"
+        shuffle = T) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
