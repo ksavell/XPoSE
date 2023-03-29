@@ -1,0 +1,24 @@
+---
+title: "F2"
+author: "Katherine Savell"
+date: "2023-03-29"
+output: html_document
+---
+
+```{r}
+glut.features <- c("Slc17a7","Gpc5","Rfx3","Rorb","Syt6","Ctgf","Tshz2")
+new.cluster.ids <- c("3", "2", "4", "1", "6", "5")
+names(new.cluster.ids) <- levels(glut.subset2)
+
+DotPlot(glut.subset2,features = glut.features, dot.min = .1, scale = F) + coord_flip() + theme_bw() + theme(legend.position = "none", axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
+```
+
+
+```{r}
+gaba.subset2 <- subset(gaba.subset2, idents = c(as.character(0:6)))
+
+gaba.features <- c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b","Meis2","Vip","Lamp5")
+levels(gaba.subset2) <- c("0","1","6","2","4","3","5")
+
+DotPlot(gaba.subset2, features = gaba.features, dot.min = 0, scale = F) + coord_flip() + theme_bw() + theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
+```
