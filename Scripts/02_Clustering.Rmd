@@ -118,5 +118,4 @@ DimPlot(gaba.subset2,
   theme(legend.position = "none") + 
   ggtitle(NULL)
 dev.off()
-DimPlot(gaba.subset2, group.by = "seurat_clusters")
 ```
