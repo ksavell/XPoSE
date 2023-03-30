@@ -22,14 +22,15 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023
 #GLUT SUBSET
 #Glut Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_ExpV4.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_Exp_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
         features = c("nFeature_RNA"), 
         pt.size = 0, 
         ncol = 1,
-        flip = T) + 
+        flip = T,
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" )) + 
   coord_flip() + 
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -39,14 +40,15 @@ dev.off()
 
 #Glut Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcriptsV4.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcripts_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(glut.subset2, 
         features = c("nCount_RNA"), 
         pt.size = 0, 
         ncol = 1,
-        flip = T) + 
+        flip = T,
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" )) + 
   coord_flip() +
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -117,14 +119,15 @@ dev.off()
 #GABA SUBSET
 #Gaba Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_ExpV3.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_Exp_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
         features = c("nFeature_RNA"), 
         pt.size = 0, 
         ncol = 1, 
-        flip = T) + 
+        flip = T,
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"))  + 
   coord_flip() + 
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -134,14 +137,15 @@ dev.off()
 
 #Gaba Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcriptsV3.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
         features = c("nCount_RNA"), 
         pt.size = 0, 
         ncol = 1, 
-        flip = T) + 
+        flip = T,     
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"))+ 
   coord_flip() + 
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -294,6 +298,49 @@ df.gaba.CRS$Fraction <- (df.gaba.CRS$Freq.x/df.gaba.CRS$Freq.y)
 df.gaba.CRS$Percent <- (df.gaba.CRS$Fract * 100)
 ```
 
+
+
+#Glut: create Fraction/Percent Totals for Cluster_Sex for Bar
+```{r}
+glut.subset2$Cluster_Sex <- paste(glut.subset2$seurat_clusters,
+                                        glut.subset2$sex,
+                                        sep = "_")
+
+df.glut.CS <- data.frame(table(glut.subset2$Cluster_Sex))
+df.glut.S <- data.frame(table(glut.subset2$sex))
+
+df.glut.CS <- separate(df.glut.CS, col = Var1, into = c("Cluster", "Sex"), sep = "_")
+
+
+df.glut.CS <- merge.data.frame(df.glut.CS, 
+                                df.glut.S, 
+                                by.x = c("Sex"), 
+                                by.y = c("Var1"), 
+                                all = TRUE)
+df.glut.CS$Fraction <- (df.glut.CS$Freq.x/df.glut.CS$Freq.y)
+df.glut.CS$Percent <- (df.glut.CS$Fraction * 100)
+```
+#GABA: create Fraction/Percent Totals for Cluster_Sex for Bar
+```{r}
+gaba.subset2$Cluster_Sex <- paste(gaba.subset2$seurat_clusters,
+                                        gaba.subset2$sex,
+                                        sep = "_")
+
+df.gaba.CS <- data.frame(table(gaba.subset2$Cluster_Sex))
+df.gaba.S <- data.frame(table(gaba.subset2$sex))
+
+df.gaba.CS <- separate(df.gaba.CS, col = Var1, into = c("Cluster", "Sex"), sep = "_")
+
+
+df.gaba.CS <- merge.data.frame(df.gaba.CS, 
+                                df.gaba.S, 
+                                by.x = c("Sex"), 
+                                by.y = c("Var1"), 
+                                all = TRUE)
+df.gaba.CS$Fraction <- (df.gaba.CS$Freq.x/df.gaba.CS$Freq.y)
+df.gaba.CS$Percent <- (df.gaba.CS$Fraction * 100)
+```
+
 #Glut:Fraction/Percent totals for Cart1/Cart2 
 ```{r}
 glut.subset2$cluster_cart <- paste(glut.subset2$seurat_clusters,
@@ -337,16 +384,58 @@ df.gaba.carts$Fraction <- (df.gaba.carts$Freq.x/df.gaba.carts$Freq.y)
 df.gaba.carts$Percent <- (df.gaba.carts$Fraction * 100)
 ```
 
+#GLUT:Fraction/Percent clusters in Cart 1/Cart 2
+```{r}
+glut.subset2$cart_cluster <- paste(glut.subset2$orig.ident,
+                                   glut.subset2$seurat_clusters,
+                                   sep = "_")
+glut.subset2$cart <- paste(glut.subset2$orig.ident)
 
+df.glut.carts <- data.frame(table(glut.subset2$cart_cluster))
+df.glut.cart.total <- data.frame(table(glut.subset2$orig.ident))
 
+df.glut.carts <- separate(df.glut.carts, col = Var1, into = c("cart", "cluster"), sep = "_")
+
+df.glut.carts <- merge.data.frame(df.glut.carts, 
+                                  df.glut.cart.total,
+                                  by.x = "cart",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.glut.carts$Fraction <- (df.glut.carts$Freq.x/df.glut.carts$Freq.y)
+df.glut.carts$Percent <- (df.glut.carts$Fraction * 100)
+
+```
+
+#GABA:Fraction/Percent clusters in Cart 1/Cart 2
+```{r}
+gaba.subset2$cart_cluster <- paste(gaba.subset2$orig.ident,
+                                   gaba.subset2$seurat_clusters,
+                                   sep = "_")
+gaba.subset2$cart <- paste(gaba.subset2$orig.ident)
+
+df.gaba.carts <- data.frame(table(gaba.subset2$cart_cluster))
+df.gaba.cart.total <- data.frame(table(gaba.subset2$orig.ident))
+
+df.gaba.carts <- separate(df.gaba.carts, col = Var1, into = c("cart", "cluster"), sep = "_")
+
+df.gaba.carts <- merge.data.frame(df.gaba.carts, 
+                                  df.gaba.cart.total,
+                                  by.x = "cart",
+                                  by.y = "Var1", 
+                                  all = TRUE)
+df.gaba.carts$Fraction <- (df.gaba.carts$Freq.x/df.gaba.carts$Freq.y)
+df.gaba.carts$Percent <- (df.gaba.carts$Fraction * 100)
+
+```
 
 #Save tables as CSV files
 ```{r}
-write_csv(df.gaba.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.CRS w Group.csv")
-write_csv(df.glut.CRS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.CRS w Group.csv")
-
-write_csv(df.gaba.cluster.rat, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.cluster.rat.csv")
 write_csv(df.gaba.carts, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.carts.csv")
+
+write_csv(df.glut.carts, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.carts.csv")
+
+write_csv(df.gaba.CS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.gaba.CS.csv")
+write_csv(df.glut.CS, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.CS.csv")
 
 write_csv(df.glut.cluster.rat, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.cluster.rat.csv")
 write_csv(df.glut.carts, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Tables for S1 Panels/df.glut.carts.csv")
