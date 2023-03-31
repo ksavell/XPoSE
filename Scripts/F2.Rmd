@@ -4,6 +4,16 @@ author: "Katherine Savell"
 date: "2023-03-29"
 output: html_document
 ---
+#Load packages
+```{r}
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(clustree)
+library(tidyverse)
+```
+
+
 
 #Load Object
 ```{r}
@@ -11,32 +21,57 @@ setwd("/Users/woodskad/Desktop/Analysis/S1/")
 load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
 load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023.RData")
 ```
+#Create function to set panel size 
+```{r}
+set_panel_size <- function(p=NULL, g=ggplotGrob(p), width=unit(3, "in"), height=unit(3, "in")){
+  panel_index_w<- g$layout$l[g$layout$name=="panel"]
+  panel_index_h<- g$layout$t[g$layout$name=="panel"]
+  g$widths[[panel_index_w]] <- width
+  g$heights[[panel_index_h]] <- height
+  class(g) <- c("fixed", class(g), "ggplot")}
+```
+
+
+
 
 ```{r}
 glut.features <- c("Slc17a7","Gpc5","Rfx3","Rorb","Syt6","Ctgf","Tshz2")
 new.cluster.ids <- c("3", "2", "4", "1", "6", "5")
 names(new.cluster.ids) <- levels(glut.subset2)
 
-DotPlot(glut.subset2,features = glut.features, dot.min = .1, scale = F)
+glutdotplot <- DotPlot(glut.subset2,features = glut.features, dot.min = .1, scale = F) +
   coord_flip() + 
   theme_bw() + 
   theme(axis.title = element_blank(), 
         axis.text.y = element_text(face = "italic", size = 10), 
         axis.text.x = element_text(size = 10))
+
+set_panel_size(glutdotplot, height=unit(1.5, "in"),width=unit(1.5, "in"))
+
 ```
 
 
 ```{r}
+
 gaba.subset2 <- subset(gaba.subset2, idents = c(as.character(0:6)))
 
 gaba.features <- c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b","Meis2","Vip","Lamp5")
 levels(gaba.subset2) <- c("0","1","6","2","4","3","5")
 
-DotPlot(gaba.subset2, features = gaba.features, dot.min = 0, scale = F) +
+gabadotplot <- DotPlot(gaba.subset2, features = gaba.features, dot.min = 0, scale = F) +
   coord_flip() + 
   theme_bw() + 
   theme(axis.title = element_blank(), 
         axis.text.y = element_text(face = "italic", size = 10), 
         axis.text.x = element_text(size = 10))
-        
+
+set_panel_size(gabadotplot, height=unit(1.5, "in"),width=unit(1.5, "in"))  
 ```
+
+```{r}
+pdf(file="/Users/woodskad/Desktop/F2_panels.pdf",
+width=10, height=10)
+glutdotplot
+dev.off()
+```
+
