@@ -14,6 +14,8 @@ library(Matrix)
 library(lmtest)
 library(tidyselect)
 library(DESeq2)
+library(limma)
+library(edgeR)
 library(Seurat)
 library(blme)
 library(glmmTMB)
@@ -172,7 +174,7 @@ pb4 <- to_pseudobulk(
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts3 <- pb3[["4"]] ##change this too
+counts4 <- pb4[["4"]] ##change this too
 
 ##Cluster 5
 pb5 <- to_pseudobulk(
@@ -182,7 +184,7 @@ pb5 <- to_pseudobulk(
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts3 <- pb3[["5"]] ##change this too
+counts5 <- pb5[["5"]] ##change this too
 
 ##All gaba combined
 pbag <- to_pseudobulk(
@@ -215,25 +217,25 @@ pb1g <- to_pseudobulk(
 counts1g <- pb1g[["1"]] ##change this too
 
 ##Cluster 2
-pb0g <- to_pseudobulk(
+pb2g <- to_pseudobulk(
   gaba2, ##change here
   replicate_col = "ratID",
   cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts0g <- pb0g[["2"]] ##change this too
+counts2g <- pb2g[["2"]] ##change this too
 
 
 ##Cluster 3
-pb0g <- to_pseudobulk(
+pb3g <- to_pseudobulk(
   gaba3, ##change here
   replicate_col = "ratID",
   cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts0g <- pb0g[["3"]] ##change this too
+counts3g <- pb3g[["3"]] ##change this too
 
 ##Cluster 4
 pb4g <- to_pseudobulk(
@@ -246,26 +248,24 @@ pb4g <- to_pseudobulk(
 counts4g <- pb4g[["4"]] ##change this too
 
 ##Cluster 5
-pb0g <- to_pseudobulk(
-  gaba0, ##change here
+pb5g <- to_pseudobulk(
+  gaba5, ##change here
   replicate_col = "ratID",
   cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts0g <- pb0g[["5"]] ##change this too
+counts5g <- pb5g[["5"]] ##change this too
 
 ##Cluster 6
-pb0g <- to_pseudobulk(
-  gaba0, ##change here
+pb6g <- to_pseudobulk(
+  gaba6, ##change here
   replicate_col = "ratID",
   cell_type_col = "seurat_clusters", #this is required, could merge as 1 to run
   label_col = "group"
 )
 #subset the cluster to test, here they are combined into one called "0"
-counts0g <- pb0g[["6"]] ##change this too
-
-
+counts6g <- pb6g[["6"]] ##change this too
 
 #generate metadata table ##FIX THIS
 metadata <- read.csv("/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S4/metadataC.csv", row.names = 1)
@@ -565,45 +565,4 @@ res_tbl6g <- res6g %>% ##change here
         rownames_to_column(var="gene") %>%
         as_tibble()
 ```
-
-#Generating coexpression table as input for UpSet
-```{r}
-ce <- merge(res_tbla, res_tbl0, 
-            by='gene', 
-            all=TRUE, 
-            suffixes=c('_a', '_0')) 
-ce1 <- merge(res_tbl1, res_tbl2, 
-             by='gene', 
-             all=TRUE, 
-             suffixes=c('_1', '_2')) 
-ce2 <- merge(res_tbl3, res_tblag, 
-             by='gene', 
-             all=TRUE, 
-             suffixes=c('_3', '_ag'))
-ce3 <- merge(res_tbl0g, res_tbl1g, 
-             by='gene', 
-             all=TRUE, 
-             suffixes=c('_0g', '_1g'))
-        
-ce4 <- merge(ce, ce1, 
-             by='gene', 
-             all=TRUE, 
-             no.dups = TRUE)
-ce5 <- merge(ce2, ce3, 
-             by ='gene', 
-             all=TRUE, 
-             no.dups = TRUE) 
-coexp <- merge(ce4, ce5, 
-               by ='gene', 
-               all=TRUE, 
-               no.dups = TRUE)
-
-
-write.csv(coexp, '/Users/savellke/Documents/Analysis/mm10_exp1/coexp_03312023.csv')
-
-#filter by sig
-coexp$keep[coexp$padj_a < 0.05 | coexp$padj_0 < 0.05 | coexp$padj_1 < 0.05 | coexp$padj_2 < 0.05 | coexp$padj_3 < 0.05 | coexp$padj_ag < 0.05 | coexp$padj_0g < 0.05 | coexp$padj_1g < 0.05] <- 1 
-coexp <- subset(coexp, coexp$keep == 1)
-```
-
 
