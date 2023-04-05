@@ -32,7 +32,12 @@ library(ComplexUpset)
 library(data.table)
 ```
 
-
+#Load Object
+```{r}
+setwd("/Users/woodskad/Desktop/Analysis/S1/")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
+load("/Users/woodskad/Desktop/Analysis/RObjects/gaba_subset_forthpipe_11102022.RData")
+```
 
 
 ##Split objects by group, only performed analysis on clusters when positive/negative was at least 30% and generally > 100 nuclei in each group
@@ -55,18 +60,18 @@ Idents(glut3) <- 'group'
 Idents(glut4) <- 'group'
 Idents(glut5) <- 'group'
 
-glut0 <- subset(glut0, idents = c("negative","positive"))
-glut1 <- subset(glut1, idents = c("negative","positive"))
-glut2 <- subset(glut2, idents = c("negative","positive"))
-glut3 <- subset(glut3, idents = c("negative","positive"))
-glut4 <- subset(glut4, idents = c("negative","positive"))
-glut5 <- subset(glut5, idents = c("negative","positive"))
+glut0 <- subset(glut0, idents = c("negative","homecage"))
+glut1 <- subset(glut1, idents = c("negative","homecage"))
+glut2 <- subset(glut2, idents = c("negative","homecage"))
+glut3 <- subset(glut3, idents = c("negative","homecage"))
+glut4 <- subset(glut4, idents = c("negative","homecage"))
+glut5 <- subset(glut5, idents = c("negative","homecage"))
 
 
 #Collapse into 1 cluster to run 'all glut' together
 all.glut <- FindClusters(glut.subset2, resolution = 0)
 Idents(all.glut) <- 'group'
-all.glut <- subset(all.glut, idents = c("negative","positive"))
+all.glut <- subset(all.glut, idents = c("negative","homecage"))
 
 
 #GABA
@@ -78,6 +83,7 @@ gaba4 <- subset(gaba.subset2, idents = "4")
 gaba5 <- subset(gaba.subset2, idents = "5")
 gaba6 <- subset(gaba.subset2, idents = "6")
 
+
 Idents(gaba0) <- 'group'
 Idents(gaba1) <- 'group'
 Idents(gaba2) <- 'group'
@@ -86,20 +92,22 @@ Idents(gaba4) <- 'group'
 Idents(gaba5) <- 'group'
 Idents(gaba6) <- 'group'
 
+
 #Subset homecage and negative
-gaba0 <- subset(gaba0, idents = c("negative","positive"))
-gaba1 <- subset(gaba1, idents = c("negative","positive"))
-gaba2 <- subset(gaba2, idents = c("negative","positive"))
-gaba3 <- subset(gaba3, idents = c("negative","positive"))
-gaba4 <- subset(gaba4, idents = c("negative","positive"))
-gaba5 <- subset(gaba5, idents = c("negative","positive"))
-gaba6 <- subset(gaba6, idents = c("negative","positive"))
+gaba0 <- subset(gaba0, idents = c("negative","homecage"))
+gaba1 <- subset(gaba1, idents = c("negative","homecage"))
+gaba2 <- subset(gaba2, idents = c("negative","homecage"))
+gaba3 <- subset(gaba3, idents = c("negative","homecage"))
+gaba4 <- subset(gaba4, idents = c("negative","homecage"))
+gaba5 <- subset(gaba5, idents = c("negative","homecage"))
+gaba6 <- subset(gaba6, idents = c("negative","homecage"))
+
 
 
 #Collapse into 1 cluster to run 'all gaba' together
 all.gaba <- FindClusters(gaba.subset2, resolution = 0)
 Idents(all.gaba) <- 'group'
-all.gaba <- subset(all.gaba, idents = c("negative","positive"))
+all.gaba <- subset(all.gaba, idents = c("negative","homecage"))
 
 ```
 ##Generate count tables for DESeq2
@@ -260,7 +268,7 @@ counts0g <- pb0g[["6"]] ##change this too
 
 
 #generate metadata table ##FIX THIS
-metadata <- read.csv("/Users/savellke/Documents/Analysis/mm10_exp1/March2023/metadataC.csv", row.names = 1)
+metadata <- read.csv("/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S4/metadataC.csv", row.names = 1)
 
 #check that the metadata is set up correctly
 all(rownames(metadataC) == colnames(countsa))  
