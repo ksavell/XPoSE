@@ -382,12 +382,17 @@ coexp <- merge(ce4, ce5,
                all=TRUE, 
                no.dups = TRUE)
 
+save(coexp, file = "~/Output/coexp.RData")
 
 write.csv(coexp, '/Users/savellke/Documents/Analysis/mm10_exp1/coexp_03312023.csv')
 
 #filter by sig
 coexp$keep[coexp$padj_a < 0.05 | coexp$padj_0 < 0.05 | coexp$padj_1 < 0.05 | coexp$padj_2 < 0.05 | coexp$padj_3 < 0.05 | coexp$padj_ag < 0.05 | coexp$padj_0g < 0.05 | coexp$padj_1g < 0.05] <- 1 
 coexp <- subset(coexp, coexp$keep == 1)
+
+backgroundgenes <- data.frame(coexp$gene)
+
+write.csv(backgroundgenes, '/Users/savellke/Output/backgroundgenes.csv')
 ```
 
 #Upset plot by ComplexHeatmap and ComplexUpSet, thanks @jokergoo! 
@@ -397,12 +402,14 @@ df <- data.frame(coexp$gene)
 rownames(df) <- df$coexp.gene
 df <- df[,-1]
 
+df$up3[(coexp$padj_3 <0.05 & coexp$log2FoldChange_3 > 0)] <- 1
 df$up1[(coexp$padj_1 <0.05 & coexp$log2FoldChange_1 > 0)] <- 1
 df$up0[(coexp$padj_0 <0.05 & coexp$log2FoldChange_0 > 0)] <- 1
 df$up2[(coexp$padj_2 <0.05 & coexp$log2FoldChange_2 > 0)] <- 1
-df$up3[(coexp$padj_3 <0.05 & coexp$log2FoldChange_3 > 0)] <- 1
 df$up0g[(coexp$padj_0g <0.05 & coexp$log2FoldChange_0g > 0)] <- 1
 df$up1g[(coexp$padj_1g <0.05 & coexp$log2FoldChange_1g > 0)] <- 1
+
+df$upglut[(df$up3 > 0 & df$up0 > 0 & df$up1 > 0 & df$up2 > 0)] <- 1
 
 #fill in NA as zero
 df[is.na(df)] <- 0
@@ -412,12 +419,12 @@ dfd <- data.frame(coexp$gene)
 rownames(dfd) <- dfd$coexp.gene
 dfd <- dfd[,-1]
 
+dfd$dn3[(coexp$padj_3 <0.05 & coexp$log2FoldChange_3 < 0)] <- 1
 dfd$dn1[(coexp$padj_1 <0.05 & coexp$log2FoldChange_1 < 0)] <- 1
 dfd$dn0[(coexp$padj_0 <0.05 & coexp$log2FoldChange_0 < 0)] <- 1
 dfd$dn2[(coexp$padj_2 <0.05 & coexp$log2FoldChange_2 < 0)] <- 1
-dfd$dn3[(coexp$padj_3 <0.05 & coexp$log2FoldChange_3 < 0)] <- 1
 dfd$dn0g[(coexp$padj_0g <0.05 & coexp$log2FoldChange_0g < 0)] <- 1
-#dfd$dn1g[(coexp$padj_1g <0.05 & coexp$log2FoldChange_1g < 0)] <- 1
+dfd$dn1g[(coexp$padj_1g <0.05 & coexp$log2FoldChange_1g < 0)] <- 1
 
 dfd[is.na(dfd)] <- 0
 
@@ -426,18 +433,40 @@ dfd[is.na(dfd)] <- 0
 #make combination matrix, distinct is mutually exclusive
 cm <- make_comb_mat(df,
                     mode = c("distinct"))
-cm <- cm[, -c(26)]
+#cm <- cm[, -c(26)]
 
 cmd <- make_comb_mat(dfd,
                     mode = c("distinct"))
-cmd <- cmd[, -c(18)]
+#cmd <- cmd[, -c(18)]
+#intersect
+cm. <- make_comb_mat(df,
+                    mode = c("intersect"))
+#cm. <- cm.[, -c(26)]
+
+cmd. <- make_comb_mat(dfd,
+                    mode = c("intersect"))
+#cmd. <- cmd.[, -c(18)]
 
 #
-UpSet(t(cm))
+distinct <- UpSet(cm,
+      top_annotation = upset_top_annotation(cm, add_numbers = TRUE),
+      right_annotation = upset_right_annotation(cm, add_numbers = TRUE),
+      set_order = c("up3","up1","up0","up2","up0g","up1g"))
 
-UpSet(t(cmd),
-      set_order = c("dn1","dn0","dn2","dn3","dn0g")
-      )
+intersect <- UpSet(cm.,
+      top_annotation = upset_top_annotation(cm., add_numbers = TRUE),
+      right_annotation = upset_right_annotation(cm., add_numbers = TRUE),
+      set_order = c("up3","up1","up0","up2","up0g","up1g"))
+
+distinctd <- UpSet(cmd,
+      top_annotation = upset_top_annotation(cmd, add_numbers = TRUE),
+      right_annotation = upset_right_annotation(cmd, add_numbers = TRUE),
+      set_order = c("dn3","dn1","dn0","dn2","dn0g","dn1g"))
+
+intersectd <- UpSet(cmd.,
+      top_annotation = upset_top_annotation(cmd., add_numbers = TRUE),
+      right_annotation = upset_right_annotation(cmd., add_numbers = TRUE),
+      set_order = c("dn3","dn1","dn0","dn2","dn0g","dn1g"))
 
 ```
 
