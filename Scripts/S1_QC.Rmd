@@ -294,9 +294,12 @@ glut.markers %>%
 #Create Heatmap
 ```{r}
 pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Heatmaps/glut_top10genes_heatmapV2.pdf",
-    width = 7,
-    height = 7)
-glut.heatmap <- DoHeatmap(glut.subset2, features = top10.glut$gene, raster = FALSE) 
+    width = 10,
+    height = 10)
+glut.heatmap <- DoHeatmap(glut.subset2, 
+                          features = top10.glut$gene, 
+                          raster = FALSE) 
+
 glut.heatmap
 
 dev.off()
