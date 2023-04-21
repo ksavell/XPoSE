@@ -55,15 +55,36 @@ VlnPlot(glut.subset2,
   ggtitle(NULL)
 dev.off()
 ```
-
-
-#UMAP Glut Group by Cartridge
+#Subset Glut object
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_CartV3.pdf",
+Cart1g <- subset(x = glut.subset2, subset = orig.ident == "C1")
+Cart2g <- subset(x = glut.subset2, subset = orig.ident == "C2")
+male.glut <- subset(x = glut.subset2, subset = sex == "male")
+female.glut <- subset(x = glut.subset2, subset = sex == "female")
+
+```
+
+#UMAP Glut Cartridge 1
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_Cart1.pdf",
     width = 10,
     height = 10)
-DimPlot(glut.subset2, 
-        group.by = "orig.ident", 
+DimPlot(Cart1g, 
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" ), 
+        shuffle = T) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
+```
+
+#UMAP Glut Cartridge 2
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_Cart2.pdf",
+    width = 10,
+    height = 10)
+DimPlot(Cart1g, 
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" ), 
         shuffle = T) + 
   theme_void() + 
   theme(legend.position = "none") + 
@@ -85,14 +106,27 @@ DimPlot(glut.subset2,
 dev.off()
 ```
 
-#UMAP Glut Group by Sex
+#UMAP Glut male
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_SexV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_male.pdf",
     width = 10,
     height = 10)
-DimPlot(glut.subset2,
-        group.by = "sex", 
-        cols = c("skyblue2", "violetred3"), 
+DimPlot(male.glut,
+        cols =  c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"), 
+        shuffle = T) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
+```
+
+#UMAP Glut female
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/GlutUMAP_female.pdf",
+    width = 10,
+    height = 10)
+DimPlot(female.glut,
+        cols =  c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"), 
         shuffle = T) + 
   theme_void() + 
   theme(legend.position = "none") + 
@@ -119,7 +153,7 @@ dev.off()
 #GABA SUBSET
 #Gaba Vlnplot (Genes Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_Gene_Exp_AAcols.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_Gene_Exp_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
@@ -127,7 +161,8 @@ VlnPlot(gaba.subset2,
         pt.size = 0, 
         ncol = 1, 
         flip = T,
-        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"))  + 
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+        y.max = 5000)  + 
   coord_flip() + 
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -137,7 +172,7 @@ dev.off()
 
 #Gaba Vlnplot (Transcripts Expressed)
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
     width = 2,
     height = 2)
 VlnPlot(gaba.subset2, 
@@ -145,7 +180,8 @@ VlnPlot(gaba.subset2,
         pt.size = 0, 
         ncol = 1, 
         flip = T,     
-        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"))+ 
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+        y.max = 15000)+ 
   coord_flip() + 
   theme(legend.position = "none") + 
   theme(axis.title = element_blank()) +
@@ -153,19 +189,43 @@ VlnPlot(gaba.subset2,
 dev.off()
 ```
 
-#UMAP Gaba Group by Cartridge
+#Subset Gaba object
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_CartV3.pdf",
+Cart1 <- subset(x = gaba.subset2, subset = orig.ident == "C1")
+Cart2 <- subset(x = gaba.subset2, subset = orig.ident == "C2")
+male.gaba <- subset(x = gaba.subset2, subset = sex == "male")
+female.gaba <- subset(x = gaba.subset2, subset = sex == "female")
+
+```
+
+
+#UMAP Gaba Group by Cartridge1
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_Cart1.pdf",
     width = 10,
     height = 10)
-DimPlot(gaba.subset2, 
-        group.by = "orig.ident", 
+DimPlot(Cart1,
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235")) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
+```
+#UMAP Gaba Group by Cartridge2
+
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GabaUMAP_Cart2.pdf",
+    width = 10,
+    height = 10)
+DimPlot(Cart2,
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
         shuffle = T) + 
   theme_void() + 
   theme(legend.position = "none") + 
   ggtitle(NULL)
 dev.off()
 ```
+
 
 #UMAP Gaba Group by Group
 ```{r}
@@ -181,14 +241,27 @@ DimPlot(gaba.subset2,
 dev.off()
 ```
 
-#UMAP Gaba Group by Sex
+#UMAP Gaba Group by male
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_SexV2.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_male.pdf",
     width = 10,
     height = 10)
-DimPlot(gaba.subset2, 
-        group.by = "sex", 
-        cols = c("skyblue2", "violetred3"), 
+DimPlot(male.gaba, 
+        cols =  c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"), 
+        shuffle = T) + 
+  theme_void() + 
+  theme(legend.position = "none") + 
+  ggtitle(NULL)
+dev.off()
+```
+
+#UMAP Gaba Group by female
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Gaba/GlutUMAP_female.pdf",
+    width = 10,
+    height = 10)
+DimPlot(female.gaba, 
+        cols =  c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"), 
         shuffle = T) + 
   theme_void() + 
   theme(legend.position = "none") + 
