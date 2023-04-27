@@ -298,7 +298,7 @@ glut.markers %>%
 ```
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapV4.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapV6.pdf",
     width = 3.5,
     height = 4.5)
 glut.heatmap <- DoHeatmap(object = glut.subset2, 
@@ -307,7 +307,7 @@ glut.heatmap <- DoHeatmap(object = glut.subset2,
                           label = (FALSE),
                           raster = TRUE)+
 
-theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")
                   
 glut.heatmap
 
@@ -328,7 +328,7 @@ top_n(n = 10, wt = avg_log2FC) -> top10.gaba
 ```
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmapV4.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmapV6.pdf",
     width = 3.5,
     height = 4.5)
 gaba.heatmap <- DoHeatmap(gaba.subset2, 
@@ -337,7 +337,7 @@ gaba.heatmap <- DoHeatmap(gaba.subset2,
                           label = (FALSE),
                           raster = TRUE)+
   
-theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 10), axis.text.x = element_text(size = 10))
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")
 
 gaba.heatmap
            
