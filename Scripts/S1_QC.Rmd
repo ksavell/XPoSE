@@ -298,7 +298,7 @@ glut.markers %>%
 ```
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapV6.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapOB.pdf",
     width = 3.5,
     height = 4.5)
 glut.heatmap <- DoHeatmap(object = glut.subset2, 
@@ -307,7 +307,9 @@ glut.heatmap <- DoHeatmap(object = glut.subset2,
                           label = (FALSE),
                           raster = TRUE)+
 
-theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")+
+  
+scale_fill_gradientn(colours = c("blue", "black" ,"orange"))
                   
 glut.heatmap
 
