@@ -1,0 +1,26 @@
+---
+title: "Rpackages"
+author: "Katherine Savell"
+date: "2023-05-01"
+output: html_document
+---
+
+```{r}
+if(!require("renv")){
+    install.packages("renv")
+    library("renv")
+}
+
+# create an renv folder in your project directory
+renv::init()
+
+# Install the packages your project requires
+renv::install("package_name")
+
+```
+
+```{r}
+#
+renv::restore()
+```
+

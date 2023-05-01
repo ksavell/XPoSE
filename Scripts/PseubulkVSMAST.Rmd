@@ -14,7 +14,6 @@ Learned from https://hbctraining.github.io/scRNA-seq/lessons/pseudobulk_DESeq2_s
 # Load packages
 
 ```{r message = FALSE}
-library(scater)
 library(Seurat)
 library(tidyverse)
 library(cowplot)
@@ -25,16 +24,13 @@ library(magrittr)
 library(Matrix)
 library(purrr)
 library(reshape2)
-library(S4Vectors)
 library(tibble)
-library(SingleCellExperiment)
 library(pheatmap)
-library(apeglm)
 library(png)
 library(DESeq2)
 library(RColorBrewer)
 library(MAST)
-library(scuttle)
+
 
 #set parallel conditions, do 1/2 or n - 2 the number of cores you have
 plan('multisession', 
