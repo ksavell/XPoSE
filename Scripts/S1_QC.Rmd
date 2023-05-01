@@ -10,6 +10,10 @@ library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ComplexHeatmap")
 ```
 #Load Object
 ```{r}
@@ -289,19 +293,28 @@ glut.markers <- FindAllMarkers(glut.subset2, only.pos = TRUE, min.pct = 0.25, lo
 glut.markers %>% 
   group_by(cluster) %>% 
   top_n(n = 10, wt = avg_log2FC) -> top10.glut
+
 ```
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Heatmaps/glut_top10genes_heatmapV2.pdf",
-    width = 10,
-    height = 10)
-glut.heatmap <- DoHeatmap(glut.subset2, 
-                          features = top10.glut$gene, 
-                          raster = FALSE) 
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapOB.pdf",
+    width = 3.5,
+    height = 4.5)
+glut.heatmap <- DoHeatmap(object = glut.subset2, 
+                          features = (top10.glut$gene),
+                          group.colors =  c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"),
+                          label = (FALSE),
+                          raster = TRUE)+
 
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")+
+  
+scale_fill_gradientn(colours = c("blue", "black" ,"orange"))
+                  
 glut.heatmap
 
 dev.off()
+
+
 ```
 
 
@@ -312,14 +325,25 @@ gaba.markers <- FindAllMarkers(gaba.subset2, only.pos = TRUE, min.pct = 0.25, lo
 gaba.markers %>% 
   group_by(cluster) %>% 
 top_n(n = 10, wt = avg_log2FC) -> top10.gaba
+
 ```
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Heatmaps/gaba_top10genes_heatmapV2.pdf",
-    width = 7,
-    height = 7)
-gaba.heatmap <- DoHeatmap(gaba.subset2, features = top10.gaba$gene, raster = FALSE) 
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmapV6.pdf",
+    width = 3.5,
+    height = 4.5)
+gaba.heatmap <- DoHeatmap(gaba.subset2, 
+                          features = top10.gaba$gene,
+                          group.colors = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+                          label = (FALSE),
+                          raster = TRUE)+
+  
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")
+
 gaba.heatmap
+           
+                          
+                         
 
 dev.off()
 ```
