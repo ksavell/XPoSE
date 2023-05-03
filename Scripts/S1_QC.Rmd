@@ -294,6 +294,10 @@ glut.markers %>%
   group_by(cluster) %>% 
   top_n(n = 10, wt = avg_log2FC) -> top10.glut
 
+top10.glut.df <- as.data.frame(top10.glut)
+
+write.csv(top10.glut.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/top10.glut.csv")
+
 ```
 #Create Heatmap
 ```{r}
@@ -325,6 +329,10 @@ gaba.markers <- FindAllMarkers(gaba.subset2, only.pos = TRUE, min.pct = 0.25, lo
 gaba.markers %>% 
   group_by(cluster) %>% 
 top_n(n = 10, wt = avg_log2FC) -> top10.gaba
+
+top10.gaba.df <- as.data.frame(top10.gaba)
+
+write.csv(top10.gaba.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/top10.gaba.csv")
 
 ```
 #Create Heatmap
