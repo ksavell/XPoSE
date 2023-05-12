@@ -1,0 +1,156 @@
+---
+title: "S3"
+author: "Kareem"
+date: "2023-05-12"
+output: html_document
+---
+
+#Load Packages
+```{r}
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+#Load Object
+```{r}
+setwd("/Users/woodskad/Desktop/Analysis/S1/")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023.RData")
+```
+
+#GLUT SUBSET
+#Glut Vlnplot (Genes Expressed)
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_Gene_Exp_AAcols.pdf",
+    width = 2,
+    height = 2)
+VlnPlot(glut.subset2, 
+        features = c("nFeature_RNA"), 
+        pt.size = 0, 
+        ncol = 1,
+        flip = T,
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" )) + 
+  coord_flip() + 
+  theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
+  ggtitle(NULL)
+dev.off()
+```
+
+#Glut Vlnplot (Transcripts Expressed)
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S1_panels/Glut/GlutVln_transcripts_AAcols.pdf",
+    width = 2,
+    height = 2)
+VlnPlot(glut.subset2, 
+        features = c("nCount_RNA"), 
+        pt.size = 0, 
+        ncol = 1,
+        flip = T,
+        cols = c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D" )) + 
+  coord_flip() +
+  theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
+  ggtitle(NULL)
+dev.off()
+```
+
+#Find Glut Markers
+```{r}
+glut.markers <- FindAllMarkers(glut.subset2, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+glut.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 10, wt = avg_log2FC) -> top10.glut
+
+top10.glut.df <- as.data.frame(top10.glut)
+
+write.csv(top10.glut.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/top10.glut.csv")
+
+```
+
+#Create Heatmap
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapOB.pdf",
+    width = 3.5,
+    height = 4.5)
+glut.heatmap <- DoHeatmap(object = glut.subset2, 
+                          features = (top10.glut$gene),
+                          group.colors =  c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"),
+                          label = (FALSE),
+                          raster = TRUE)+
+
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")+
+  
+glut.heatmap
+dev.off()
+```
+
+#GABA SUBSET
+#Gaba Vlnplot (Genes Expressed)
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_Gene_Exp_AAcols.pdf",
+    width = 2,
+    height = 2)
+VlnPlot(gaba.subset2, 
+        features = c("nFeature_RNA"), 
+        pt.size = 0, 
+        ncol = 1, 
+        flip = T,
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+        y.max = 5000)  + 
+  coord_flip() + 
+  theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
+  ggtitle(NULL)
+dev.off()
+```
+
+#Gaba Vlnplot (Transcripts Expressed)
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
+    width = 2,
+    height = 2)
+VlnPlot(gaba.subset2, 
+        features = c("nCount_RNA"), 
+        pt.size = 0, 
+        ncol = 1, 
+        flip = T,     
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+        y.max = 15000)+ 
+  coord_flip() + 
+  theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
+  ggtitle(NULL)
+dev.off()
+```
+
+#Find Gaba Markers
+```{r}
+gaba.markers <- FindAllMarkers(gaba.subset2, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25) 
+gaba.markers %>% 
+  group_by(cluster) %>% 
+top_n(n = 10, wt = avg_log2FC) -> top10.gaba
+
+top10.gaba.df <- as.data.frame(top10.gaba)
+
+write.csv(top10.gaba.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/top10.gaba.csv")
+
+```
+
+#Create Heatmap
+```{r}
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmapV6.pdf",
+    width = 3.5,
+    height = 4.5)
+gaba.heatmap <- DoHeatmap(gaba.subset2, 
+                          features = top10.gaba$gene,
+                          group.colors = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+                          label = (FALSE),
+                          raster = TRUE)+
+  
+theme(axis.title = element_blank(), axis.text.y = element_text(face = "italic", size = 5), legend.position = "none")
+
+gaba.heatmap
+dev.off()
+```
