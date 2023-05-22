@@ -1,0 +1,106 @@
+---
+title: "F1"
+author: "Katherine Savell"
+date: "2023-05-02"
+output: html_document
+---
+
+```{r}
+library(renv)
+renv::restore()
+library(ggplot2)
+library(reshape2)
+library(ComplexHeatmap)
+library(pheatmap)
+```
+
+```{r}
+#load raw counts
+C1ST <- read.csv("~/RData/STreads/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+                 skip = 7, row.names = 1)
+rownames(C1ST) <- paste0(rownames(C1ST), "_1")
+C2ST <- read.csv("~/RData/STreads/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+                 skip = 7, row.names = 1)
+rownames(C2ST) <- paste0(rownames(C2ST), "_2")
+ST <- rbind(C1ST, C2ST)
+ST <- ST[,2:9]
+
+#make dataframe of metadata
+df <- data.frame(glut.subset2@meta.data) #are row names the nuclei ID?
+idx <- match(rownames(df), rownames(ST))
+
+ST$rat <- NA
+ST$rat[!is.na(idx)] <- df$ratID[idx[!is.na(idx)]]
+
+#make dataframe with rat ID and ST counts
+
+
+
+#make new metadata, this is broken 
+glut.subset2$ST2count <- ST$SampleTag02_mm.stAbO[idx]
+glut.subset2$ST3count <- ST$SampleTag03_mm.stAbO[idx]
+glut.subset2$ST4count <- ST$SampleTag04_mm.stAbO[idx]
+glut.subset2$ST5count <- ST$SampleTag05_mm.stAbO[idx]
+glut.subset2$ST6count <- ST$SampleTag06_mm.stAbO[idx]
+glut.subset2$ST7count <- ST$SampleTag07_mm.stAbO[idx]
+glut.subset2$ST8count <- ST$SampleTag08_mm.stAbO[idx]
+glut.subset2$ST9count <- ST$SampleTag09_mm.stAbO[idx]
+
+#heatmap of counts don't use
+rat <- split(glut.subset2, glut.subset2$ratID) #R7 not splitting
+cols <- c("ST2count", "ST3count","ST4count","ST5count","ST6count","ST7count","ST8count","ST9count")
+
+# Extract the desired columns from each data frame in the split object
+#ST_rat_list <- lapply(rat, function(df) {
+        #df@meta.data[[cols]]})
+
+
+```
+
+
+#Check sample tag reads for nuclei in rest of figures
+```{r}
+C1ST <- read.csv("~/RData/STreads/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+                 skip = 7, row.names = 1)
+C1calls <- read.csv("~/Downloads/cart1-good-only_Sample_Tag_Calls.csv",
+                    skip = 7, row.names = 1
+                    )
+C1ST <- C1ST[,1:9]
+idx <- match(rownames(C1ST), rownames(C1calls))
+C1ST$STcall <- C1calls$Sample_Tag[idx]
+
+C1STlist <- split(C1ST, C1ST$STcall)
+
+#Make summary table of the medians of ST to determine heat map range
+median <- sapply(C1STlist, function(x) {
+  # Find the names of the numeric columns
+  numeric_cols <- sapply(x, is.numeric)
+  
+  # Ignore character columns
+  numeric_cols <- numeric_cols & !sapply(x, is.character)
+  
+  # Find the medians of the numeric columns
+  medians <- apply(x[, numeric_cols], 2, median)
+  
+  # Return a named vector of medians
+  names(medians) <- names(x)[numeric_cols]
+  return(medians)
+})
+
+#rownames(C1ST) <- paste(C1ST$Cell_Index, "_1")
+C1STmat <- as.matrix(C1ST[1:9])
+
+clipping_range <- list(lower = 0, upper = 1500)
+hm <- Heatmap(C1STmat, 
+              cluster_columns = FALSE, 
+              cluster_rows = TRUE,
+              show_row_names = FALSE,
+              show_column_names = TRUE)
+
+pdf(file = "~/Output/C1ST.pdf",
+    width = 10,
+    height = 10)
+draw(hm, heatmap_legend_side = "right")
+dev.off()
+```
+
