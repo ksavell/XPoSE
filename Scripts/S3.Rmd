@@ -67,6 +67,11 @@ top10.glut.df <- as.data.frame(top10.glut)
 
 write.csv(top10.glut.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/top10.glut.csv")
 
+glut.genes <- data.frame(table(top10.glut$gene))
+colnames(glut.genes)[1] = "Gene"
+df2 <- data.frame(Gene = "Slc17a7", Freq = 1)
+glut.genes2 = rbind(glut.genes, df2)
+
 ```
 
 #Create Heatmap
@@ -75,7 +80,7 @@ pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPo
     width = 3.5,
     height = 4.5)
 glut.heatmap <- DoHeatmap(object = glut.subset2, 
-                          features = (top10.glut$gene),
+                          features = top10.glut$gene,
                           group.colors =  c("#64C7C8", "#41B75F", "#2C8CB9", "#0A5B8C", "#3C9E64", "#6F499D"),
                           label = (FALSE),
                           raster = TRUE)+
