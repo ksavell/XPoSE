@@ -71,7 +71,7 @@ write.csv(top10.glut.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mR
 
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmapOB.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/glut_top10genes_heatmap052423.pdf",
     width = 3.5,
     height = 4.5)
 glut.heatmap <- DoHeatmap(object = glut.subset2, 
@@ -140,11 +140,11 @@ write.csv(top10.gaba.df, file = "/Users/woodskad/Library/CloudStorage/Box-Box/mR
 
 #Create Heatmap
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmapV6.pdf",
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S3_panels/Heatmaps/gaba_top10genes_heatmap052423.pdf",
     width = 3.5,
     height = 4.5)
 gaba.heatmap <- DoHeatmap(gaba.subset2, 
-                          features = top10.gaba$gene,
+                          features = c("Gad1", top10.gaba$gene),
                           group.colors = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
                           label = (FALSE),
                           raster = TRUE)+
