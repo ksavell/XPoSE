@@ -104,3 +104,22 @@ draw(hm, heatmap_legend_side = "right")
 dev.off()
 ```
 
+#Create dataframe for pie chart values
+```{r}
+gaba.subset2$ratID_group <- paste(gaba.subset2$ratID,
+                                  gaba.subset2$group,
+                                  gaba.subset2$orig.ident,
+                                  sep = "_")
+
+df.gaba.rat_group <- data.frame(table(gaba.subset2$ratID_group))
+df.gaba.group <- data.frame(table(gaba.subset2$group))
+
+glut.subset2$ratID_group <- paste(glut.subset2$ratID,
+                                  glut.subset2$group,
+                                  glut.subset2$orig.ident,
+                                  sep = "_")
+
+df.glut.rat_group <- data.frame(table(glut.subset2$ratID_group))
+df.glut.group <- data.frame(table(glut.subset2$group))
+```
+
