@@ -69,7 +69,7 @@ set_panel_size(gabadotplot, height=unit(1.5, "in"),width=unit(1.5, "in"))
 ```
 
 ```{r}
-pdf(file="/Users/woodskad/Desktop/F2_panels.pdf",
+pdf(file="~/Output/GlutUMAP.pdf",
 width=10, height=10)
 glutdotplot
 dev.off()
