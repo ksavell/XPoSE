@@ -17,20 +17,36 @@ library(pheatmap)
 ```{r}
 #load raw counts
 C1ST <- read.csv("~/RData/STreads/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
-                 skip = 7, row.names = 1)
-rownames(C1ST) <- paste0(rownames(C1ST), "_1")
+                 skip = 7, row.names = 1) #load in file, skip summary in first 7 lines
+rownames(C1ST) <- paste0(rownames(C1ST), "_1") # add cart ID
 C2ST <- read.csv("~/RData/STreads/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
                  skip = 7, row.names = 1)
 rownames(C2ST) <- paste0(rownames(C2ST), "_2")
-ST <- rbind(C1ST, C2ST)
-ST <- ST[,2:9]
+ST <- rbind(C1ST, C2ST) #combined C1 and C2
+ST <- ST[,2:9] #exclude ST that we did not use
 
-#make dataframe of metadata
-df <- data.frame(glut.subset2@meta.data) #are row names the nuclei ID?
-idx <- match(rownames(df), rownames(ST))
+GlutIDs <- data.frame(glut.subset2@assays[["RNA"]]@data@Dimnames[[2]])
+GlutIDs$cart <- glut.subset2@meta.data[["orig.ident"]]
+GlutIDs$rat <- glut.subset2@meta.data[["ratID"]]
+GlutIDs$st <- glut.subset2@meta.data[["Sample_tag"]]
+rownames(GlutIDs) <- GlutIDs$glut.subset2.assays...RNA....counts.Dimnames..2..
+GlutIDs <- GlutIDs[,2:4]
+ 
+#filter the ST object by the final nuclei IDs after QC
+idx <- match(rownames(GlutIDs), rownames(ST))
+ST_filt <- ST[idx, ]
 
-ST$rat <- NA
-ST$rat[!is.na(idx)] <- df$ratID[idx[!is.na(idx)]]
+#order the tables the same to combine
+ST_filt[order(row.names(ST_filt)), ]
+idx <- match(rownames(GlutIDs), rownames(ST_filt))
+ST_filt <- ST_filt[idx, ]
+
+all(rownames(GlutIDs) == rownames(ST_filt))  
+
+GabaIDs <- gaba.subset2@assays[["RNA"]]@counts@Dimnames[[2]]
+AllIDs <- merge(GlutIDs, GabaIDs)
+
+
 
 #make dataframe with rat ID and ST counts
 
