@@ -91,7 +91,7 @@ load("/Users/woodskad/Desktop/Analysis/S1/Robject/gaba_subset_forthpipe_03142023
 
 #UMAP Glut Subset. 
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GlutUMAPV2.pdf",
+pdf(file = "~/Output/GlutClusters_UMAP.pdf",
     width = 10,
     height = 10)
 DimPlot(glut.subset2, 
@@ -106,7 +106,7 @@ dev.off()
 
 #UMAP GABA Subset. 
 ```{r}
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/F2_panels/UMAPs w: AA colors/GABAUMAP.pdf",
+pdf(file = "~/Output/GABAClusters_UMAP.pdf",
     width = 10,
     height = 10)
 DimPlot(gaba.subset2, 
