@@ -58,6 +58,13 @@ if (userData == 1){
   userData <- glut
 }
 
+#Turns first letter to uppercase in most groups
+userData@meta.data$sex[userData@meta.data$sex=="male"] <- "Male"
+userData@meta.data$sex[userData@meta.data$sex=="female"] <- "Female"
+userData@meta.data$group[userData@meta.data$group=="homecage"] <- "Homecage"
+userData@meta.data$group[userData@meta.data$group=="negative"] <- "Negative"
+userData@meta.data$group[userData@meta.data$group=="positive"] <- "Positive"
+
 
 ##My Functions
 
@@ -125,7 +132,7 @@ getGroup <- function(dataset){
       theGroup <- "group"
     } else if (theGroup == 2){
       theGroup <- "ratID"
-    } else if (theGroup == 2){
+    } else if (theGroup == 3){
       theGroup <- "sex"
     }else {
       theGroup <- NULL
