@@ -9,24 +9,28 @@ library(patchwork)
 library(stringr)
 library(bslib)
 library(fontawesome)
+library(magick)
 
 setwd("~/Desktop/Analysis/Shiny/Test")
 
-load("/Volumes/CM-Data2/Robjects/gaba_subset_forthpipe_11102022.RData")
+load("~/Desktop/Analysis/Shiny/Test/gaba_subset_forthpipe_03142023.RData")
 
 # save dataset as a spare
 gaba <- gaba.subset2
+
+# creating a watermark text
+watermark_text <- "Hope Lab©"  # Customize the watermark text
 
 # Define UI for the Shiny app (side panel and main panel layout)
 ui <- fluidPage(
   
   # Theme for page -----
   theme=bs_theme(
-    bootswatch = "morph"
+    bootswatch = "minty"
   ),
   
   # App Title -----
-  titlePanel("GABA Datasets"),
+  titlePanel("GABA Dataset"),
   
   # Sidebar layout with input and output definitions ---- 
   sidebarLayout(
@@ -64,17 +68,27 @@ ui <- fluidPage(
       #             choices = c("UMAP",
       #                         "Ridge Plot")),
       
-      downloadButton("downloadUMAP", "Download UMAP as PDF", icon = shiny::icon("download")),
+      downloadButton("downloadUMAP", "Download UMAP", icon = shiny::icon("download")),
       br(),
       br(),
-      downloadButton("downloadRidge", "Download Ridge Plot as PDF", icon = shiny::icon("download"))
+      downloadButton("downloadRidge", "Download Ridge Plot", icon = shiny::icon("download")),
+      br(),
+      br(),
+      downloadButton("downloadFeature", "Download Feature Plot", icon = shiny::icon("download"))
     ),
     
     # Main panel for displaying outputs ----
     mainPanel(
       #plotOutput("plot"),
       plotOutput("umap_plot"),
-      plotOutput("ridge")
+      fluidRow(
+        column(6,
+               plotOutput("ridge")
+        ),
+        column(6,
+               plotOutput("feature")
+        )
+      )
     )
     
   )
@@ -82,7 +96,7 @@ ui <- fluidPage(
 
 # Define server logic for the Shiny app ---- 
 server <- function(input, output, session){
-  
+    
   vals <- reactiveValues()
   
   # Sanitizes the error message for the UI
@@ -114,7 +128,8 @@ server <- function(input, output, session){
   
   output$ridge <- renderPlot({
     head(gene())
-    ridge_final <- RidgePlot(gaba, features = str_to_title(input$gene), group.by = g())
+    ridge_final <- RidgePlot(gaba, features = str_to_title(input$gene), group.by = g()) + 
+      theme(legend.position = "top", legend.justification = "center")
     vals$ridge <- ridge_final
     print(ridge_final)
   })
@@ -129,27 +144,54 @@ server <- function(input, output, session){
   # })
   # 
   
+  # plots Feature plot ----
+  output$feature <- renderPlot({
+    feature <- FeaturePlot(gaba, features = str_to_title(input$gene))
+    vals$feature <- feature
+    print(feature)
+  })
+  
   # Downloadable plot of selected gene and group ----
   
-  output$downloadUMAP <-  downloadHandler(
-    filename = function() {
-      paste("plot_", "UMAP",".pdf",sep="")
+  output$downloadUMAP <-  downloadHandler( # downloads UMAP
+    filename = function() { 
+      paste("plot_", "UMAP",".png",sep="")
     },
     
     content = function(file) {
-      pdf(file,width=15,height=8)
+      png(file, width=500, height=500)
       print(vals$umap)
+      dev.off()
+      
+      # # Open the generated plot
+      # img <- image_read(file)
+      # 
+      # # Add the watermark to the plot
+      # img_with_watermark <- image_annotate(img, watermark_text, location = "+300+150", color = "grey", size = 20)
+      # 
+      # # Save the modified plot with the watermark
+      # image_write(img_with_watermark, path = file)
+    }
+  )
+  
+  output$downloadRidge <- downloadHandler( # downloads Ridge Plot
+    filename = function(){
+      paste("plot_",str_to_title(input$gene), "RidgePlot_by",input$group,".png",sep="")
+    },
+    content = function(file) {
+      png(file,width=1000)
+      print(vals$ridge)
       dev.off()
     }
   )
   
-  output$downloadRidge <- downloadHandler(
+  output$downloadFeature <- downloadHandler( # downloads Feature Plot
     filename = function(){
-      paste("plot_",str_to_title(input$gene), "RidgePlot_by",input$group,".pdf",sep="")
+      paste("plot_",str_to_title(input$gene), "FeaturePlot",".png",sep="")
     },
     content = function(file) {
-      pdf(file,width=15,height=8)
-      print(vals$ridge)
+      png(file,width=1000,height=1000)
+      print(vals$feature)
       dev.off()
     }
   )
