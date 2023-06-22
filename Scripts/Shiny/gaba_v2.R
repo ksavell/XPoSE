@@ -18,6 +18,8 @@ load("~/Desktop/Analysis/Shiny/Test/gaba_subset_forthpipe_03142023.RData")
 # save dataset as a spare
 gaba <- gaba.subset2
 
+gaba@meta.data$all <- gaba@meta.data$seurat_clusters
+
 # creating a watermark text
 watermark_text <- "Hope Lab©"  # Customize the watermark text
 
@@ -62,7 +64,9 @@ ui <- fluidPage(
                               tabPanel("GABA Dataset",
                             #plotOutput("plot"),
                             plotOutput("umap_plot"),
-                            plotOutput("ridge")
+                            plotOutput("ridge"),
+                            plotOutput("feature")
+                            
                             # fluidRow(
                             #   column(6,
                             #          plotOutput("ridge")),
@@ -88,49 +92,58 @@ server <- function(input, output, session){
     NoV = K()
     Ge = sapply(1:NoV, function(i){paste0("gene",i)})
     Gr = sapply(1:NoV, function(i){paste0("group",i)})
+    Gr_UMAP = sapply(1:NoV, function(i){paste0("groupu",i)})
     
     output = tagList()
     
     for(i in seq_along(1:NoV)){
       output[[i]] = tagList()
       output[[i]][[1]] = textInput(Ge[i], label = "Choose gene", value = "", placeholder = "Gad1")
-      output[[i]][[2]] =  selectInput(Gr[i],label="Choose to split by group or display all",
+      output[[i]][[2]] =  selectInput(Gr_UMAP[i],label="Choose to split UMAP by group or display all",
                                       choices = c("Experiment Group" = "group",
                                                   "Rat" = "ratID",
                                                   "Sex" = "sex",
-                                                  "All"))
+                                                  "All" = "all"))
+      output[[i]][[3]] =  selectInput(Gr[i],label="Choose to split other plots by group or display all",
+                                      choices = c("Experiment Group" = "group",
+                                                  "Rat" = "ratID",
+                                                  "Sex" = "sex",
+                                                  "All" = "all"))
     }
     
     output
   })
   
-  # Sanitizes the error message for the UI
-  gene <- reactive({
-    validate(
-      need(input$gene != "", "Please provide a gene.")
-    )
-  })
+  # # Sanitizes the error message for the UI
+  # gene <- reactive({
+  #   validate(
+  #     need(input$gene != "", "Please provide a gene.")
+  #   )
+  # })
   
   # plots UMAP ----
   output$umap_plot <- renderPlot({
-    umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5)
-    #vals$umap <- umap
-    print(umap)
+    #  umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5) -- his line works fine
+    # print(umap)
+    plot_list <- list()
+    # gaba.features <- c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b","Meis2","Vip","Lamp5")
+    for(i in 1:K()){
+      groupu <- input[[paste0("groupu", i)]]
+      
+      plot <- DimPlot(gaba, reduction = "umap", label = FALSE, pt.size = 0.5, group.by = groupu) +
+        ggtitle(NULL)
+      
+      plot_list[[i]] <- plot
+    }
+    
+    plot_output <- do.call(patchwork::wrap_plots, plot_list) 
+    print(plot_output)
   })
   
   
   
   # plots Ridge ----
-  # manipulates stored variable if user chooses not to group
-  g <- reactive({
-    if(input$group=="All"){
-      NULL
-    }
-    else{
-      input$group
-    }
-  })
-  
+
   output$ridge <- renderPlot({
     plot_list <- list()
     
@@ -153,21 +166,29 @@ server <- function(input, output, session){
     
   })
   
-  # plot <- reactive({
-  #   if(input$downloadplot=="UMAP"){
-  #     output$umap_plot
-  #   }
-  #   else if(input$downloadplot=="Ridge plot"){
-  #     output$ridge
-  #   }
-  # })
-  # 
-  
   # plots Feature plot ----
   output$feature <- renderPlot({
-    feature <- FeaturePlot(gaba, features = str_to_title(C))
-    vals$feature <- feature
-    print(feature)
+    plot_list <- list()
+    
+    for(i in 1:K()){
+      gene <- input[[paste0("gene", i)]]
+      group <- input[[paste0("group", i)]]
+      
+      validate(
+        need(gene != "", "Please provide a gene.")
+      )
+      
+      plot <- FeaturePlot(gaba, features = str_to_title(gene), split.by = group) 
+      
+      plot_list[[i]] <- plot
+    }
+    
+    plot_output <- do.call(patchwork::wrap_plots, plot_list)
+    print(plot_output)
+    # 
+    # feature <- FeaturePlot(gaba, features = str_to_title(C))
+    # vals$feature <- feature
+    # print(feature)
   })
   
   # Downloadable plot of selected gene and group ----
