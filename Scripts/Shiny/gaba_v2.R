@@ -47,7 +47,7 @@ ui <- fluidPage(
                      h3("Customize your plots!"),
                      numericInput(
                        "NoVars",
-                       "Number of genes to plot",
+                       "Number of gene-specific plots",
                        value = 1,
                        min = 1,
                        max = 6
@@ -100,15 +100,15 @@ server <- function(input, output, session){
       output[[i]] = tagList()
       output[[i]][[1]] = textInput(Ge[i], label = "Choose gene", value = "", placeholder = "Gad1")
       output[[i]][[2]] =  selectInput(Gr_UMAP[i],label="Choose to split UMAP by group or display all",
-                                      choices = c("Experiment Group" = "group",
+                                      choices = c("All" = "all",
+                                                  "Experiment Group" = "group",
                                                   "Rat" = "ratID",
-                                                  "Sex" = "sex",
-                                                  "All" = "all"))
+                                                  "Sex" = "sex"))
       output[[i]][[3]] =  selectInput(Gr[i],label="Choose to split other plots by group or display all",
-                                      choices = c("Experiment Group" = "group",
+                                      choices = c("All" = "all",
+                                                  "Experiment Group" = "group",
                                                   "Rat" = "ratID",
-                                                  "Sex" = "sex",
-                                                  "All" = "all"))
+                                                  "Sex" = "sex"))
     }
     
     output
@@ -155,7 +155,7 @@ server <- function(input, output, session){
         need(gene != "", "Please provide a gene.")
       )
       
-      plot <- RidgePlot(gaba, features = str_to_title(gene), group.by = group) + 
+      plot <- VlnPlot(gaba, features = str_to_title(gene), group.by = group) + 
         theme(legend.position = "top", legend.justification = "center")
       
       plot_list[[i]] <- plot
