@@ -23,7 +23,7 @@ gaba@meta.data$all <- gaba@meta.data$seurat_clusters
 # creating a watermark text
 watermark_text <- "Hope Lab©"  # Customize the watermark text
 
-# Define UI for the Shiny app (side panel and main panel layout)
+# Define UI for the Shiny app (side panel and main panel layout) ----
 ui <- fluidPage(
   
   # Theme for page -----
@@ -35,7 +35,6 @@ ui <- fluidPage(
   titlePanel("GABA Dataset"),
   
   # Sidebar layout with input and output definitions ---- 
- # sidebarLayout(
     
     # selecting genes to get fed into plot ---- 
    
@@ -45,6 +44,11 @@ ui <- fluidPage(
                #     9,
                    sidebarPanel(
                      h3("Customize your plots!"),
+                     selectInput("Gr_UMAP",label="Choose to split UMAP by group or display all",
+                                 choices = c("Experiment Group" = "group",
+                                             "Rat" = "ratID",
+                                             "Sex" = "sex",
+                                             "All" = "all")),
                      numericInput(
                        "NoVars",
                        "Number of genes to plot",
@@ -52,7 +56,12 @@ ui <- fluidPage(
                        min = 1,
                        max = 6
                      ),
-                     uiOutput("VarsInput")
+                     uiOutput("VarsInput"),
+                     actionButton("submitBtn", "Submit", icon=icon("brain",stroke="black",class = "font-awesome",
+                                                                   style = "color: mediumvioletred;
+                                                                   border-color: black"),
+                                  style= "color:black;
+                                  background-color: powderblue")
                      
                      # adds a button to refresh plots by gene and group
                      #submitButton("Create plots",icon=fa("brain",fill="pink",stroke="black"))
@@ -63,21 +72,22 @@ ui <- fluidPage(
                             tabsetPanel(
                               tabPanel("GABA Dataset",
                             #plotOutput("plot"),
-                            plotOutput("umap_plot"),
+                            #plotOutput("umap_plot"),
+                            
+                            fluidRow(
+                              column(6,
+                                     plotOutput("umap_plot"),
+                              ),
+                              column(6,
+                                     plotOutput("mainfeature")
+                              )
+                            ),
                             plotOutput("ridge"),
                             plotOutput("feature")
-                            
-                            # fluidRow(
-                            #   column(6,
-                            #          plotOutput("ridge")),
-                            #   column(6,
-                            #          plotOutput("feature"))
-                            # ))
-               # )
+                )
                    
       )
     )
-  )
   )
 )
 
@@ -93,22 +103,23 @@ server <- function(input, output, session){
     Ge = sapply(1:NoV, function(i){paste0("gene",i)})
     Gr = sapply(1:NoV, function(i){paste0("group",i)})
     Gr_UMAP = sapply(1:NoV, function(i){paste0("groupu",i)})
+    Gr_f = sapply(1:NoV, function(i){paste0("groupf",i)})
+    
     
     output = tagList()
     
     for(i in seq_along(1:NoV)){
       output[[i]] = tagList()
       output[[i]][[1]] = textInput(Ge[i], label = "Choose gene", value = "", placeholder = "Gad1")
-      output[[i]][[2]] =  selectInput(Gr_UMAP[i],label="Choose to split UMAP by group or display all",
+      output[[i]][[2]] =  selectInput(Gr[i],label="Choose to split Ridge Plot by group or display all",
                                       choices = c("Experiment Group" = "group",
                                                   "Rat" = "ratID",
                                                   "Sex" = "sex",
                                                   "All" = "all"))
-      output[[i]][[3]] =  selectInput(Gr[i],label="Choose to split other plots by group or display all",
+      output[[i]][[3]] =  selectInput(Gr_f[i],label="Choose to split Feature Plot by group",
                                       choices = c("Experiment Group" = "group",
                                                   "Rat" = "ratID",
-                                                  "Sex" = "sex",
-                                                  "All" = "all"))
+                                                  "Sex" = "sex"))
     }
     
     output
@@ -123,21 +134,23 @@ server <- function(input, output, session){
   
   # plots UMAP ----
   output$umap_plot <- renderPlot({
-    #  umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5) -- his line works fine
-    # print(umap)
-    plot_list <- list()
-    # gaba.features <- c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b","Meis2","Vip","Lamp5")
-    for(i in 1:K()){
-      groupu <- input[[paste0("groupu", i)]]
-      
-      plot <- DimPlot(gaba, reduction = "umap", label = FALSE, pt.size = 0.5, group.by = groupu) +
-        ggtitle(NULL)
-      
-      plot_list[[i]] <- plot
-    }
+    umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5, group.by = input$Gr_UMAP)
     
-    plot_output <- do.call(patchwork::wrap_plots, plot_list) 
-    print(plot_output)
+    # Modify the plot to add borders and caption
+    umap <- umap + 
+      theme(plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+            plot.caption = element_text(size = 12, hjust = 0),
+            panel.border = element_rect(color = "black", fill = NA, size = 0.5))
+    
+    # Create the caption text
+    caption_text <- paste("Figure 1: UMAP Plot by ", input$Gr_UMAP, ".", sep="")
+    
+    # Add the caption to the plot
+    umap <- umap + labs(caption = caption_text)
+    
+    # Display the modified plot
+    print(umap)
+    
   })
   
   
@@ -166,19 +179,39 @@ server <- function(input, output, session){
     
   })
   
-  # plots Feature plot ----
-  output$feature <- renderPlot({
+  # plots Feature plot that is general ----
+  output$mainfeature <- renderPlot({
     plot_list <- list()
     
     for(i in 1:K()){
       gene <- input[[paste0("gene", i)]]
-      group <- input[[paste0("group", i)]]
       
       validate(
         need(gene != "", "Please provide a gene.")
       )
       
-      plot <- FeaturePlot(gaba, features = str_to_title(gene), split.by = group) 
+      plot <- FeaturePlot(gaba, features = str_to_title(gene)) 
+      
+      plot_list[[i]] <- plot
+    }
+    
+    plot_output <- do.call(patchwork::wrap_plots, plot_list)
+    print(plot_output)
+  })
+  
+  # plots Feature plot split by group ----
+  output$feature <- renderPlot({
+    plot_list <- list()
+    
+    for(i in 1:K()){
+      gene <- input[[paste0("gene", i)]]
+      groupf <- input[[paste0("groupf", i)]]
+      
+      validate(
+        need(gene != "", "Please provide a gene.")
+      )
+      
+      plot <- FeaturePlot(gaba, features = str_to_title(gene), split.by = groupf) 
       
       plot_list[[i]] <- plot
     }
