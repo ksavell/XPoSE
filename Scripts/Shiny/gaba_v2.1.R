@@ -54,6 +54,8 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
+      style = "position:fixed;width:inherit;",
+      width = 4,
       h3("Customize your plots!"),
       selectInput("Gr_UMAP",label="Choose to split UMAP by group or display all",
                   choices = c("Experiment Group" = "group",
@@ -69,6 +71,15 @@ ui <- fluidPage(
         max = 6
       ),
       uiOutput("VarsInput"),
+      checkboxInput("show_ridge_clust", "Show cluster-specific Violin Plot"),
+      conditionalPanel(
+        condition = "input.show_ridge_clust == true",
+        selectInput(
+          "cluster",
+          label = "Choose cluster to display",
+          choices = c(inhib_clusters[1:6])
+        )
+      ),
       actionButton("submitBtn", "Submit", icon=icon("brain",stroke="black",class = "font-awesome",
                                                     style = "color: mediumvioletred;
                                                                    border-color: black"),
@@ -81,21 +92,24 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("Single gene analysis",
+                 plotOutput("umap_plot"),
                  fluidRow(
-                   column(6,
-                          plotOutput("umap_plot"),
-                          style='margin-bottom:30px;border:1px solid; padding: 10px;'
+                   column(5,
+                          plotOutput("umap_split"),
+                          style='margin-bottom:25px;border:1px solid; padding: 5px;margin-left:55px;'
                    ),
-                   column(6,
+                   column(5,
                           plotOutput("mainfeature"),
-                          style='margin-bottom:30px;border:1px solid; padding: 10px;'
+                          style='margin-bottom:25px;border:1px solid; padding: 5px;'
                    )
                  ),
                  hr(),
-                 plotOutput("ridge"),
+                 plotOutput("feature"),
                  hr(),
-                 plotOutput("feature")
+                 plotOutput("violin")
         ),
+        
+        # 2ND TAB ------
         tabPanel("Multiple gene analysis",
                  fluidRow(
                    column(6,
@@ -117,6 +131,7 @@ ui <- fluidPage(
     )
   )
 )
+
 
 # Define server logic for the Shiny app ---- 
 server <- function(input, output, session){
@@ -157,7 +172,7 @@ server <- function(input, output, session){
           4,
           selectInput(
             Gr[i],
-            label = "Split Ridge Plot",
+            label = "Split Violin Plot",
             choices = c(
               "Experiment" = "group",
               "Rat" = "ratID",
@@ -184,11 +199,31 @@ server <- function(input, output, session){
     tagList(output_list)
   })
   
-  
   # plots UMAP ----
   output$umap_plot <- renderPlot({
-    umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5, group.by = input$Gr_UMAP
-                    ,cols = inhib_hex) +
+    umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5, group.by = "all",
+                    cols = inhib_hex, label.box=TRUE, label.color="white", repel=TRUE, label.size=5) +
+      ggtitle(paste("Overall UMAP plot"))
+    
+    # Modify the plot to add borders and caption
+    umap <- umap + 
+      theme(plot.title = element_text(face = "bold", size = 14, hjust = 0.5))
+    # 
+    # # Create the caption text
+    # caption_text <- paste("Figure 1: UMAP Plot by ", input$Gr_UMAP, ".", sep="")
+    # 
+    # # Add the caption to the plot
+    # umap <- umap + labs(caption = caption_text)
+    # 
+    
+    # Display the modified plot
+    print(umap)
+    
+  })
+  
+  # plots UMAP by group ----
+  output$umap_split <- renderPlot({
+    umap <- DimPlot(gaba, reduction = "umap", label = TRUE, pt.size = 0.5, group.by = input$Gr_UMAP) +
       ggtitle(paste("UMAP plot by", input$Gr_UMAP))
     
     # Modify the plot to add borders and caption
@@ -209,9 +244,8 @@ server <- function(input, output, session){
   
   
   
-  # plots Ridge ----
-  
-  output$ridge <- renderPlot({
+  # plots Violin ----
+  output$violin <- renderPlot({
     plot_list <- list()
     
     for(i in 1:K()){
@@ -222,17 +256,34 @@ server <- function(input, output, session){
         need(gene != "", "Please provide a gene.")
       )
       
-      plot <- RidgePlot(gaba, features = str_to_title(gene), group.by = group) + 
+      plot <- VlnPlot(gaba, features = str_to_title(gene), group.by = group) + 
         ggtitle(str_to_title(gene)) +
         theme(legend.position = "top", legend.justification = "center", plot.title = element_text(face = "bold.italic"))
       
       plot_list[[i]] <- plot
     }
     
-    plot_output <- do.call(patchwork::wrap_plots, plot_list)
-    print(plot_output)
+    if (input$show_ridge_clust) {
+      for(i in 1:K()){
+        gene <- input[[paste0("gene", i)]]
+        group <- input[[paste0("group", i)]]
+        
+        validate(
+          need(gene != "", "Please provide a gene.")
+        )
+        
+        plot <- VlnPlot(gaba, features = str_to_title(gene), group.by = group, idents = (which(inhib_clusters==input$cluster)-1)) + 
+          ggtitle(str_to_title(gene)) +
+          theme(legend.position = "top", legend.justification = "center", plot.title = element_text(face = "bold.italic"))
+        
+        plot_list[[i]] <- plot
+      }
+    }
     
+    plot_output <- do.call(patchwork::wrap_plots, plot_list)
+    plot_output
   })
+
   
   # plots Feature plot that is general ----
   output$mainfeature <- renderPlot({
