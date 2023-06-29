@@ -15,80 +15,28 @@ library(pheatmap)
 ```
 
 ```{r}
-#load raw counts
-C1ST <- read.csv("~/RData/STreads/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
-                 skip = 7, row.names = 1) #load in file, skip summary in first 7 lines
-rownames(C1ST) <- paste0(rownames(C1ST), "_1") # add cart ID
-C2ST <- read.csv("~/RData/STreads/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
-                 skip = 7, row.names = 1)
-rownames(C2ST) <- paste0(rownames(C2ST), "_2")
-ST <- rbind(C1ST, C2ST) #combined C1 and C2
-ST <- ST[,2:9] #exclude ST that we did not use
-
-GlutIDs <- data.frame(glut.subset2@assays[["RNA"]]@data@Dimnames[[2]])
-GlutIDs$cart <- glut.subset2@meta.data[["orig.ident"]]
-GlutIDs$rat <- glut.subset2@meta.data[["ratID"]]
-GlutIDs$st <- glut.subset2@meta.data[["Sample_tag"]]
-rownames(GlutIDs) <- GlutIDs$glut.subset2.assays...RNA....counts.Dimnames..2..
-GlutIDs <- GlutIDs[,2:4]
- 
-#filter the ST object by the final nuclei IDs after QC
-idx <- match(rownames(GlutIDs), rownames(ST))
-ST_filt <- ST[idx, ]
-
-#order the tables the same to combine
-ST_filt[order(row.names(ST_filt)), ]
-idx <- match(rownames(GlutIDs), rownames(ST_filt))
-ST_filt <- ST_filt[idx, ]
-
-all(rownames(GlutIDs) == rownames(ST_filt))  
-
-GabaIDs <- gaba.subset2@assays[["RNA"]]@counts@Dimnames[[2]]
-AllIDs <- merge(GlutIDs, GabaIDs)
-
-
-
-#make dataframe with rat ID and ST counts
-
-
-
-#make new metadata, this is broken 
-glut.subset2$ST2count <- ST$SampleTag02_mm.stAbO[idx]
-glut.subset2$ST3count <- ST$SampleTag03_mm.stAbO[idx]
-glut.subset2$ST4count <- ST$SampleTag04_mm.stAbO[idx]
-glut.subset2$ST5count <- ST$SampleTag05_mm.stAbO[idx]
-glut.subset2$ST6count <- ST$SampleTag06_mm.stAbO[idx]
-glut.subset2$ST7count <- ST$SampleTag07_mm.stAbO[idx]
-glut.subset2$ST8count <- ST$SampleTag08_mm.stAbO[idx]
-glut.subset2$ST9count <- ST$SampleTag09_mm.stAbO[idx]
-
-#heatmap of counts don't use
-rat <- split(glut.subset2, glut.subset2$ratID) #R7 not splitting
-cols <- c("ST2count", "ST3count","ST4count","ST5count","ST6count","ST7count","ST8count","ST9count")
-
-# Extract the desired columns from each data frame in the split object
-#ST_rat_list <- lapply(rat, function(df) {
-        #df@meta.data[[cols]]})
-
-
+IDs <- data.frame(combined@assays[["RNA"]]@data@Dimnames[[2]])
+IDs$cart <- combined@meta.data[["orig.ident"]]
+IDs$rat <- combined@meta.data[["ratID"]]
+IDs$st <- combined@meta.data[["Sample_tag"]]
+IDs$st2 <- combined@meta.data[["ST2_reads"]]
+IDs$st3 <- combined@meta.data[["ST3_reads"]]
+IDs$st4 <- combined@meta.data[["ST4_reads"]]
+IDs$st5 <- combined@meta.data[["ST5_reads"]]
+IDs$st6 <- combined@meta.data[["ST6_reads"]]
+IDs$st7 <- combined@meta.data[["ST7_reads"]]
+IDs$st8 <- combined@meta.data[["ST8_reads"]]
+IDs$st9 <- combined@meta.data[["ST9_reads"]]
+rownames(IDs) <- IDs$combined.assays...RNA....data.Dimnames..2..
 ```
 
 
 #Check sample tag reads for nuclei in rest of figures
 ```{r}
-C1ST <- read.csv("~/RData/STreads/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
-                 skip = 7, row.names = 1)
-C1calls <- read.csv("~/Downloads/cart1-good-only_Sample_Tag_Calls.csv",
-                    skip = 7, row.names = 1
-                    )
-C1ST <- C1ST[,1:9]
-idx <- match(rownames(C1ST), rownames(C1calls))
-C1ST$STcall <- C1calls$Sample_Tag[idx]
-
-C1STlist <- split(C1ST, C1ST$STcall)
+IDslist <- split(IDs, IDs$st)
 
 #Make summary table of the medians of ST to determine heat map range
-median <- sapply(C1STlist, function(x) {
+median <- sapply(IDslist, function(x) {
   # Find the names of the numeric columns
   numeric_cols <- sapply(x, is.numeric)
   
@@ -103,15 +51,23 @@ median <- sapply(C1STlist, function(x) {
   return(medians)
 })
 
-#rownames(C1ST) <- paste(C1ST$Cell_Index, "_1")
-C1STmat <- as.matrix(C1ST[1:9])
+mean <- sapply(IDslist, function(x) {
+  # Find the names of the numeric columns
+  numeric_cols <- sapply(x, is.numeric)
+  
+  # Ignore character columns
+  numeric_cols <- numeric_cols & !sapply(x, is.character)
+  
+  # Find the medians of the numeric columns
+  means <- apply(x[, numeric_cols], 2, mean)
+  
+  # Return a named vector of medians
+  names(means) <- names(x)[numeric_cols]
+  return(means)
+})
 
-clipping_range <- list(lower = 0, upper = 1500)
-hm <- Heatmap(C1STmat, 
-              cluster_columns = FALSE, 
-              cluster_rows = TRUE,
-              show_row_names = FALSE,
-              show_column_names = TRUE)
+write.csv(mean, '/Users/savellke/Output/stReadsMean06232023.csv')
+write.csv(median, '/Users/savellke/Output/stReadsMedian06232023.csv')
 
 pdf(file = "~/Output/C1ST.pdf",
     width = 10,
