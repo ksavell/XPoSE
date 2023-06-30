@@ -1,0 +1,39 @@
+---
+title: "Sil"
+author: "Kareem"
+date: "2023-06-22"
+output: html_document
+---
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("scran")
+
+BiocManager::install("bluster")
+
+library(bluster)
+
+library(scran)
+
+```
+
+#Load Object
+```{r}
+setwd("/Users/woodskad/Desktop/Analysis/S1/")
+load("/Users/woodskad/Desktop/Analysis/S1/Robject/glut_subset_forthpipe_11102022.RData")
+load("/Users/woodskad/Desktop/Analysis/RObjects/gaba_subset_forthpipe_11102022.RData")
+```
+
+```{r}
+# Extract raw counts and metadata to create 
+gaba.counts <- gaba.subset2@assays[["RNA"]]@counts
+gaba.metadata <- gaba.subset2@meta.data[["nCount_RNA"]]
+gaba.counts 
+
+sil.approx <- approxSilhouette(reducedDim(gaba.metadata, "PCA"), cluster=colLabels(gaba.counts))
+```
+
