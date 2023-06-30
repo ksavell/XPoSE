@@ -32,7 +32,7 @@ load("/Users/woodskad/Desktop/Analysis/RObjects/gaba_subset_forthpipe_11102022.R
 # Extract raw counts and metadata to create 
 gaba.counts <- gaba.subset2@assays[["RNA"]]@counts
 gaba.metadata <- gaba.subset2@meta.data[["nCount_RNA"]]
-gaba.counts 
+gaba.counts <- data.frame(gaba.counts)
 
 sil.approx <- approxSilhouette(reducedDim(gaba.metadata, "PCA"), cluster=colLabels(gaba.counts))
 ```
