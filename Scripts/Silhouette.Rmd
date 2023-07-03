@@ -34,6 +34,35 @@ gaba.counts <- gaba.subset2@assays[["RNA"]]@counts
 gaba.metadata <- gaba.subset2@meta.data[["nCount_RNA"]]
 gaba.counts <- data.frame(gaba.counts)
 
+gaba.clusters <- clusterCells(gaba.counts, use.dimred = "PCA", full=TRUE)
+
 sil.approx <- approxSilhouette(reducedDim(gaba.metadata, "PCA"), cluster=colLabels(gaba.counts))
 ```
+
+#Method 2
+#load packages
+```{r}
+library(tidyverse)
+library(Seurat)
+library(scran)
+library(patchwork)
+library(viridis)
+library(ggforce)
+library(gghalves)
+library(ggridges)
+library(scDblFinder)
+library(SingleR)
+```
+
+```{r}
+library(cluster)
+
+distance_matrix <- dist(Embeddings(gaba.subset2@reductions[["pca"]]) [, 1:30])
+clusters <- gaba.subset2@meta.data[["seurat_clusters"]]
+clusters <- as.numeric(clusters)
+silhouette(gaba.subset2@meta.data[["seurat_clusters"]], dist = distance_matrix)
+seurat@meta.data$silhouette_score <- silhouette[ ,3]
+
+```
+
 
