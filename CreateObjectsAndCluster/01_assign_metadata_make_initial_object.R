@@ -19,33 +19,45 @@ library(tidyverse)
 setwd("~/MakeObject")
 
 # Read gene count tables
-counts.C1 <- read.table("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
+counts_c1 <- read.table("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
                         sep = ",", skip = 7, header = TRUE, row.names = 1)
-counts.C2 <- read.table("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
+counts_c2 <- read.table("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
                         sep = ",", skip = 7, header = TRUE, row.names = 1)
 
 # Read sample tag calls
-tags.C1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
+tags_c1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
                       sep = ",", skip = 7, header = TRUE, row.names = 1)
-tags.C2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
+tags_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
                       sep = ",", skip = 7, header = TRUE, row.names = 1)
 
 #Read Sample tag reads
-STreads.C1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
                          sep = ",", skip = 7, header = TRUE, row.names = 1)
-STreads.C2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
                          sep = ",", skip = 7, header = TRUE, row.names = 1)
 
-#reorder so binding works
-tags.C1 <- tags.C1[order(row.names(tags.C1)),]
-tags.C2 <- tags.C2[order(row.names(tags.C2)),]
 
-counts.C1 <- counts.C1[order(row.names(counts.C1)),]
-counts.C2 <- counts.C2[order(row.names(counts.C2)),]
+# Reorder all input files -------------------------------------------------
+
+# function to order rows
+order_rows <- function(data) {
+        ordered_data <- data[order(row.names(data)), ]
+        return(ordered_data)
+}
+
+# rows ordered
+objects <- ls()
+
+#order them 
+for (object in objects) {
+object <- get(object_name)  # Get the object from the environment
+# Perform operations on the object
+# ...
+}
 
 
 # Create intermediate object and bind sample tag reads and calls ----------
-# This is custom since we used 2 cartridges and used sample tags #2-9.
+# In this experiment, we used 2 cartridges and used sample tags #2-9.
 
 # create Seurat objects for each cartridge
 # transpose the counts since SB output is opposite of Seurat input
@@ -56,22 +68,18 @@ data.C2 <- CreateSeuratObject(counts = t(counts.C2), project = "C2")
 data.C1$Sample_tag <- cbind(tags.C1$Sample_Tag)
 data.C2$Sample_tag <- cbind(tags.C2$Sample_Tag)
 
-#Add Sample_tag reads as metadata to Seurat object
-data.C1$ST2_reads <- cbind(STreads.C1$SampleTag02_mm.stAbO)
-data.C1$ST3_reads <- cbind(STreads.C1$SampleTag03_mm.stAbO)
-data.C1$ST4_reads <- cbind(STreads.C1$SampleTag04_mm.stAbO)
-data.C1$ST5_reads <- cbind(STreads.C1$SampleTag05_mm.stAbO)
-data.C1$ST6_reads <- cbind(STreads.C1$SampleTag06_mm.stAbO)
-data.C1$ST7_reads <- cbind(STreads.C1$SampleTag07_mm.stAbO)
-data.C1$ST8_reads <- cbind(STreads.C1$SampleTag08_mm.stAbO)
-data.C1$ST9_reads <- cbind(STreads.C1$SampleTag09_mm.stAbO)
+# Define the Seurat objects
+seurat_objects <- list(data.C1, data.C2)
 
-data.C2$ST2_reads <- cbind(STreads.C2$SampleTag02_mm.stAbO)
-data.C2$ST3_reads <- cbind(STreads.C2$SampleTag03_mm.stAbO)
-data.C2$ST4_reads <- cbind(STreads.C2$SampleTag04_mm.stAbO)
-data.C2$ST5_reads <- cbind(STreads.C2$SampleTag05_mm.stAbO)
-data.C2$ST6_reads <- cbind(STreads.C2$SampleTag06_mm.stAbO)
-data.C2$ST7_reads <- cbind(STreads.C2$SampleTag07_mm.stAbO)
-data.C2$ST8_reads <- cbind(STreads.C2$SampleTag08_mm.stAbO)
-data.C2$ST9_reads <- cbind(STreads.C2$SampleTag09_mm.stAbO)
+# Define the SampleTag numbers used in the experiment
+sample_tags <- paste0("ST", 2:9)
 
+# Loop over the Seurat objects and SampleTags
+for (seurat_object in seurat_objects) {
+        for (sample_tag in sample_tags) {
+                column_name <- paste0(sample_tag, "_reads")
+                sample_tag_name <- paste0("STreads.C", substr(seurat_object$name, nchar(seurat_object$name)))
+                
+                seurat_object[[column_name]] <- cbind(get(paste0(sample_tag_name, "$SampleTag", sample_tag, "_mm.stAbO")))
+        }
+}
