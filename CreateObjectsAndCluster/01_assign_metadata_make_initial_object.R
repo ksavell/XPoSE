@@ -11,7 +11,7 @@
 
 # Load packages -----------------------------------------------------------
 library(Seurat)
-library(tidyverse)
+#library(tidyverse)
 
 # Load data ---------------------------------------------------------------
 
@@ -39,47 +39,36 @@ streads_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.c
 
 # Reorder all input files -------------------------------------------------
 
-# function to order rows
+# function to order rows (nuclei barcodes)
 order_rows <- function(data) {
-        ordered_data <- data[order(row.names(data)), ]
-        return(ordered_data)
+  ordered_data <- data[order(row.names(data)), ]
+  return(ordered_data)
 }
 
-# rows ordered
-objects <- ls()
-
-#order them 
-for (object in objects) {
-object <- get(object_name)  # Get the object from the environment
-# Perform operations on the object
-# ...
-}
-
+counts_c1 <- order_rows(counts_c1)
+counts_c2 <- order_rows(counts_c2)
+tags_c1 <- order_rows(tags_c1)
+tags_c2 <- order_rows(tags_c2)
+streads_c1 <- order_rows(streads_c1)
+streads_c2 <- order_rows(streads_c2)
 
 # Create intermediate object and bind sample tag reads and calls ----------
 # In this experiment, we used 2 cartridges and used sample tags #2-9.
 
 # create Seurat objects for each cartridge
 # transpose the counts since SB output is opposite of Seurat input
-data.C1 <- CreateSeuratObject(counts = t(counts.C1), project = "C1")
-data.C2 <- CreateSeuratObject(counts = t(counts.C2), project = "C2")
+data_c1 <- CreateSeuratObject(counts = t(counts_c1), project = "C1")
+data_c2 <- CreateSeuratObject(counts = t(counts_c2), project = "C2")
 
 # add sample tag calls as metadata
-data.C1$Sample_tag <- cbind(tags.C1$Sample_Tag)
-data.C2$Sample_tag <- cbind(tags.C2$Sample_Tag)
+data_c1$Sample_tag <- cbind(tags_c1$Sample_Tag)
+data_c2$Sample_tag <- cbind(tags_c2$Sample_Tag)
 
 # Define the Seurat objects
-seurat_objects <- list(data.C1, data.C2)
+seurat_objects <- list(data_c1, data_c2)
 
 # Define the SampleTag numbers used in the experiment
 sample_tags <- paste0("ST", 2:9)
 
 # Loop over the Seurat objects and SampleTags
-for (seurat_object in seurat_objects) {
-        for (sample_tag in sample_tags) {
-                column_name <- paste0(sample_tag, "_reads")
-                sample_tag_name <- paste0("STreads.C", substr(seurat_object$name, nchar(seurat_object$name)))
-                
-                seurat_object[[column_name]] <- cbind(get(paste0(sample_tag_name, "$SampleTag", sample_tag, "_mm.stAbO")))
-        }
-}
+
