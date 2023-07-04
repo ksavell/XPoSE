@@ -39,22 +39,32 @@ streads_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.c
 
 # Reorder all input files -------------------------------------------------
 
-# function to order rows
-order_rows <- function(data) {
-        ordered_data <- data[order(row.names(data)), ]
-        return(ordered_data)
-}
-
-# rows ordered
+# current objects in environment to order
 objects <- ls()
 
-#order them 
-for (object in objects) {
-object <- get(object_name)  # Get the object from the environment
-# Perform operations on the object
-# ...
+# function to order by rows or specified column
+sort_dataframe <- function(df, col_sort = NULL) {
+        if (is.null(col_sort)) {
+                # Sort based on row names
+                sorted_df <- df[order(row.names(df)), ]
+        } else {
+                if (col_sort %in% colnames(df)) {
+                        # Sort based on the specified column
+                        sorted_df <- df[order(df[, col_sort]), ]
+                } else {
+                        stop("Column name not found in this data frame!")
+                }
+        }
+        
+        return(sorted_df)
 }
 
+#order them
+invisible(lapply(objects, function(name) {
+        df <- get(name)  # Get the data frame from the environment
+        modified_df <- sort_dataframe(df)  # Apply the function to the data frame
+        assign(name, modified_df, envir = .GlobalEnv)  # Update the data frame in the environment
+}))
 
 # Create intermediate object and bind sample tag reads and calls ----------
 # In this experiment, we used 2 cartridges and used sample tags #2-9.
