@@ -11,7 +11,7 @@
 
 # Load packages -----------------------------------------------------------
 library(Seurat)
-library(tidyverse)
+#library(tidyverse)
 
 # Load data ---------------------------------------------------------------
 
@@ -52,7 +52,7 @@ sort_dataframe <- function(df, col_sort = NULL) {
                         # Sort based on the specified column
                         sorted_df <- df[order(df[, col_sort]), ]
                 } else {
-                        stop("Column name not found in this data frame!")
+                        stop("Column name not found!")
                 }
         }
         
@@ -71,24 +71,25 @@ invisible(lapply(objects, function(name) {
 
 # create Seurat objects for each cartridge
 # transpose the counts since SB output is opposite of Seurat input
-data.C1 <- CreateSeuratObject(counts = t(counts.C1), project = "C1")
-data.C2 <- CreateSeuratObject(counts = t(counts.C2), project = "C2")
+data_c1 <- CreateSeuratObject(counts = t(counts_c1), project = "c1")
+data_c2 <- CreateSeuratObject(counts = t(counts_c2), project = "c2")
 
 # add sample tag calls as metadata
-data.C1$Sample_tag <- cbind(tags.C1$Sample_Tag)
-data.C2$Sample_tag <- cbind(tags.C2$Sample_Tag)
+data_c1$Sample_tag <- cbind(tags_c1$Sample_Tag)
+data_c2$Sample_tag <- cbind(tags_c2$Sample_Tag)
 
 # Define the Seurat objects
-seurat_objects <- list(data.C1, data.C2)
+seurat_objects <- list(data_c1, data_c2)
 
 # Define the SampleTag numbers used in the experiment
 sample_tags <- paste0("ST", 2:9)
 
 # Loop over the Seurat objects and SampleTags
+#this is not working right now, need to reference the streads objects?
 for (seurat_object in seurat_objects) {
         for (sample_tag in sample_tags) {
                 column_name <- paste0(sample_tag, "_reads")
-                sample_tag_name <- paste0("STreads.C", substr(seurat_object$name, nchar(seurat_object$name)))
+                sample_tag_name <- paste0("STreads_c", substr(seurat_object$name, nchar(seurat_object$name)))
                 
                 seurat_object[[column_name]] <- cbind(get(paste0(sample_tag_name, "$SampleTag", sample_tag, "_mm.stAbO")))
         }
