@@ -1,5 +1,5 @@
 #Makes a volcano plot for the data given
-#Authors: Katherine Savell, Padma Saravanan, Drake Thompson
+#Authors: Katherine Savell, Padmashri Saravanan, Drake Thompson
 
 # Info --------------------------------------------------------------------
 
