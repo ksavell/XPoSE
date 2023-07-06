@@ -7,6 +7,7 @@ output:
   fig_width: 6
   fig_height: 4
 ---
+
 ## Set knitting settings
 
 ```{r Setup, include=FALSE, echo = FALSE}
@@ -51,6 +52,32 @@ data.C2$percent_mt <- PercentageFeatureSet(data.C2, pattern = "^mt.")
 #filter out mitochondrial genes for downstream analysis
 #data.C1 <- data.C1[!grepl("^mt\\.", rownames(data.C1)), ]
 #data.C2 <- data.C2[!grepl("^mt\\.", rownames(data.C2)), ]
+
+seur_list <- ls()
+
+#' Create Seurat Object
+#'
+#' @param count 
+#' @param tag 
+#' @param cluster_no 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+create_seur <- function(count, cluster_no){
+   assign(paste("data",".C",cluster_no,sep=""),CreateSeuratObject(counts = t(count), project = paste("C",cluster_no,sep="")))
+}
+
+
+refine_seur <- function(seur_obj, tag){
+   seur_obj[["Sample_tag"]] <- cbind(tag)
+   seur_obj[["percent_mt"]] <- PercentageFeatureSet(seur_obj, pattern = "^mt.")
+   return(seur_obj)
+}
+
+
+
 ```
 
 ## Cartridge QC plots, looking at number of genes and transcripts detected
