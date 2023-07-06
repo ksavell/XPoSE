@@ -1,24 +1,25 @@
-#Remakes the remade base file with code sections, minor improvements and such
-#By: Drake Thompson, Padma Saravanan, Katherine Savell
+# Remakes the remade base file with code sections, minor improvements and such
+
+# By: Drake Thompson, Padma Saravanan, Katherine Savell
 
 # Info --------------------------------------------------------------------
 
-#This doesn't make an Upset plot but sets up a lot of the steps. Everything up 
-#to the last 3 functions is done for you. 
-#This makes two main things: 
-#           a 'MEGA' table that can divided into subtables 
+# This doesn't make an Upset plot but sets up a lot of the steps. Everything up 
+# to the last 3 functions is done for you. 
+# This makes two main things: 
+#           ** a 'MEGA' table that can divided into subtables 
 #                       (use get_pie_piece to get subtables)
-#           metadata table (stored  as metaData) for making result tables
+#           ** metadata table (stored  as metaData) for making result tables
 #                       (use get_result_tbl or get_result_2bl)
-#Making individual count and result tables will have to be done by user
-#This is done w/ the three remaining functions:
+# Making individual count and result tables will have to be done by user
+# This is done w/ the three remaining functions:
 #                                              get_pie_piece
 #                                              get_result_tbl
 #                                              get_result_2bl
 
-#Note: This code is broken into various sections. You can collapse sections and 
-#look at specific chunks of code. There is also a Jump To Command that takes you 
-#to the specific sections under 'Code' on the top menu bar.
+# Note: This code is broken into various sections. You can collapse sections and 
+# look at specific chunks of code. There is also a Jump To Command that takes you 
+# to the specific sections under 'Code' on the top menu bar.
 
 
 # Loading # -----------------------------------------------------------------
@@ -169,7 +170,7 @@ verify_factor <- function(dataset, vect, factor){
           sapply(valids, print, quote = FALSE)
           vect[i] = readline(paste("Group", i, ": ", sep = ""))
         }
-      #If group = 1, i needs subtraction
+        #If group = 1, i needs subtraction
       } else {
         mod <- 1
       }
@@ -290,7 +291,7 @@ fill_vect <- function(possible){
   if (use_tbl == 'y'){
     dVect <- possible
     
-  #No, prompts user to ask for wanted clusters
+    #No, prompts user to ask for wanted clusters
   }else {
     #prompts user on cluster amt
     cs = readline("How many clusters would you like to use?: ")
@@ -331,21 +332,19 @@ fill_vect <- function(possible){
 
 #' Kowalski
 #' "Decides" which clusters to use for each dataset. 
-#' Uses analysis and fill_vect
+#' Uses fill_vect
 #' 
 #'
-#' @param dataset SE
+#' @param dataset SE --- change
 #' @param dataname The name of the dataset being used. Funneled to 'analysis'
 #'
 #' @return a vector of the cluster "names"
 #' @export
 Kowalski <- function(dataset, dataname){
   
-  #Calls other functions to generate table
-  #data_tut <- analysis(dataset, dataname)
   #Prompts for threshold
   prompt <- paste("What would you like the threshold for your", dataname,
-                  "data to be?: " )
+                  "data to be?: ")
   thres = readline(prompt)
   thres <- as.numeric(thres) #Code will break without this line
   
@@ -355,11 +354,7 @@ Kowalski <- function(dataset, dataname){
   print(temp)
   cat("\n")
   
-  # #returns temp so it can be stored
-  # return(temp)
-  
   #Makes vector of possible clusters to use
-  #poss <- rownames(data_tut)
   poss <- rownames(temp)
   
   #returns wanted clusters
@@ -550,9 +545,9 @@ get_pie_piece <- function(data_tab, dataset, dataname){
   
   #populates data_lst 
   for (name in names(unique(data_tab))){
-      if (str_detect(name, dataname)){
-          data_lst <- append(data_lst, name)
-      }
+    if (str_detect(name, dataname)){
+      data_lst <- append(data_lst, name)
+    }
   }
   
   #splits data_lst into a list 
@@ -560,12 +555,12 @@ get_pie_piece <- function(data_tab, dataset, dataname){
   
   #populates clust_vect using numbers from data_lst
   for (i in 1:(length(temp))){
-     clust_vect <- append(clust_vect, temp[[i]][2]) 
+    clust_vect <- append(clust_vect, temp[[i]][2]) 
   }  
   
   #removes possible NAs from clust_vect
   clust_vect <- clust_vect[!is.na(clust_vect)]  
-    
+  
   #Verifies 
   while (!((piece %in% data_lst) | (piece %in% clust_vect)) 
          & piece != "all"){
@@ -686,7 +681,7 @@ get_result_2bl <- function(data_tab = glut_tabs, dataset = glut,
 
 #' Make Mega Table
 #'
-#' @param dataset SE
+#' @param dataset SE -- drakeeeee
 #'
 #' @return a 'MEGA' table of all of the chosen cluster's count tables
 #' @export
@@ -696,6 +691,7 @@ get_result_2bl <- function(data_tab = glut_tabs, dataset = glut,
 #' #clusters
 #' my_glut_cnts <- mk_mega_tbl(glut)
 mk_mega_tbl <- function(dataset){
+  
   #prompts user for what they want their data to be named
   cat("What would you like the name for your dataset to be?",
       "Good examples include:",
@@ -727,18 +723,22 @@ mk_mega_tbl <- function(dataset){
   }
   
   #Makes our data containers
-  clust_nams <- c()
-  clust_lst <- list()
+  # clust_nams <- c()
+  # clust_lst <- list()
   data_tabs <- matrix()
   
   #gets and stores the cluster variables that user defines
-  clust_nams <- Kowalski(dataset, dataname)
+  #clust_nams <- Kowalski(dataset, dataname)
   
   #creates and stores seurot objects from split clusters
-  clust_lst <- make_clust_list(clust_nams, dataset, dataname)
+  #clust_lst <- make_clust_list(clust_nams, dataset, dataname)
   
   #makes the covetted MEGA table
-  data_tabs <- get_cnt_tbls(clust_lst, clust_nams, dataset, dataname)
+  #data_tabs <- get_cnt_tbls(clust_lst, clust_nams, dataset, dataname)
+  data_tabs <- get_cnt_tbls(make_clust_list(clust_nams, dataset, dataname),
+                            Kowalski(dataset, dataname),
+                            dataset,
+                            dataname)
   
   #returns the MEGA table
   return(data_tabs)
