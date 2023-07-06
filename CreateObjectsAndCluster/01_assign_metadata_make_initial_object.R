@@ -87,9 +87,14 @@ addSTReads <- function(seuratObj, readsObj, tagPrefix, STrange) {
 }
 
 # Add Sample_tags as metadata to the Seurat objects
-data_c1$Sample_tag <- cbind(tags_c1$Sample_Tag)
-data_c2$Sample_tag <- cbind(tags_c2$Sample_Tag)
+data_c1$sample_tag <- cbind(tags_c1$Sample_Tag)
+data_c2$sample_tag <- cbind(tags_c2$Sample_Tag)
 
 # Add Sample_tag reads as metadata to Seurat objects
 data_c1 <- addSTReads(data_c1, streads_c1, "ST", 2:9)
 data_c2 <- addSTReads(data_c2, streads_c2, "ST", 2:9)
+
+
+# Add experiment-specific metadata ----------------------------------------
+
+# Split object by metadata
