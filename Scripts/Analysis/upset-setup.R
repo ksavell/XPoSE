@@ -24,7 +24,7 @@
 
 # Loading # -----------------------------------------------------------------
 ## Load Packages -----------------------------------------------------------
-#loads all required packages
+# loads all required packages
 library(dplyr)
 library(purrr)
 library(magrittr)
@@ -52,7 +52,7 @@ library(data.table)
 
 
 ## Data Loading ------------------------------------------------------------
-#Loads data depending on user choice
+# Loads data depending on user choice
 prompt <- paste("Use both data sets?\n", 
                 "1. Yes\n",
                 "2. Just Glut\n",
@@ -60,23 +60,23 @@ prompt <- paste("Use both data sets?\n",
 cat(prompt)
 choice = readline()
 
-#validates input, loops if invalid
+# validates input, loops if invalid
 while (!(choice %in% 1:3)) {
-  #"error" message
+  # "error" message
   print("Invalid Input. Please return a 1, 2, or 3")
   
-  #asks fo input again
+  # asks fo input again
   cat(prompt)
   choice = readline()
 }
 
-#Loads data, you may need to change below code depending on device. 
+# Loads data, you may need to change below code depending on device. 
 ##-----------------------------------------------##
 #Loads data depending on user choice
 if (choice == 1 | choice == 2){
   to_load = readline("Load glut? (y/n): ")
   if (to_load == "y"){
-    load("data/glut_subset_forthpipe_11102022.RData")
+    load("data/glut_subset_forthpipe_11102022.RData") # change to here() 
     glut <- glut.subset2
   }
 }
