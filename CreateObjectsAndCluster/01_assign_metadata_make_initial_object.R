@@ -19,22 +19,22 @@ library(Seurat)
 setwd("~/MakeObject")
 
 # Read gene count tables
-counts_c1 <- read.table("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
-                        sep = ",", skip = 7, header = TRUE, row.names = 1)
-counts_c2 <- read.table("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
-                        sep = ",", skip = 7, header = TRUE, row.names = 1)
+counts_c1 <- read.csv("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
+                        skip = 7, row.names = 1)
+counts_c2 <- read.csv("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
+                        skip = 7, row.names = 1)
 
 # Read sample tag calls
-tags_c1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
-                      sep = ",", skip = 7, header = TRUE, row.names = 1)
-tags_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
-                      sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
+                    skip = 7, row.names = 1)
+tags_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
+                    skip = 7, row.names = 1)
 
 #Read Sample tag reads
-streads_c1 <- read.table("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
-                         sep = ",", skip = 7, header = TRUE, row.names = 1)
-streads_c2 <- read.table("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
-                         sep = ",", skip = 7, header = TRUE, row.names = 1)
+streads_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+                       skip = 7, row.names = 1)
+streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+                       skip = 7, row.names = 1)
 
 
 # Reorder all input files -------------------------------------------------
@@ -78,19 +78,18 @@ data_c2 <- CreateSeuratObject(counts = t(counts_c2), project = "c2")
 data_c1$Sample_tag <- cbind(tags_c1$Sample_Tag)
 data_c2$Sample_tag <- cbind(tags_c2$Sample_Tag)
 
-# Define the Seurat objects
-seurat_objects <- list(data_c1, data_c2)
-
-# Define the SampleTag numbers used in the experiment
-sample_tags <- paste0("ST", 2:9)
-
-# Loop over the Seurat objects and SampleTags
-#this is not working right now, need to reference the streads objects?
-for (seurat_object in seurat_objects) {
-        for (sample_tag in sample_tags) {
-                column_name <- paste0(sample_tag, "_reads")
-                sample_tag_name <- paste0("STreads_c", substr(seurat_object$name, nchar(seurat_object$name)))
-                
-                seurat_object[[column_name]] <- cbind(get(paste0(sample_tag_name, "$SampleTag", sample_tag, "_mm.stAbO")))
-        }
+addSTReads <- function(seuratObj, readsObj, tagPrefix, STrange) {
+  for (i in STrange) {
+    colName <- paste0(tagPrefix, i, "_reads")
+    seuratObj[[colName]] <- cbind(readsObj[[paste0("SampleTag", sprintf("%02d", i), "_mm.stAbO")]])
+  }
+  return(seuratObj)
 }
+
+# Add Sample_tags as metadata to the Seurat objects
+data_c1$Sample_tag <- cbind(tags_c1$Sample_Tag)
+data_c2$Sample_tag <- cbind(tags_c2$Sample_Tag)
+
+# Add Sample_tag reads as metadata to Seurat objects
+data_c1 <- addSTReads(data_c1, streads_c1, "ST", 2:9)
+data_c2 <- addSTReads(data_c2, streads_c2, "ST", 2:9)
