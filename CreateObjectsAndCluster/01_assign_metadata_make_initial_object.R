@@ -75,19 +75,78 @@ data_c1 <- CreateSeuratObject(counts = t(counts_c1), project = "c1")
 data_c2 <- CreateSeuratObject(counts = t(counts_c2), project = "c2")
 
 # add sample tag calls as metadata
-data_c1$sample_tag <- cbind(tags_c1$Sample_Tag)
-data_c2$sample_tag <- cbind(tags_c2$Sample_Tag)
+data_c1$stag <- cbind(tags_c1$Sample_Tag)
+data_c2$stag <- cbind(tags_c2$Sample_Tag)
 
-addSTReads <- function(seuratObj, readsObj, tagPrefix = 'ST', STrange = c(1:12)) {
+add_STreads <- function(seurat_obj, reads_obj, STrange = c(1:12)) {
   for (i in STrange) {
-    colName <- paste0(tagPrefix, i, "_reads")
-    seuratObj[[colName]] <- cbind(readsObj[[paste0("SampleTag", sprintf("%02d", i), "_mm.stAbO")]])
+    colName <- paste0("stag", i, "_reads")
+    seurat_obj[[colName]] <- cbind(reads_obj[[paste0("SampleTag", sprintf("%02d", i), "_mm.stAbO")]])
   }
-  return(seuratObj)
+  return(seurat_obj)
 }
 
 # Add Sample_tag reads as metadata to Seurat objects
-data_c1 <- addSTReads(data_c1, streads_c1, STrange =  2:9)
-data_c2 <- addSTReads(data_c2, streads_c2, STrange =  2:9)
+data_c1 <- add_STreads(data_c1, streads_c1, STrange =  2:9)
+data_c2 <- add_STreads(data_c2, streads_c2, STrange =  2:9)
 
+combined <- merge(data_c1, data_c2)
 
+# BROKEN Assign metadata ---------------------------------------------------------
+# Create a cart_stag metadata
+combined$cart_stag <- paste0(combined$orig.ident, combined$stag, sep = "_")
+Idents(combined) <- 'cart_stag'
+
+# Might need to exclude multiplet and undetermined
+combined_filt <- subset(combined, idents = c("c1SampleTag02_mm_", "c2SampleTag02_mm_",
+                                             "c1SampleTag03_mm_", "c2SampleTag03_mm_",
+                                             "c1SampleTag04_mm_", "c2SampleTag04_mm_",
+                                             "c1SampleTag05_mm_", "c2SampleTag05_mm_",
+                                             "c1SampleTag06_mm_", "c2SampleTag06_mm_",
+                                             "c1SampleTag07_mm_", "c2SampleTag07_mm_",
+                                             "c1SampleTag08_mm_", "c2SampleTag08_mm_"))
+
+add_metadata <- function(seurat_obj, metadata_df, split_col = cart_stag, factor1 = NULL, 
+                         factor2 = NULL, factor3 = NULL, factor4 = NULL, factor5 = NULL) {
+  # Check if the column to split by exists in the Seurat object
+  if (!(split_col %in% colnames(seurat_obj@meta.data))) {
+    stop(paste("Column", split_col, "not found in seurat_obj"))
+  }
+  
+  # Get unique values of the split column
+  unique_vals <- unique(seurat_obj@meta.data[[split_col]])
+  
+  # Make a list to store split objects
+  split_data <- vector("list", length(unique_vals))
+  
+  # Iterate over unique values and create split objects
+  for (i in seq_along(unique_vals)) {
+    # Filter rows based on the current unique value
+    split_rows <- seurat_obj@meta.data[[split_col]] == unique_vals[i]
+    
+    # Create a new Seurat object for the split rows
+    split_obj <- subset(seurat_obj, subset = split_rows)
+    
+    # Extract metadata for the split object
+    metadata <- metadata_df[rownames(metadata_df) == unique_vals[i], ]
+  
+    # Assign metadata to the split object
+    split_obj$factor1 <- metadata$factor1
+    split_obj$factor2 <- metadata$factor2
+    split_obj$factor3 <- metadata$factor3
+    split_obj$factor4 <- metadata$factor4
+    split_obj$factor5 <- metadata$factor5
+    
+    # Update the split data
+    split_data[[i]] <- split_obj
+  }
+  
+# Recombine the split objects into a single Seurat object
+seurat_obj <- do.call(Seurat, split_data)
+  
+  # Return the combined Seurat object
+  return(seurat_obj)
+}
+
+combined_meta <- add_metadata(combined_filt, split_col = 'cart_stag', metadata = metadata, 
+                              factor1 = 'group', factor2 = 'ratID')
