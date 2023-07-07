@@ -106,47 +106,84 @@ combined_filt <- subset(combined, idents = c("c1SampleTag02_mm_", "c2SampleTag02
                                              "c1SampleTag07_mm_", "c2SampleTag07_mm_",
                                              "c1SampleTag08_mm_", "c2SampleTag08_mm_"))
 
-add_metadata <- function(seurat_obj, metadata_df, split_col = cart_stag, factor1 = NULL, 
-                         factor2 = NULL, factor3 = NULL, factor4 = NULL, factor5 = NULL) {
+# add_metadata <- function(seurat_obj, metadata_df, split_col = cart_stag, factor1 = NULL, 
+#                          factor2 = NULL, factor3 = NULL, factor4 = NULL, factor5 = NULL) {
+#   # Check if the column to split by exists in the Seurat object
+#   if (!(split_col %in% colnames(seurat_obj@meta.data))) {
+#     stop(paste("Column", split_col, "not found in seurat_obj"))
+#   }
+#   
+#   # Get unique values of the split column
+#   unique_vals <- unique(seurat_obj@meta.data[[split_col]])
+#   
+#   # Make a list to store split objects
+#   split_data <- vector("list", length(unique_vals))
+#   
+#   # Iterate over unique values and create split objects
+#   for (i in seq_along(unique_vals)) {
+#     # Filter rows based on the current unique value
+#     split_rows <- seurat_obj@meta.data[[split_col]] == unique_vals[i]
+#     
+#     # Create a new Seurat object for the split rows
+#     split_obj <- subset(seurat_obj, subset = split_rows)
+#     
+#     # Extract metadata for the split object
+#     metadata <- metadata_df[rownames(metadata_df) == unique_vals[i], ]
+#   
+#     # Assign metadata to the split object
+#     split_obj$factor1 <- metadata$factor1
+#     split_obj$factor2 <- metadata$factor2
+#     split_obj$factor3 <- metadata$factor3
+#     split_obj$factor4 <- metadata$factor4
+#     split_obj$factor5 <- metadata$factor5
+#     
+#     # Update the split data
+#     split_data[[i]] <- split_obj
+#   }
+#   
+# # Recombine the split objects into a single Seurat object
+# seurat_obj <- do.call(Seurat, split_data)
+#   
+#   # Return the combined Seurat object
+#   return(seurat_obj)
+# }
+# 
+# combined_meta <- add_metadata(combined_filt, split_col = 'cart_stag', metadata = metadata, 
+#                               factor1 = 'group', factor2 = 'ratID')
+
+# Let's try again
+# This is not working yet but I think it's promising
+split_add_merge <- function(seurat_obj, meta_name, new_meta_df){
   # Check if the column to split by exists in the Seurat object
-  if (!(split_col %in% colnames(seurat_obj@meta.data))) {
-    stop(paste("Column", split_col, "not found in seurat_obj"))
+     if (!(meta_name %in% colnames(seurat_obj@meta.data))) {
+       stop(paste("Column", meta_name, "not found in seurat_obj"))
+     }
+  # Get the unique metadata values
+  unique_meta <- unique(seurat_obj@meta.data[[meta_name]])
+  
+  # Initialize an empty list to store split Seurat objects
+  seurat_list <- list()
+  
+  # Iterate over the unique metadata values
+  for (i in seq_along(unique_meta)) {
+    # Split the Seurat object by metadata
+    temp_obj <- subset(seurat_obj, subset = seurat_obj@meta.data[[meta_name]] == unique_meta[i])
+    # Add new metadata to the split object
+    for (j in 1:ncol(new_meta_df)) {
+      temp_obj[[colnames(new_meta_df)[j]]] <- new_meta_df[i, j]
+    }
+    # Add the updated Seurat object to the list
+    seurat_list[[i]] <- temp_obj
   }
   
-  # Get unique values of the split column
-  unique_vals <- unique(seurat_obj@meta.data[[split_col]])
-  
-  # Make a list to store split objects
-  split_data <- vector("list", length(unique_vals))
-  
-  # Iterate over unique values and create split objects
-  for (i in seq_along(unique_vals)) {
-    # Filter rows based on the current unique value
-    split_rows <- seurat_obj@meta.data[[split_col]] == unique_vals[i]
-    
-    # Create a new Seurat object for the split rows
-    split_obj <- subset(seurat_obj, subset = split_rows)
-    
-    # Extract metadata for the split object
-    metadata <- metadata_df[rownames(metadata_df) == unique_vals[i], ]
-  
-    # Assign metadata to the split object
-    split_obj$factor1 <- metadata$factor1
-    split_obj$factor2 <- metadata$factor2
-    split_obj$factor3 <- metadata$factor3
-    split_obj$factor4 <- metadata$factor4
-    split_obj$factor5 <- metadata$factor5
-    
-    # Update the split data
-    split_data[[i]] <- split_obj
+  # Recombine the Seurat objects
+  new_seurat_obj <- seurat_list[[1]]
+  for (i in seq_along(seurat_list)[-1]) {
+    new_seurat_obj <- merge(new_seurat_obj, y = seurat_list[[i]])
   }
   
-# Recombine the split objects into a single Seurat object
-seurat_obj <- do.call(Seurat, split_data)
-  
-  # Return the combined Seurat object
-  return(seurat_obj)
+  # Return the new Seurat object
+  return(new_seurat_obj)
 }
 
-combined_meta <- add_metadata(combined_filt, split_col = 'cart_stag', metadata = metadata, 
-                              factor1 = 'group', factor2 = 'ratID')
+combined_meta <- split_add_merge(combined_filt, meta_name = 'cart_stag', new_meta_df = metadata)
