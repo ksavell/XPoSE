@@ -47,11 +47,6 @@ tags <- list(t1 = subset(tags.C1, select=-c(2)),
 
 # Creating Seurat Objects -----
 
-<<<<<<< Updated upstream
-#find mitochondrial percentages: use pattern "^Mt." for rat, “^mt.” for mouse, “^MT.” for human
-data.C1$percent_mt <- PercentageFeatureSet(data.C1, pattern = "^mt.")
-data.C2$percent_mt <- PercentageFeatureSet(data.C2, pattern = "^mt.")
-=======
 #' Create Seurat Object and add count and sample tag tables
 #'
 #' @param count inputs count table for cartridge
@@ -94,16 +89,7 @@ for(i in 1:length(counts)){
 # #find mitochondrial percentages: use pattern "^Mt." for rat, “^mt.” for mouse, “^MT.” for human
 # data.C1$percent_mt <- PercentageFeatureSet(data.C1, pattern = "^mt.")
 # data.C2$percent_mt <- PercentageFeatureSet(data.C2, pattern = "^mt.")
->>>>>>> Stashed changes
 
-#filter out mitochondrial genes for downstream analysis
-#data.C1 <- data.C1[!grepl("^mt\\.", rownames(data.C1)), ]
-#data.C2 <- data.C2[!grepl("^mt\\.", rownames(data.C2)), ]
-<<<<<<< Updated upstream
-=======
-
-
->>>>>>> Stashed changes
 ```
 
 ## Cartridge QC plots, looking at number of genes and transcripts detected
