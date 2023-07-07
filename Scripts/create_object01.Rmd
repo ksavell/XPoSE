@@ -1,0 +1,78 @@
+---
+title: "QC and creating seurat object with all metadata, Exp1 aligned to mm10-liftoff"
+author: "Hope Lab snRNA team"
+date: "07/07/2023"
+output:
+  word_document: default
+  fig_width: 6
+  fig_height: 4
+---
+## Set knitting settings
+
+```{r Setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Load packages
+
+```{r LoadPackages}
+library(Seurat)
+library(ggplot2)
+```
+
+## Set working directory. Import data, create Seurat object, and assign sample tag call to each nuclei.
+
+```{r import}
+
+# Read gene count data tables in 
+
+counts.C1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart1-good-only_RSEC_MolsPerCell.csv",
+                        sep = ",", skip = 7, header = TRUE, row.names = 1)
+counts.C2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart2-good-only_RSEC_MolsPerCell.csv",
+                        sep = ",", skip = 7, header = TRUE, row.names = 1)
+
+# store count tables as a list
+counts <- list(c1 = counts.C1, c2 = counts.C2)
+
+# Import and add sample tag identification and format to one column
+tags.C1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart1-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags.C2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart2-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+
+tags <- list(t1 = subset(tags.C1, select=-c(2)),
+             t2 = subset(tags.C2, select=-c(2)))
+
+# Creating Seurat Objects -----
+
+#' Create Seurat Object and add count and sample tag tables
+#'
+#' @param count inputs count table for cartridge
+#' @param cart_no inputs cartridge number
+#' @param tag inputs sample tag table for cartridge
+#'
+#' @return a seurat object containing count and sample tag tables
+#' @export
+#'
+#' @examples
+#' create_seur(counts.C1, 1, tags.C1)
+create_seur <- function(count, cart_no, tag){
+   
+   # Create Seurat objects for each cartridge while transposing since BD output is opposite of Seurat input
+   seur_obj <- CreateSeuratObject(counts =  t(as.data.frame(counts[cart_no])), project = paste("C",cart_no,sep=""))
+   
+   # Add Sample_tags as metadata to the Seurat object
+   seur_obj[["Sample_tag"]] <- cbind(tag)
+   seur_obj[["percent_mt"]] <- PercentageFeatureSet(seur_obj, pattern = "^mt.")
+   return(seur_obj)
+}
+
+# creates separate seurat object for each count table present in environment
+for(i in 1:length(counts)){
+   assign(paste("data",".C",i,sep=""),
+          create_seur(counts[i], i, tags[i]),
+          envir = .GlobalEnv)
+   
+}
+
+```
+
+
