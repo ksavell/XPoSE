@@ -71,3 +71,28 @@ for(i in 1:length(seur_list)){
 }
 
 ```
+
+## Break each sample tag into an individual object and assign meta data. Combine back together as single object
+
+```{r AssignAndCombine}
+
+# input list of ratIDs used
+ratIDs <- c(NA, "KES029R7", "KES029R1", "KES029R6", "KES029R5", "KES029R8",
+            "KES029R2", "KES016R12", "KES016R10")
+
+# input sex of each rat
+rat_sex <- c(NA, "male", "male", "female", "female", "male",
+             "male", "female", "female")
+
+# creates sample tag list
+st_list <- c(NA)
+for(i in 2:length(ratIDs)){
+  st_list <- c(st_list,paste("SampleTag0",i,"_mm",sep=""))
+}
+  
+source("Functions/assign_combine.R") # read function for assignment
+
+for (l in 1:length(seur_list)) {
+  seur_list <- assign_combine(seur_list, l, ratIDs, st_list, rat_sex)
+}
+```

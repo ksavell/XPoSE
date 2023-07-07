@@ -140,118 +140,171 @@ for(i in 1:length(seur_list)){
 ## Break each sample tag into an individual object and assign meta data. Combine back together as single object
 
 ```{r AssignAndCombine}
-# Break each cartridge into the biological groups you want to look at by sample tag subset
-data.C1.5 <- subset(data.C1, subset = Sample_tag == 'SampleTag05_mm')
-data.C1.9 <- subset(data.C1, subset = Sample_tag == 'SampleTag09_mm')
-data.C1.3 <- subset(data.C1, subset = Sample_tag == 'SampleTag03_mm')
-data.C1.7 <- subset(data.C1, subset = Sample_tag == 'SampleTag07_mm')
-data.C2.3 <- subset(data.C2, subset = Sample_tag == 'SampleTag03_mm')
-data.C2.7 <- subset(data.C2, subset = Sample_tag == 'SampleTag07_mm')
-data.C2.5 <- subset(data.C2, subset = Sample_tag == 'SampleTag05_mm')
-data.C2.9 <- subset(data.C2, subset = Sample_tag == 'SampleTag09_mm')
-data.C1.2 <- subset(data.C1, subset = Sample_tag == 'SampleTag02_mm')
-data.C1.4 <- subset(data.C1, subset = Sample_tag == 'SampleTag04_mm')
-data.C1.6 <- subset(data.C1, subset = Sample_tag == 'SampleTag06_mm')
-data.C1.8 <- subset(data.C1, subset = Sample_tag == 'SampleTag08_mm')
-data.C2.2 <- subset(data.C2, subset = Sample_tag == 'SampleTag02_mm')
-data.C2.4 <- subset(data.C2, subset = Sample_tag == 'SampleTag04_mm')
-data.C2.6 <- subset(data.C2, subset = Sample_tag == 'SampleTag06_mm')
-data.C2.8 <- subset(data.C2, subset = Sample_tag == 'SampleTag08_mm')
 
-# Assign metadata to each Cartridge/ Sample tag combo
-data.C1.2$group <- "homecage"
-data.C1.2$ratID <- "KES029R7"
-data.C1.2$sex <- "male"
+# input list of ratIDs used
+ratIDs <- c(NA, "KES029R7", "KES029R1", "KES029R6", "KES029R5", "KES029R8",
+            "KES029R2", "KES016R12", "KES016R10")
 
-data.C1.3$group <- "negative"
-data.C1.3$ratID <- "KES029R1"
-data.C1.3$sex <- "male"
+# input sex of each rat
+rat_sex <- c(NA, "male", "male", "female", "female", "male",
+             "male", "female", "female")
 
-data.C1.4$group <- "homecage"
-data.C1.4$ratID <- "KES029R6"
-data.C1.4$sex <- "female"
+# creates sample tag list
+st_list <- c(NA)
+for(i in 2:length(ratIDs)){
+  st_list <- c(st_list,paste("SampleTag0",i,"_mm",sep=""))
+}
+  
+assign_combine <- function(seur_list, cart_no, ratIDs, st_list, rat_sex){
+  temp <- seur_list[[cart_no]]
+  temp$group <- rep(NA,length(temp$Sample_tag))
+  temp$sex <- temp$group
+  temp$ratID <- temp$group
+  
+  for (s in 2:length(st_list)) {
+    if (s %in% c(2,4,6,8)) {
+     temp$group[temp$Sample_tag==st_list[s]] <- "homecage"
+    }
+    else if(s %in% c(3,7)){
+      if (cart_no == 1) {
+        temp$group[temp$Sample_tag==st_list[s]] <- "negative"
+      }
+      else {
+        temp$group[temp$Sample_tag==st_list[s]] <- "positive"
+      }
+    }
+    else if (s %in% c(5,9)) {
+      if (cart_no == 1) {
+        temp$group[temp$Sample_tag==st_list[s]] <- "positive"
+      }
+      else {
+        temp$group[temp$Sample_tag==st_list[s]] <- "negative"
+      }
+    }
+    
+    temp$sex[temp$Sample_tag==st_list[s]] <- rat_sex[s]
+    temp$ratID[temp$Sample_tag==st_list[s]] <- ratIDs[s]
+  }
+  seur_list[[cart_no]] <- temp
+  return(seur_list)
+}
 
-data.C1.5$group <- "positive"
-data.C1.5$ratID <- "KES029R5"
-data.C1.5$sex <- "female"
+for (l in 1:length(seur_list)) {
+  seur_list <- assign_combine(seur_list, l, ratIDs, st_list, rat_sex)
+}
 
-data.C1.6$group <- "homecage"
-data.C1.6$ratID <- "KES029R8"
-data.C1.6$sex <- "male"
-
-data.C1.7$group <- "negative"
-data.C1.7$ratID <- "KES029R2"
-data.C1.7$sex <- "male"
-
-data.C1.8$group <- "homecage"
-data.C1.8$ratID <- "KES016R12"
-data.C1.8$sex <- "female"
-
-data.C1.9$group <- "positive"
-data.C1.9$ratID <- "KES016R10"
-data.C1.9$sex <- "female"
-
-data.C2.2$group <- "homecage"
-data.C2.2$ratID <- "KES029R7"
-data.C2.2$sex <- "male"
-
-data.C2.3$group <- "positive"
-data.C2.3$ratID <- "KES029R1"
-data.C2.3$sex <- "male"
-
-data.C2.4$group <- "homecage"
-data.C2.4$ratID <- "KES029R6"
-data.C2.4$sex <- "female"
-
-data.C2.5$group <- "negative"
-data.C2.5$ratID <- "KES029R5"
-data.C2.5$sex <- "female"
-
-data.C2.6$group <- "homecage"
-data.C2.6$ratID <- "KES029R8"
-data.C2.6$sex <- "male"
-
-data.C2.7$group <- "positive"
-data.C2.7$ratID <- "KES029R2"
-data.C2.7$sex <- "male"
-
-data.C2.8$group <- "homecage"
-data.C2.8$ratID <- "KES016R12"
-data.C2.8$sex <- "female"
-
-data.C2.9$group <- "negative"
-data.C2.9$ratID <- "KES016R10"
-data.C2.9$sex <- "female"
-
-#combine into a single object
-combined <- merge(
-  x = data.C1.2,
-  y = list(data.C1.3, data.C1.5, data.C1.7, data.C1.9, data.C2.3, data.C2.5, data.C2.7, data.C2.9, data.C1.4, data.C1.6, data.C1.8, data.C2.2, data.C2.4, data.C2.6, data.C2.8))
-
-# Filter nuclei with low number of detected genes
-combined <- subset(combined, subset = nFeature_RNA > 50 )
-
-# clean up environment
-rm(counts.C1,
-   counts.C2,
-   tags.C1,
-   tags.C2,
-   data.C1,
-   data.C2,
-   data.C1.5,
-   data.C1.9,
-   data.C1.3,
-   data.C1.7,
-   data.C2.3,
-   data.C2.7,
-   data.C2.5,
-   data.C2.9,
-   data.C1.2,
-   data.C1.4,
-   data.C1.6,
-   data.C1.8,
-   data.C2.2,
-   data.C2.4,
-   data.C2.6,
-   data.C2.8)
+# # Break each cartridge into the biological groups you want to look at by sample tag subset
+# data.C1.5 <- subset(data.C1, subset = Sample_tag == 'SampleTag05_mm')
+# data.C1.9 <- subset(data.C1, subset = Sample_tag == 'SampleTag09_mm')
+# data.C1.3 <- subset(data.C1, subset = Sample_tag == 'SampleTag03_mm')
+# data.C1.7 <- subset(data.C1, subset = Sample_tag == 'SampleTag07_mm')
+# data.C2.3 <- subset(data.C2, subset = Sample_tag == 'SampleTag03_mm')
+# data.C2.7 <- subset(data.C2, subset = Sample_tag == 'SampleTag07_mm')
+# data.C2.5 <- subset(data.C2, subset = Sample_tag == 'SampleTag05_mm')
+# data.C2.9 <- subset(data.C2, subset = Sample_tag == 'SampleTag09_mm')
+# data.C1.2 <- subset(data.C1, subset = Sample_tag == 'SampleTag02_mm')
+# data.C1.4 <- subset(data.C1, subset = Sample_tag == 'SampleTag04_mm')
+# data.C1.6 <- subset(data.C1, subset = Sample_tag == 'SampleTag06_mm')
+# data.C1.8 <- subset(data.C1, subset = Sample_tag == 'SampleTag08_mm')
+# data.C2.2 <- subset(data.C2, subset = Sample_tag == 'SampleTag02_mm')
+# data.C2.4 <- subset(data.C2, subset = Sample_tag == 'SampleTag04_mm')
+# data.C2.6 <- subset(data.C2, subset = Sample_tag == 'SampleTag06_mm')
+# data.C2.8 <- subset(data.C2, subset = Sample_tag == 'SampleTag08_mm')
+# 
+# # Assign metadata to each Cartridge/ Sample tag combo
+# data.C1.2$group <- "homecage"
+# data.C1.2$ratID <- "KES029R7"
+# data.C1.2$sex <- "male"
+# 
+# data.C1.3$group <- "negative"
+# data.C1.3$ratID <- "KES029R1"
+# data.C1.3$sex <- "male"
+# 
+# data.C1.4$group <- "homecage"
+# data.C1.4$ratID <- "KES029R6"
+# data.C1.4$sex <- "female"
+# 
+# data.C1.5$group <- "positive"
+# data.C1.5$ratID <- "KES029R5"
+# data.C1.5$sex <- "female"
+# 
+# data.C1.6$group <- "homecage"
+# data.C1.6$ratID <- "KES029R8"
+# data.C1.6$sex <- "male"
+# 
+# data.C1.7$group <- "negative"
+# data.C1.7$ratID <- "KES029R2"
+# data.C1.7$sex <- "male"
+# 
+# data.C1.8$group <- "homecage"
+# data.C1.8$ratID <- "KES016R12"
+# data.C1.8$sex <- "female"
+# 
+# data.C1.9$group <- "positive"
+# data.C1.9$ratID <- "KES016R10"
+# data.C1.9$sex <- "female"
+# 
+# data.C2.2$group <- "homecage"
+# data.C2.2$ratID <- "KES029R7"
+# data.C2.2$sex <- "male"
+# 
+# data.C2.3$group <- "positive"
+# data.C2.3$ratID <- "KES029R1"
+# data.C2.3$sex <- "male"
+# 
+# data.C2.4$group <- "homecage"
+# data.C2.4$ratID <- "KES029R6"
+# data.C2.4$sex <- "female"
+# 
+# data.C2.5$group <- "negative"
+# data.C2.5$ratID <- "KES029R5"
+# data.C2.5$sex <- "female"
+# 
+# data.C2.6$group <- "homecage"
+# data.C2.6$ratID <- "KES029R8"
+# data.C2.6$sex <- "male"
+# 
+# data.C2.7$group <- "positive"
+# data.C2.7$ratID <- "KES029R2"
+# data.C2.7$sex <- "male"
+# 
+# data.C2.8$group <- "homecage"
+# data.C2.8$ratID <- "KES016R12"
+# data.C2.8$sex <- "female"
+# 
+# data.C2.9$group <- "negative"
+# data.C2.9$ratID <- "KES016R10"
+# data.C2.9$sex <- "female"
+# 
+# #combine into a single object
+# combined <- merge(
+#   x = data.C1.2,
+#   y = list(data.C1.3, data.C1.5, data.C1.7, data.C1.9, data.C2.3, data.C2.5, data.C2.7, data.C2.9, data.C1.4, data.C1.6, data.C1.8, data.C2.2, data.C2.4, data.C2.6, data.C2.8))
+# 
+# # Filter nuclei with low number of detected genes
+# combined <- subset(combined, subset = nFeature_RNA > 50 )
+# 
+# # clean up environment
+# rm(counts.C1,
+#    counts.C2,
+#    tags.C1,
+#    tags.C2,
+#    data.C1,
+#    data.C2,
+#    data.C1.5,
+#    data.C1.9,
+#    data.C1.3,
+#    data.C1.7,
+#    data.C2.3,
+#    data.C2.7,
+#    data.C2.5,
+#    data.C2.9,
+#    data.C1.2,
+#    data.C1.4,
+#    data.C1.6,
+#    data.C1.8,
+#    data.C2.2,
+#    data.C2.4,
+#    data.C2.6,
+#    data.C2.8)
 ```
