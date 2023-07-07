@@ -90,17 +90,51 @@ for(i in 1:length(counts)){
 # data.C1$percent_mt <- PercentageFeatureSet(data.C1, pattern = "^mt.")
 # data.C2$percent_mt <- PercentageFeatureSet(data.C2, pattern = "^mt.")
 
+# Creating a list of both Seurat Objects for easier reference
+seur_list <- list(data.C1 = data.C1, data.C2 = data.C2)
+
 ```
 
 ## Cartridge QC plots, looking at number of genes and transcripts detected
 
 ```{r QCplots}
-#Plots of how many genes detected etc
-VlnPlot(data.C1, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart1 genes")
-VlnPlot(data.C2, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart2 genes")
+# Plots of how many genes detected etc ----
 
-VlnPlot(data.C1, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart1 transcripts")
-VlnPlot(data.C2, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart2 transcripts")
+#' Plots how many genes detected 
+#'
+#' @param feature "genes" or "transcripts" depending on which feature user wants to input
+#' @param cart_no cartridge number = 1 or 2
+#' @param seur_objs a list of seurat objects to plot
+#'
+#' @return a violin plot of genes detected by feature of choice
+#' @export
+#'
+#' @examples
+#' plot_detection("genes", 1, seur_list)
+plot_detection <- function(feature, cart_no, seur_objs = seur_list){
+  
+  if (feature == "genes"){
+      VlnPlot(seur_objs[[cart_no]], features = "nFeature_RNA", group.by = "Sample_tag") +
+      ggtitle(paste("Cart",cart_no," genes", sep=""))
+  }
+  else {
+      VlnPlot(seur_list[[cart_no]], features = "nCount_RNA", group.by = "Sample_tag") +
+      ggtitle(paste("Cart",cart_no," transcripts", sep=""))
+  }
+}
+
+for(i in 1:length(seur_list)){
+  for(f in c("genes", "transcripts")){
+    print(plot_detection(f, i))
+  }
+}
+
+# 
+# VlnPlot(data.C1, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart1 genes")
+# VlnPlot(data.C2, features = "nFeature_RNA", group.by = "Sample_tag") + ggtitle("Cart2 genes")
+# 
+# VlnPlot(data.C1, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart1 transcripts")
+# VlnPlot(data.C2, features = "nCount_RNA", group.by = "Sample_tag") + ggtitle("Cart2 transcripts")
 ```
 
 ## Break each sample tag into an individual object and assign meta data. Combine back together as single object

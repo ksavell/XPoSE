@@ -19,11 +19,3 @@ create_seur <- function(count, cart_no, tag){
   seur_obj[["percent_mt"]] <- PercentageFeatureSet(seur_obj, pattern = "^mt.")
   return(seur_obj)
 }
-
-# creates separate seurat object for each count table present in environment
-for(i in 1:length(counts)){
-  assign(paste("data",".C",i,sep=""),
-         create_seur(counts[i], i, tags[i]),
-         envir = .GlobalEnv)
-  
-}
