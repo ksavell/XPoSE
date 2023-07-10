@@ -1,5 +1,5 @@
 # Assign metadata and create combined initial seurat object
-# Authors: Katherine Savell
+# Authors: Katherine Savell and Padmashri Saravanan
 
 # Info --------------------------------------------------------------------
 
@@ -16,24 +16,24 @@ library(Seurat)
 # Load data ---------------------------------------------------------------
 
 # set working directory where the raw data files are found
-setwd("~/MakeObject")
+setwd("~/Desktop/Analysis/XPoSE_seq_cartridge")
 
 # Read gene count tables
-counts_c1 <- read.csv("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
+counts_c1 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
                         skip = 7, row.names = 1)
-counts_c2 <- read.csv("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
+counts_c2 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
                         skip = 7, row.names = 1)
 
 # Read sample tag calls
-tags_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
+tags_c1 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/cart1-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
-tags_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
+tags_c2 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/cart2-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
 
 #Read Sample tag reads
-streads_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c1 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
-streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c2 <- read.csv("~/Desktop/Analysis/XPoSE_seq_cartridge/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
 
 
@@ -80,11 +80,27 @@ data_c2$stag <- cbind(tags_c2$Sample_Tag)
 
 add_STreads <- function(seurat_obj, reads_obj, STrange = c(1:12)) {
   for (i in STrange) {
-    colName <- paste0("stag", i, "_reads")
+    colName <- paste0("SampleTag", i, "_reads")
     seurat_obj[[colName]] <- cbind(reads_obj[[paste0("SampleTag", sprintf("%02d", i), "_mm.stAbO")]])
   }
   return(seurat_obj)
 }
+
+streads <- list(c1 = streads_c1, c2 = streads_c2)
+counts <- list(c1 = counts_c1, c2 = counts_c2)
+tags <- list(t1 = subset(tags_c1, select=-c(2)),
+             t2 = subset(tags_c2, select=-c(2)))
+
+source("~/Documents/GitHub/XPoSE/Scripts/Functions/create_seur.R")
+# creates separate seurat object for each count table present in environment
+for (i in 1:length(streads)) {
+  assign(paste("data","_c",i,sep=""),
+         create_seur(counts[i], i, tags[[i]],
+                     addSTreads = TRUE, streads = streads[[i]], STrange = c(2:9)),
+         envir = .GlobalEnv)
+  
+}
+
 
 # Add Sample_tag reads as metadata to Seurat objects
 data_c1 <- add_STreads(data_c1, streads_c1, STrange =  2:9)
