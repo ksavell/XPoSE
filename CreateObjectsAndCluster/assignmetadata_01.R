@@ -94,3 +94,5 @@ for (i in 1:length(streads)) {
 }
 
 combined <- merge(data_c1, data_c2) # combine data from both cartridges
+
+# use assign_combine.R for any other metadata assignments
