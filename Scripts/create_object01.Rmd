@@ -7,6 +7,11 @@ output:
   fig_width: 6
   fig_height: 4
 ---
+
+# Assign metadata and create combined initial seurat object
+# Authors: Padmashri Saravanan, Katherine Savell
+
+
 ## Set knitting settings
 
 ```{r Setup, include=FALSE, echo = FALSE}
@@ -27,20 +32,20 @@ library(ggplot2)
 setwd("~/Documents/GitHub/XPoSE/Scripts/")
 # Read gene count data tables in 
 
-counts.C1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart1-good-only_RSEC_MolsPerCell.csv",
+counts_c1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart1-good-only_RSEC_MolsPerCell.csv",
                         sep = ",", skip = 7, header = TRUE, row.names = 1)
-counts.C2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart2-good-only_RSEC_MolsPerCell.csv",
+counts_c2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/Combined_cart2-good-only_RSEC_MolsPerCell.csv",
                         sep = ",", skip = 7, header = TRUE, row.names = 1)
 
 # store count tables as a list
-counts <- list(c1 = counts.C1, c2 = counts.C2)
+counts <- list(c1 = counts_c1, c2 = counts_c2)
 
 # Import and add sample tag identification and format to one column
-tags.C1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart1-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
-tags.C2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart2-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags_c1 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart1-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
+tags_c2 <- read.table("~/Desktop/Analysis/XPoSE_seq_cartridge/cart2-good-only_Sample_Tag_Calls.csv", sep = ",", skip = 7, header = TRUE, row.names = 1)
 
-tags <- list(t1 = subset(tags.C1, select=-c(2)),
-             t2 = subset(tags.C2, select=-c(2)))
+tags <- list(t1 = subset(tags_c1, select=-c(2)),
+             t2 = subset(tags_c2, select=-c(2)))
 
 source("Functions/create_seur.R")
 
@@ -53,7 +58,7 @@ for(i in 1:length(counts)){
 }
 
 # Creating a list of both Seurat Objects for easier reference
-seur_list <- list(data.C1 = data.C1, data.C2 = data.C2) # this needs to be changed if we have more than 1 cartridge
+seur_list <- list(data_c1 = data_c1, data_c2 = data_c2) # this needs to be changed if we have more than 1 cartridge
 
 ```
 
@@ -95,4 +100,6 @@ source("Functions/assign_combine.R") # read function for assignment
 for (l in 1:length(seur_list)) {
   seur_list <- assign_combine(seur_list, l, ratIDs, st_list, rat_sex)
 }
+
+combined_data <- merge(seur_list[[1]],seur_list[[2]])
 ```
