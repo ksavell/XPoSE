@@ -1,81 +1,45 @@
-#' Get Pie Pieces
+#' Make Metadata
 #' 
-#' Returns chosen cluster's count table
+#' Swipes the rat:factor pairs from the big table in order to make the metadata
 #'
-#' @param data_tab Aggregate table for the given object, returned by 
-#'                 'get_cnt_tbls'
-#' @param data_lst List of object's split cluster objects, returned by 
-#'                 'make_cluster_list'
-#' #@param clust_vect Vector of used clusters, returned by 'Kowalski'
-#' @param object SE
-#' @param dataname name of object, used a lot for once, if you put in the wrong
-#'                 name, this function breaks
+#' @param tbl_lst list of the psuedobulk counts
+#' @param object Seurat object to perform analysis on
 #'
-#' @return the user's chosen count table
+#' @return returns metadata as data frame
 #' @export
 #'
 #' @examples
-#' #Get count table for a cluster in the glut object
-#' my_cnt_tbl <- prep_DEseq(glut_tab, glut, "Glut")
-prep_DEseq <- function(data_tab, object, dataname){
-  # prompt user for table
-  cat("What cluster do you want to see a count table for?", 
-      "Press 'v' to view options.", sep = "\n")
-  piece = readline()
-  
-  # vectors to store cluster names
-  data_lst <- c()
-  clust_vect <- c()
-  
-  # populates data_lst 
-  for (name in names(unique(data_tab))){
-    if (str_detect(name, dataname)){
-      data_lst <- append(data_lst, name)
+#' #Make metadata for the glut object
+#' meta_data <- prep_DESeq(my_tbls, glut)
+prep_DESeq <- function(tbl_lst, object){
+    
+    #splits names into list of the ratID's and groups
+    temp <- sapply(names(tbl_lst[[1]]), strsplit, ":")
+    justF <- c()
+    
+    #Fills justF w/ only the comparisons in the split
+    for (i in 1:length(temp)){
+        justF <- append(justF, temp[[i]][2]) 
     }
-  }
-  
-  # splits data_lst into a list 
-  temp <- sapply(data_lst, strsplit, dataname)
-  
-  # populates clust_vect using numbers from data_lst
-  for (i in 1:(length(temp))){
-    clust_vect <- append(clust_vect, temp[[i]][2]) 
-  }  
-  
-  # removes possible NAs from clust_vect
-  clust_vect <- clust_vect[!is.na(clust_vect)]  
-  
-  # Verifies 
-  while (!((piece %in% data_lst) | (piece %in% clust_vect)) 
-         & piece != "all"){
-    if (piece != "v"){
-      cat("Invalid input. Please enter a valid cluster or 'v'. \n") 
+    
+    #finds factor used in the list for user
+    for (name in colnames(object@meta.data)){
+        if (justF[1] %in% unique(object@meta.data[name][, 1])){
+            factor <- name
+        }
     }
-    # Shows options
-    cat("Your options are:\n")
-    sapply(data_lst, print, quote = FALSE)
-    sapply(clust_vect, print, quote = FALSE)
-    print("all", quote = FALSE)
-    print("v", quote = FALSE)
-    # reruns prev line
-    cat("What cluster do you want to see a count table for?", 
-        "Press 'v' to view options.", sep = "\n")
-    piece = readline()
-  }
-  
-  # if a single num (like a 4), turns to something we can check for in the data Table
-  if (piece %in% clust_vect){
-    piece <- paste(dataname, piece, sep = "")
-  }
-  # same as prev but with all
-  if (piece == "all"){
-    piece <- paste("all", dataname, sep = "")
-  }
-  
-  # Finds section
-  tbl_sect <- match(piece, names(data_tab))
-  
-  # gets piece of the pie (table)
-  tbl_piece <- data_tab[1:nrow(data_tab), (tbl_sect + 1):(tbl_sect + length(unique(object@meta.data[["ratID"]])))]
-  return(tbl_piece)
+    
+    #Makes data frame and labels it 
+    met_fram <- data.frame(justF)
+    rownames(met_fram) <- names(tbl_lst[[1]])
+    colnames(met_fram) <- factor  #<- Will likely need to be changed if multiple
+                                  #   factors wanted
+    
+    #checks that the metadata is set up correctly
+    cat("There should be at least one 'TRUE' under this line:\n")
+    cat(as.character(unique(met_fram[,1]) %in% unique(object@meta.data[factor][, 1])), "\n")
+    cat("\n")
+    
+    #returns frame
+    return(met_fram)
 }
