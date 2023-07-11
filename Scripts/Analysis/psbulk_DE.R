@@ -1,28 +1,27 @@
 # Remakes the remade base file with code sections, minor improvements and such
 
-# By: Drake Thompson, Padma Saravanan, Katherine Savell
+# By: Drake Thompson, Padmashri Saravanan, Katherine Savell
 
 # Info --------------------------------------------------------------------
 
-# This doesn't make an Upset plot but sets up a lot of the steps. Everything up 
-# to the last 3 functions is done for you. 
-# This makes two main things: 
+# This script creates: 
 #           ** a 'MEGA' table that can divided into subtables 
 #                       (use prep_DEseq to get subtables)
 #           ** metadata table (stored  as metaData) for making result tables
 #                       (use get_result_tbl or run_DEseq)
+
 # Making individual count and result tables will have to be done by user
-# This is done w/ the three remaining functions:
-#                                              prep_DEseq
-#                                              get_result_tbl
-#                                              run_DEseq
+# This is done with the three remaining functions:
+#                                              prep_DEseq()
+#                                              get_result_tbl()
+#                                              run_DEseq()
 
 # Note: This code is broken into various sections. You can collapse sections and 
 # look at specific chunks of code. There is also a Jump To Command that takes you 
 # to the specific sections under 'Code' on the top menu bar.
 
 
-# Loading # -----------------------------------------------------------------
+# Loading -----------------------------------------------------------------
 ## Load Packages -----------------------------------------------------------
 # loads all required packages
 library(dplyr)
@@ -53,7 +52,7 @@ while (!(choice %in% 1:3)) {
 
 # Loads data, you may need to change below code depending on device. 
 ##-----------------------------------------------##
-#Loads data depending on user choice
+# Loads data depending on user choice
 if (choice == 1 | choice == 2){
   to_load = readline("Load glut? (y/n): ")
   if (to_load == "y"){
@@ -74,15 +73,15 @@ if (choice == 1 | choice == 3){
 
 # Function Section # --------------------------------------------------------
 ## Notes About Function Section --------------------------------------------
-#SE refers to 'self explanatory'
-#Functions are collapsable if you want to just read descriptions and this section
-#feels cluttered.
+# SE refers to 'self explanatory'
+# Functions are collapsable if you want to just read descriptions and this section
+# feels cluttered.
 
 ## List of Functions that May Require Changes ------------------------------
 ##------------------------##
-#List of functions that may need to be changed with a new experiment
+# List of functions that may need to be changed with a new experiment
 ##------------------------##
-###verify_factor:
+### verify_factor:
 #               This takes from a rather specific part of the data, where it pulls
 #               from may have to change if data is formatted differently
 #
@@ -240,7 +239,8 @@ get_cnt_tbls <- function(data_lst, clust_vect, object, dataname){
   #returns Mega Table, the IKEA bulk order
   return(furniture)
 }
-#If this function is too long for you, I can separate it into 2
+
+
 
 
 #' Make Metadata
@@ -683,11 +683,11 @@ prep_psuedobulk <- function(object){
 ## Data Containers ---------------------------------------------------------
 
 
-#Matrices to hold count tables
+# Matrices to hold count tables
 glut_tabs <- matrix()
 gaba_tabs <- matrix()
 
-#Will hold metadata, shouldn't need to change between objects
+# Will hold metadata, shouldn't need to change between objects
 metaData <- data.frame()
 
 
