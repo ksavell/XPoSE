@@ -1,0 +1,568 @@
+# The ps_bulk functions but modified to be able to take two factors
+
+# By: Drake Thompson
+
+
+# Info --------------------------------------------------------------------
+
+#To be filled later
+
+
+# Packages ----------------------------------------------------------------
+
+# loads all required packages
+library(dplyr)
+library(purrr)
+library(Seurat)
+library(Libra)
+library(here)
+library(rlist)
+
+
+# Data Loading ------------------------------------------------------------
+# Loads data depending on user choice
+prompt <- paste("Use both data sets?\n", 
+                "1. Yes\n",
+                "2. Just Glut\n",
+                "3. Just GABA\n")
+cat(prompt)
+choice = readline()
+
+# validates input, loops if invalid
+while (!(choice %in% 1:3)) {
+  # "error" message
+  print("Invalid Input. Please return a 1, 2, or 3")
+  
+  # asks fo input again
+  cat(prompt)
+  choice = readline()
+}
+
+# Loads data, you may need to change below code depending on device. 
+##-----------------------------------------------##
+#Loads data depending on user choice
+if (choice == 1 | choice == 2){
+  to_load = readline("Load glut? (y/n): ")
+  if (to_load == "y"){
+    load("data/glut_subset_forthpipe_11102022.RData") # change to here() 
+    glut <- glut.subset2
+  }
+}
+if (choice == 1 | choice == 3){
+  to_load = readline("Load GABA? (y/n): ")
+  if (to_load == "y"){
+    #load("data/gaba_subset_forthpipe_03142023.RData") #Newer doesn't work with this :P
+    load("data/gaba_subset_forthpipe_11102022.RData")
+    gaba <- gaba.subset2
+  }
+}
+##------------------------------------------------##
+
+
+# Functions ---------------------------------------------------------------
+
+#' Verify Factor
+#' 
+#' General function that will take in a vector of user input and correct it using
+#' a vector of the wanted factor's names. 
+#'
+#' @param object SE
+#' @param vect the vector being verified, should have at least 2 elems
+#' @param factor the factor to verify with. Within our object this will be 
+#'               'group' or 'sex'
+#'
+#' @return the user's (corrected) choice vector
+#' @export
+verify_factor <- function(object, vect, factor){
+  #makes vector of valid options, normal and lowercase
+  valids <- unique(object[[factor]])[, 1]
+  valids_low <- tolower(valids)
+  
+  #There is a case where factor is the first elem so this ensures output to user
+  #is consistent
+  mod <- 0 
+  
+  #Loops vector
+  for (i in 1:length(vect)){
+    #Checks if first elem is the factor
+    if (i == 1){
+      if (vect[i] != factor){
+        #Loops until valid input
+        while (!(vect[i] %in% valids)){
+          #checks for case, converts to proper if not
+          if (tolower(vect[i]) %in% valids_low){
+            vect[i] <- valids[match(tolower(vect[i]), valids_low)]
+          }else {
+            #prompts user about 
+            cat("Invalid input for Comparison", i, 
+                ". Please check for typo.\n",
+                "Valid inputs include:\n", sep = "")
+            sapply(valids, print, quote = FALSE)
+            vect[i] = readline(paste("Comparsion", i, 
+                                     ": ", sep = ""))
+          }
+        }
+        #If the factor is the first index, i needs to be 1
+      } else {
+        mod <- 1
+      }
+    }else {
+      #Loops until valid input
+      while (!(vect[i] %in% valids)){
+        #checks for case 
+        if (tolower(vect[i]) %in% valids_low){
+          vect[i] <- valids[match(tolower(vect[i]), valids_low)]
+        }else {
+          cat("Invalid input for Comparison", i, 
+              ". Please check for typo.\n",
+              "Valid inputs include:\n", sep = "")
+          sapply(valids, print, quote = FALSE)
+          vect[i] = readline(paste("Comparsion", i, ": ", sep = ""))
+        }
+      }
+    }
+  }
+  
+  #dupe check
+  if (length(vect) > 1){
+    for (i in (1 + mod):(length(vect) - 1)){
+      for (j in (2 + mod):length(vect)){
+        while (vect[i] == vect[j]){
+          cat("Dupe found at Comparsion", j - mod,
+              ". Please use a different option within your set.\n",
+              "Valid inputs include:\n", sep = "")
+          sapply(valids, print, quote = FALSE)
+          cat("Please don't put in the same thing in...")
+          vect[j] = readline(paste("Comparsion", j - mod, ": ", sep = ""))
+        }
+      }
+    }
+  }
+  
+  #returns vect with changes (if any)
+  return(vect)
+}
+
+
+#' Verify Factors
+#' 
+#' General function that will take in a vector of user input and correct it using
+#' a vector of the wanted factors' names. 
+#'
+#' @param object SE
+#' @param vect the vector being verified, should have at least 2 elems
+#' @param factors the factor vector to verify with. Within our object this will 
+#'                contain chars from 'group' or 'sex'
+#'
+#' @return the user's (corrected) choice vector
+#' @export
+verify_factors <- function(object, vect, factors){
+  #makes vector of valid options, normal and lowercase
+  valids <- c()
+  for (factor in factors){
+    valids <- append(valids, unique(object[[factor]])[, 1])
+  }
+  valids_low <- tolower(valids)
+  
+  #There is a case where factor is the first elem so this ensures output to user
+  #is consistent
+  mod <- 0 
+  
+  #Loops vector
+  for (i in 1:length(vect)){
+    #Checks if first elem is the factor
+    if (i == 1){
+      if (vect[i] != factor){
+        #Loops until valid input
+        while (!(vect[i] %in% valids)){
+          #checks for case, converts to proper if not
+          if (tolower(vect[i]) %in% valids_low){
+            vect[i] <- valids[match(tolower(vect[i]), valids_low)]
+          }else {
+            #prompts user about 
+            cat("Invalid input for Comparison", i, 
+                ". Please check for typo.\n",
+                "Valid inputs include:\n", sep = "")
+            sapply(valids, print, quote = FALSE)
+            vect[i] = readline(paste("Comparsion", i, 
+                                     ": ", sep = ""))
+          }
+        }
+        #If the factor is the first index, i needs to be 1
+      } else {
+        mod <- 1
+      }
+    }else {
+      #Loops until valid input
+      while (!(vect[i] %in% valids)){
+        #checks for case 
+        if (tolower(vect[i]) %in% valids_low){
+          vect[i] <- valids[match(tolower(vect[i]), valids_low)]
+        }else {
+          cat("Invalid input for Comparison", i, 
+              ". Please check for typo.\n",
+              "Valid inputs include:\n", sep = "")
+          sapply(valids, print, quote = FALSE)
+          vect[i] = readline(paste("Comparsion", i, ": ", sep = ""))
+        }
+      }
+    }
+  }
+  
+  #dupe check
+  if (length(vect) > 1){
+    for (i in (1 + mod):(length(vect) - 1)){
+      for (j in (2 + mod):length(vect)){
+        while (vect[i] == vect[j]){
+          cat("Dupe found at Comparsion", j - mod,
+              ". Please use a different option within your set.\n",
+              "Valid inputs include:\n", sep = "")
+          sapply(valids, print, quote = FALSE)
+          cat("Please don't put in the same thing in...")
+          vect[j] = readline(paste("Comparsion", j - mod, ": ", sep = ""))
+        }
+      }
+    }
+  }
+  
+  #returns vect with changes (if any)
+  return(vect)
+}
+
+
+#' Prep Pseudobulk
+#' 
+#' Takes in user input to create a list of Seurat objects with clusters chosen 
+#' by the user.
+#'
+#' @param object Seurat object to perform analysis on 
+#'
+#' @return a list of Seurat objects with user chosen clusters
+#' @export
+#'
+#' @examples
+#' #make list of chosen clusters within glut object
+#' clust_lst <- prep_psuedobulk(glut)
+prep_multi_psbulk <- function(object){
+  #Prompts for threshold
+  cat("\n")
+  threshold = as.numeric(readline(
+    "What would you like the threshold for your object to be?: "))
+  
+  #validates input
+  while (is.na(threshold)) {
+    cat("Invalid input. Please enter a number.")
+    threshold = as.numeric(readline(
+      "What would you like the threshold for your object to be?: "))
+  }
+  
+  #prompts for num of factors
+  fact_num = as.numeric(readline(
+    "How many factors would you like to use? (Max 3): "))
+  
+  #checks if user input is number
+  while (is.na(fact_num)) {
+    cat("Invalid input. Please enter a number.")
+    fact_num = as.numeric(readline(
+      "What would you like the threshold for your object to be?: "))
+  }
+  
+  #ensures fact_num is valid size
+  while (fact_num < 1 | fact_num > 3){
+    cat("Invalid num. Please put in a number between 1 and 3. \n")
+    
+    #reprompts user
+    fact_num = as.numeric(readline(
+      "How many factors would you like to use? (Max 3): "))
+    
+    #checks if number again
+    while (is.na(fact_num)) {
+      cat("Invalid input. Please enter a number.")
+      fact_num = as.numeric(readline(
+        "What would you like the threshold for your object to be?: "))
+    }
+  }
+  
+  #will hold factor(s)
+  factors <- c()
+  
+  #populates factor vect
+  for (i in 1:fact_num){
+  
+    #prompts user for factor
+    factor = readline(prompt = paste("What will your factor ", i,
+                                     " be?: ", sep = ""))
+    
+    #verifies that factor is something that exists within the object
+    while (!(factor %in% colnames(object@meta.data)) | (factor %in% factors)) {
+      if (factor %in% factors){
+        cat("Factor '", factor, "' already used. Please use another factor: ", sep = "")
+        factor = readline()
+      }else if (tolower(factor) %in% tolower(colnames(object@meta.data))){
+        factor <- colnames(object@meta.data)[
+                  match(tolower(factor), tolower(colnames(object@meta.data)))]
+      }else {      
+        cat("Invalid input. Please try something like:\n",
+          "group\n",    
+          "sex\n", 
+          "ratID\n", 
+          "What will factor ", i," be?: ", sep = "")
+        factor = readline()
+      }
+    }
+    
+    factors <- append(factors, factor)
+  }
+  
+  #Makes our possible column names
+  factor_nams <- c()
+  for (factor in factors){
+    factor_nams <- append(factor_nams, unique(object[[factor]])[, 1])
+  }
+  
+  #
+  rat_list <- list()
+  cmprsn <- list()
+  index <- 1
+  #factor <- ""
+  
+  
+  for (factor in factors){
+    #stores the comparisons within the factor for ease of access
+    cat("What would you like to compare within '", factor,"'?", sep = "")
+    cmprsn[[factor]] <- c(readline("Comparison1: "), 
+                          readline("Comparison2: "))
+    
+    #verifies user input
+    #cmprsn <- verify_factors(object, cmprsn, factors)
+    #cmprsn <- verify_factor(object, cmprsn, factor)
+    cmprsn[[factor]] <- verify_factor(object, cmprsn[[factor]], factor)
+    
+    #Makes base data table so we can import the data to the frame
+    #Makes tables
+    rat_list <- list.append(rat_list,
+                            factor = nrow(table(object$ratID,
+                                                object[[factor]][, 1])[
+                            table(object$ratID,
+                                  object[[factor]][, 1])[, cmprsn[[factor]][1]] > 0 |
+                            table(object$ratID,
+                                  object[[factor]][, 1])[, cmprsn[[factor]][2]] > 0, ]))
+    # rat_list <- list.append(rat_list, 
+    #                         factor = nrow(table(object$ratID, 
+    #                                             object[[factor]][, 1])[
+    #                                               table(object$ratID, 
+    #                                                     object[[factor]][, 1])[, cmprsn[[factor]][1]] &
+    #                                                 table(object$ratID, 
+    #                                                       object[[factor]][, 1])[, cmprsn[[factor]][2]], ]))
+    
+   
+    #Confirmation it is right now
+    names(rat_list)[index] <- factor
+    #print("uuuuuu")
+    # nrow(table(object$ratID, object[[factor]][, 1])[
+    #      table(object$ratID, object[[factor]][, 1])[, cmprsn[1]] > 0 &
+    #      table(object$ratID, object[[factor]][, 1])[, cmprsn[2]] > 0, ])
+    index <- index + 1
+  }
+  
+  #print(rat_list)
+  
+  #Need to find primary factor so data isn't wonky
+  if (length(factors) > 1){
+    #stores name of minimum
+    minim <- c(names(rat_list)[1])
+    
+    #compares min to find primary factor
+    for (i in 2:length(factors)){
+      
+      #New min found
+      if (rat_list[[minim]] > rat_list[[i]]){
+        #minim <- c()
+        minim <- c(names(rat_list)[i])
+      
+      #Tie between mins, user will be given choice
+      } else if (rat_list[[minim]] == rat_list[[i]]){
+        minim <- append(minim, names(rat_list)[i])
+      }
+    }
+    
+    #tie, user is given a choice
+    if (length(minim) > 1){
+      cat("No primary found. Please choose a factor that will help you filter ",
+          "your clusters. \n",
+          "Your options include:\n", sep = "")
+      sapply(minim, print, quote = FALSE)
+      factor = readline()
+      
+      while (!(factor %in% minim)) {
+        cat("Invalid option. Please choose between the factors below:\n",
+            sep = "")
+        sapply(minim, print, quote = FALSE)
+        factor = readline()
+      }
+    } else {
+      factor <- minim[1]
+      
+      #A surprise tool that will help us later
+      #names(rat_list)[match(factor, factors)] <- "min"
+    }
+    
+    
+    names(rat_list)[match(factor, factors)] <- "min"
+    
+    #Alerts user
+    cat(factor, " chosen as primary factor. \n", sep = "")
+    #if < update minim
+    #if = ??? 
+    #Post Lunch problem lol
+  }else {
+    #sets factor to only option
+    factor <- factors[1]
+  }
+  
+  #
+  
+  #stores the comparisons within the factor for ease of access
+  # cat("What would you like to compare within factor '", factor, "'?", sep = "")
+  # cmprsn <- c(readline("Comparison1: "), 
+  #             readline("Comparison2: "))
+  # 
+  # #verifies user input
+  # #cmprsn <- verify_factors(object, cmprsn, factors)
+  # cmprsn <- verify_factor(object, cmprsn, factor)
+  
+  #Makes base data table so we can import the data to the frame
+  data_tbl <- table(object$seurat_clusters, object[[factor]][, 1])
+  
+  # #Makes base data table so we can import the data to the frame
+  # data_tbl <- matrix(nrow = length(levels(object$seurat_clusters)))
+  # #Adds data from all factors
+  # for (factor in factors){
+  #   data <- table(object$seurat_clusters, object[[factor]][, 1])
+  #   data_tbl <- cbind(data_tbl, data)
+  # }
+  # 
+  # #Deletes base row
+  # data_tbl <- data_tbl[, -1]
+  
+  #row.names = rownames(dtb), ncol = ncol()
+  
+  #Makes data frame to store
+  clust_tab <- data.frame(matrix(ncol = length(unique(object[[factor]][, 1])), 
+                                 nrow = length(rownames(data_tbl))))
+  
+  #labels the frame's rows and columns
+  colnames(clust_tab) <- unique(object[[factor]][, 1])
+  rownames(clust_tab) <- unique(levels(object@active.ident))
+  
+  #populates data frame
+  for (i in 1:length(unique(object[[factor]][, 1]))){
+    clust_tab[, unique(object[[factor]][, 1])[i]] <- data_tbl[, i]
+  }
+  
+  #Prints table for user pleasure
+  cat("\nTable:\n")
+  #Very specific right now, Could probably be changed to reflect greater group 
+  #size
+  # final <- clust_tab[clust_tab[, cmprsn[1]] > threshold &
+  #                      clust_tab[, cmprsn[2]] > threshold, ] %>% 
+  #                      select(cmprsn[1], cmprsn[2])
+  final <- clust_tab[clust_tab[, cmprsn[[factor]][1]] > threshold &
+                       clust_tab[, cmprsn[[factor]][2]] > threshold, ] %>% 
+    select(cmprsn[[factor]][1], cmprsn[[factor]][2])
+  print(final)
+  cat("\n")
+  
+  #Makes vector of possible clusters to use
+  poss <- rownames(final)
+  
+  #returns wanted clusters
+  dVect <- c() #will be returned at function end
+  
+  #prompts user
+  use_tbl = readline(paste("Would you like to keep the clusters in this",
+                           "table? (y/n): "))
+  #input validation
+  while (use_tbl != 'y' & use_tbl != 'n') {
+    use_tbl = readline("Invalid input. Please return a 'y' or 'n': ")
+  }
+  
+  #yes, so sets dVect to poss
+  if (use_tbl == 'y'){
+    dVect <- poss
+    
+    #No, so prompts user to ask for wanted clusters
+  }else {
+    #prompts user on cluster amt
+    cs = as.numeric(readline("How many clusters would you like to use?: "))
+    maximum <- length(poss)
+    
+    #
+    while (is.na(cs)) {
+      cat("Invalid input. Please enter a number.")
+      cs = as.numeric(readline(paste("How many clusters would you like",
+                                     "to use?: ")))
+      cs <- as.numeric(cs)
+    }
+    
+    #Basically means this is out of bounds
+    while(maximum < cs | cs < 1){
+      if (maximum < cs){
+        cs = as.numeric(readline(paste("Choice exceeds current", 
+                                       "clusters. Please use a",
+                                       "lower number")))
+      }else {
+        cs = as.numeric(readline(paste("Choice is too small. Please use a",
+                                       "greater number")))
+      }
+    }
+    #max means all 
+    if (cs == maximum){
+      dVect <- poss
+    }else {
+      #prompts user for cs clusters by looping
+      for (i in 1:cs){
+        #Makes prompt
+        prompt <- paste("Cluster ", i, ": ", sep = "")
+        clust = readline(prompt)
+        
+        #loops until valid
+        while (!(clust %in% poss) | (clust %in% dVect)){
+          cat("Invalid. Please choose a valid cluster that you have ",
+              "not already called.\n",
+              "Your options include:\n")
+          sapply(poss, print, quote = FALSE)
+          clust = readline(prompt)
+        }
+        
+        #appends to dVect
+        dVect <- append(dVect, clust)
+      }
+    }
+  }
+  
+  #prints cluster names so user can see
+  print(dVect)
+  
+  #will be returned at function's end, will contain the objs
+  new_list <- list()
+  
+  #Makes cluster subsets derived from user input
+  for (i in 1:length(dVect)) {
+    
+    #Makes val of new_list the subset
+    new_list[[dVect[i]]] <- subset(object, idents = dVect[i])
+    
+    #Splitting stuff
+    Idents(new_list[[dVect[i]]]) <- factor
+    new_list[[dVect[i]]] <- subset(new_list[[dVect[i]]], idents = cmprsn[[factor]])
+  }
+  
+  #Adds other factors as "hidden" data
+  if (length(factors) > 1){
+    new_list[["hidden"]] <- names(rat_list)[names(rat_list) != "min"]
+  }
+  
+  #returns list
+  return(new_list)
+}
