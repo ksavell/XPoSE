@@ -1,6 +1,6 @@
 # Remakes the remade base file with code sections, minor improvements and such
 
-# By: Drake Thompson, Padma Saravanan, Katherine Savell
+# By: Drake Thompson, Padmashri Saravanan, Katherine Savell
 
 # Info --------------------------------------------------------------------
 
