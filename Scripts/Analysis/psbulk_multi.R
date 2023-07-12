@@ -580,3 +580,232 @@ prep_multi_psbulk <- function(object){
   #returns list
   return(new_list)
 }
+
+
+
+#' Count Psuedobulk
+#' 
+#' #Makes a list containing the count tables for each of the user's chosen 
+#' clusters. Can "deal" with multiple factors
+#'
+#' @param data_lst a list of Seurat objects with user chosen clusters
+#' @param object Seurat object to perform analysis on
+#'
+#' @return a list of the psuedobulk counts
+#' @export
+#'
+#' @examples
+#' #Make list of count tables for glut object
+#' my_tbls <- count_pseudobulk(clust_lst, glut)
+count_multi_psbulk <- function(data_lst, object){
+    
+    #Will hold all the tables
+    furniture <- list(matrix(1:length(data_lst[[1]]@assays[["RNA"]]@counts@Dimnames[[1]]),
+                             ncol = 1))
+    
+    #finds factor used in the list for user
+    for (name in colnames(object@meta.data)){
+        if (unique(data_lst[[1]]@active.ident)[1] %in% 
+            unique(object@meta.data[name][, 1])){
+            factor <- name
+        }
+    }
+    
+    #Marks whether we have to transfer the vect in hidden or not
+    hidden <- FALSE
+    
+    #makes a count table for each cluster
+    for (i in 1:length(data_lst)){
+        #hidden exists so we mark hidden and skip making a count table for it
+        if (i == length(data_lst) & names(data_lst)[i] == "hidden"){
+            hidden <- TRUE
+        }else {
+            #pseudobulks and subsets the cluster
+            cnt_tbl <- to_pseudobulk(
+                    data_lst[[i]], #The source of what we're generating a count
+                    replicate_col = "ratID",
+                    cell_type_col = "seurat_clusters",
+                    label_col = factor
+                    )[[levels(object$seurat_clusters)[i]]]
+            
+            #Adds table to list
+            if (i != 1){
+                furniture <- list.append(furniture, clust_nam = cnt_tbl)
+              
+            }else {
+                #First col = special case as mat is unpopulated
+                furniture[[1]] <- cnt_tbl
+            }
+            
+            #Ensures table has correct name
+            names(furniture)[i] <- names(data_lst)[i]
+        }
+    }
+    
+    #Makes the element with all the data
+    allset <- FindClusters(object, resolution = 0)
+    Idents(allset) <- factor
+    allset <- subset(allset, idents = levels(data_lst[[1]]))
+    
+    #psuedobulks all and turns into a table to add to list
+    all_tbl <- to_pseudobulk(
+        allset, #The source of what we're generating a count
+        replicate_col = "ratID",
+        cell_type_col = "seurat_clusters",
+        label_col = factor
+    )[["0"]]  #<- The "0" was an inference that works
+    furniture <- list.append(furniture, "AllClust" = all_tbl)
+    
+    #transfers hidden 
+    if (hidden){
+      furniture[["hidden"]] <- data_lst[["hidden"]]
+    }
+    
+    #returns list of count tables
+    return(furniture)
+}
+
+
+#' Make Metadata
+#' 
+#' Swipes the rat:factor pairs from the big table in order to make the metadata
+#'
+#' @param tbl_lst list of the psuedobulk counts
+#' @param object Seurat object to perform analysis on
+#'
+#' @return returns metadata as data frame
+#' @export
+#'
+#' @examples
+#' #Make metadata for the glut object
+#' meta_data <- prep_DESeq(my_tbls, glut)
+prep_mu_DESeq <- function(tbl_lst, object){
+    
+    #splits names into list of the ratID's and groups
+    temp <- sapply(names(tbl_lst[[1]]), strsplit, ":")
+    justF <- c()
+    rat_nams <- c()
+    
+    #Fills justF w/ only the comparisons in the split
+    for (i in 1:length(temp)){
+        justF <- append(justF, temp[[i]][2]) 
+        rat_nams <- append(rat_nams, temp[[i]][1])
+    }
+    
+    #finds factor used in the list for user
+    for (name in colnames(object@meta.data)){
+        if (justF[1] %in% unique(object@meta.data[name][, 1])){
+            factor <- name
+        }
+    }
+    
+    #Makes data frame and labels it 
+    met_fram <- data.frame(justF)
+    rownames(met_fram) <- names(tbl_lst[[1]])
+    colnames(met_fram) <- factor  
+    
+    #makes new column for extra meta data
+    if ("hidden" %in% names(tbl_lst)){
+        #loops through extra fectors
+        for (i in 1:length(tbl_lst[["hidden"]])){
+            #Makes vector to store what will be in new column
+            new_col <- c()
+            
+            #loops through list of rat names get an index
+            for (rat in rat_nams){
+                #uses the index of the ratID to get what's within factor
+                new_col <- append(new_col, 
+                                  glut@meta.data[[tbl_lst[["hidden"]][i]]][
+                                  match(rat, glut$ratID)][[1]])
+            }
+            
+            #Adds vector as column and names it properly
+            met_fram <- cbind(met_fram, factor = new_col)
+            colnames(met_fram)[1 + i] <- tbl_lst[["hidden"]][i]
+        }
+    }
+    
+    #checks that the metadata is set up correctly
+    cat("There should be at least one 'TRUE' on each line:\n")
+    cat(as.character(unique(met_fram[,1]) %in% unique(object@meta.data[factor][, 1])), "\n")
+    for (i in 1:length(tbl_lst[["hidden"]])) {
+      cat(as.character(unique(met_fram[, 1 + i]) %in% unique(object@meta.data[tbl_lst[["hidden"]][i]][, 1])), "\n")
+    }
+    cat("\n")
+    
+    #returns frame
+    return(met_fram)
+}
+
+
+#You are here. Helllo tomorrow me, hope you slept goood last night
+
+
+#' Run DEseq
+#'
+#' @param tbl_lst list of the psuedobulk counts
+#' @param meta_tbl table of metadata
+#' @param object Seurat object to perform analysis on
+#'
+#' @return returns aggegate list of the result tables (they are tibbles)
+#' @export
+#'
+#' @examples
+#' #Makes result tibbles for my_tbls list
+#' my_tibbs <- run_DEseq(my_tbls, meta_data, glut)
+run_DEseq <- function(tbl_lst, meta_tbl, object){
+  #our base list to hold tibbles, will be returned at function's end
+  agg_res <- list()
+  
+  #finds factor used in the list for user
+  for (name in colnames(object@meta.data)){
+    if (unique(meta_tbl[,1])[1] %in% unique(object@meta.data[name][, 1])){
+      factor <- name
+    }
+  }
+  
+  #Gets user's input for contrast
+  cat("Enter 2 comparisons, should be same as before")  #<- This may need to 
+  #   be changed if more 
+  #   wanted
+  contrast_vect <- c(factor, readline("Experimental Group: "), 
+                     readline("Control Group: "))
+  
+  
+  #Makes factor a formula for the design
+  form_fact <- paste("~", factor, sep = "")
+  form_fact <- as.formula(form_fact)
+  
+  #verifies user input
+  contrast_vect <- verify_factor(object, contrast_vect, factor)
+  
+  #Makes result table for each count table in list
+  for (i in 1:length(tbl_lst)){
+    #Makes object
+    cluster <- DESeqDataSetFromMatrix(tbl_lst[[i]],  #Data Table
+                                      colData = meta_tbl,  #metaData
+                                      design = form_fact)
+    
+    #Filters out insignificant parts
+    cluster <- cluster[ rowSums(counts(cluster)) > 5, ]
+    cluster <- DESeq(cluster)
+    
+    #Makes results obj
+    results <- results(cluster,
+                       contrast = contrast_vect,
+                       alpha = 0.05,
+                       pAdjustMethod = "fdr")
+    
+    #Turns results into a Tibble
+    results_tib <- results %>%
+      data.frame() %>%
+      rownames_to_column(var="gene") %>%
+      as_tibble()
+    
+    #returns results
+    agg_res <- list.append(agg_res, clust_nam = results_tib)
+    names(agg_res)[i] <- names(tbl_lst)[i]
+  }
+  
+  return(agg_res)
+}
