@@ -59,20 +59,41 @@ verify_factor <- function(object, vect, factor){
             }
         }
     }
+
+    #Check to see if we need to rerun the function
+    rerun <- FALSE
     
     #dupe check
     if (length(vect) > 1){
         for (i in (1 + mod):(length(vect) - 1)){
             while (vect[i] == vect[i + 1]){
+                rerun <- TRUE
                 cat("Dupe found at Comparsion", i + 1 - mod,
                     ". Please use a different option within your set.\n",
-                    "Valid inputs include:\n", sep = "")
+                    "Valid inputs include:\n", 
+                    "If you would like to delete this option, please enter 'd'. \n",
+                    sep = "")
                 sapply(valids, print, quote = FALSE)
                 cat("Please don't put in the same thing in...")
                 vect[i + 1] = readline(paste("Comparsion", i + 1 - mod, ": ", sep = ""))
-              }
-           }
-      }
+            }
+        }
+        #Cleans vect of d's
+        vect <- vect[vect != "d"]
+    }
+
+    while (length(vect) < 2){
+        rerun <- TRUE
+        cat("Additional comparison needed.",
+            " Please enter one of the below options:\n")
+        sapply(valids, print, quote = FALSE)
+        vect <- append(vect, readline("New Comparsion: "))
+    }
+  
+    #Validates possible new changes
+    if (rerun){
+        vect <- verify_factor(object, vect, factor)
+    }
     
     #returns vect with changes (if any)
     return(vect)
