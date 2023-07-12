@@ -73,7 +73,7 @@ prep_psuedobulk <- function(object){
   poss <- rownames(final)
   
   #returns wanted clusters
-  dVect <- c() #will be returned at function end
+  dVect <- c() 
   
   #prompts user
   use_tbl = readline(paste("Would you like to keep the clusters in this",
