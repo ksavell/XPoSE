@@ -727,10 +727,17 @@ prep_mu_DESeq <- function(tbl_lst, object){
     
     #checks that the metadata is set up correctly
     cat("There should be at least one 'TRUE' on each line:\n")
-    cat(as.character(unique(met_fram[,1]) %in% unique(object@meta.data[factor][, 1])), "\n")
-    for (i in 1:length(tbl_lst[["hidden"]])) {
-      cat(as.character(unique(met_fram[, 1 + i]) %in% unique(object@meta.data[tbl_lst[["hidden"]][i]][, 1])), "\n")
+    cat(as.character(unique(met_fram[,1]) %in% 
+                     unique(object@meta.data[factor][, 1])), "\n")
+    #Checks posssible hidden columns
+    if (hidden){
+        for (i in 1:length(tbl_lst[["hidden"]])) {
+            cat(as.character(unique(met_fram[, 1 + i]) %in% 
+                             unique(object@meta.data[
+                             tbl_lst[["hidden"]][i]][, 1])), "\n")
+        }
     }
+    
     cat("\n")
     
     #returns frame
