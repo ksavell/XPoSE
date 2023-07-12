@@ -13,7 +13,7 @@ create_seur <- function(count, cart_no, tag,
                         addSTreads = FALSE, streads = NULL, STrange = c(2:9)){
   
   # Create Seurat objects for each cartridge while transposing since BD output is opposite of Seurat input
-  seur_obj <- CreateSeuratObject(counts =  t(as.data.frame(counts[cart_no])), project = paste("C",cart_no,sep=""))
+  seur_obj <- CreateSeuratObject(counts =  t(as.data.frame(counts[[cart_no]])), project = paste("C",cart_no,sep=""))
   
   # Add Sample_tags as metadata to the Seurat object
   seur_obj[["Sample_tag"]] <- cbind(tag[1])
