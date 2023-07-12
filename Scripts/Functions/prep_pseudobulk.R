@@ -42,6 +42,7 @@ prep_psuedobulk <- function(object){
   cmprsn <- c(readline("Comparison1: "), 
               readline("Comparison2: "))
   
+  source("~/Documents/GitHub/XPoSE/Scripts/Functions/verify_factor.R")
   #verifies user input
   cmprsn <- verify_factor(object, cmprsn, factor)
   
