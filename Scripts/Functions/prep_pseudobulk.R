@@ -111,6 +111,14 @@ prep_psuedobulk <- function(object){
         cs = as.numeric(readline(paste("Choice is too small. Please use a",
                                        "greater number")))
       }
+
+      #Ensures a non numeric is not used
+      while (is.na(cs)) {
+        cat("Invalid input. Please enter a number.")
+        cs = as.numeric(readline(paste("How many clusters would you like",
+                                       "to use?: ")))
+        cs <- as.numeric(cs)
+      }
     }
     #max means all 
     if (cs == maximum){
