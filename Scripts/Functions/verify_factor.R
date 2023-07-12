@@ -63,18 +63,16 @@ verify_factor <- function(object, vect, factor){
     #dupe check
     if (length(vect) > 1){
         for (i in (1 + mod):(length(vect) - 1)){
-            for (j in (2 + mod):length(vect)){
-                while (vect[i] == vect[j]){
-                    cat("Dupe found at Comparsion", j - mod,
-                        ". Please use a different option within your set.\n",
-                        "Valid inputs include:\n", sep = "")
-                    sapply(valids, print, quote = FALSE)
-                    cat("Please don't put in the same thing in...")
-                    vect[j] = readline(paste("Comparsion", j - mod, ": ", sep = ""))
-                }
-            }
-        }
-    }
+            while (vect[i] == vect[i + 1]){
+                cat("Dupe found at Comparsion", i + 1 - mod,
+                    ". Please use a different option within your set.\n",
+                    "Valid inputs include:\n", sep = "")
+                sapply(valids, print, quote = FALSE)
+                cat("Please don't put in the same thing in...")
+                vect[i + 1] = readline(paste("Comparsion", i + 1 - mod, ": ", sep = ""))
+              }
+           }
+      }
     
     #returns vect with changes (if any)
     return(vect)
