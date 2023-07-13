@@ -704,8 +704,14 @@ prep_mu_DESeq <- function(tbl_lst, object){
     rownames(met_fram) <- names(tbl_lst[[1]])
     colnames(met_fram) <- factor  
     
+    #Marks whether we have to transfer the vect in hidden or not
+    hidden <- FALSE
+    
     #makes new column for extra meta data
     if ("hidden" %in% names(tbl_lst)){
+        #flags hidden as true
+        hidden <- TRUE
+      
         #loops through extra fectors
         for (i in 1:length(tbl_lst[["hidden"]])){
             #Makes vector to store what will be in new column
@@ -723,13 +729,65 @@ prep_mu_DESeq <- function(tbl_lst, object){
             met_fram <- cbind(met_fram, factor = new_col)
             colnames(met_fram)[1 + i] <- tbl_lst[["hidden"]][i]
         }
+      
+        #Makes aggregate cols
+        for (i in 1:length(tbl_lst[["hidden"]])){
+            #Will hold aggregates
+            new_col <- c()
+            
+            #makes the data within
+            for (j in 1:nrow(met_fram)){
+                #makes factor-hidd pairs
+                new_col <- append(new_col, 
+                                  paste(met_fram[, factor][j], "_", 
+                                        met_fram[, tbl_lst[["hidden"]][i]][j], 
+                                        sep = ""))
+            }
+            #Adds vector as column and names it properly
+            met_fram <- cbind(met_fram, factor = new_col)
+            colnames(met_fram)[1 + 
+                               length(tbl_lst[["hidden"]]) + i] <- paste(factor,
+                                          "_", tbl_lst[["hidden"]][i], sep = "")
+        }
+      
+        #for tri-factor sets
+        if (length(tbl_lst[["hidden"]]) == 2){
+            
+            ind <- 1
+            #targets aggregate vectors
+            for (agg in colnames(met_fram)[4:5]){
+                
+                #Will hold tri-factor aggregates
+                new_col <- c()
+                
+                #swipes the datapiece not in the aggregate 
+                singl <- colnames(met_fram)[1:3][
+                          !(colnames(met_fram)[1:3] %in% str_split_1(agg, "_"))]
+                
+                #makes the data within
+                for (j in 1:nrow(met_fram)){
+                    #makes tri-factor data
+                    new_col <- append(new_col, 
+                                      paste(met_fram[, agg][j], "_", 
+                                            met_fram[, singl][j], 
+                                            sep = ""))
+                }
+                
+                #Adds vector as column and names it properly
+                met_fram <- cbind(met_fram, factor = new_col)
+                colnames(met_fram)[5 + ind] <- paste(agg, "_", singl, sep = "")
+                
+                #increments ind
+                ind <- ind + 1
+            }
+        }
     }
     
     #checks that the metadata is set up correctly
     cat("There should be at least one 'TRUE' on each line:\n")
     cat(as.character(unique(met_fram[,1]) %in% 
                      unique(object@meta.data[factor][, 1])), "\n")
-    #Checks posssible hidden columns
+    #Checks possible hidden columns
     if (hidden){
         for (i in 1:length(tbl_lst[["hidden"]])) {
             cat(as.character(unique(met_fram[, 1 + i]) %in% 
@@ -737,7 +795,6 @@ prep_mu_DESeq <- function(tbl_lst, object){
                              tbl_lst[["hidden"]][i]][, 1])), "\n")
         }
     }
-    
     cat("\n")
     
     #returns frame
