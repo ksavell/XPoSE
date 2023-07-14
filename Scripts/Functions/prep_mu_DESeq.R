@@ -44,6 +44,9 @@ prep_mu_DESeq <- function(tbl_lst, object){
         #flags hidden as true
         hidden <- TRUE
 
+        #prevents ratID use
+        tbl_lst[["hidden"]] <- tbl_lst[["hidden"]][tbl_lst[["hidden"]] != "ratID"]
+
         #Users can append to hidden. This code prevents more than 2 factors
         #from existing in hidden when it is used. 
         if (length(tbl_lst[["hidden"]]) > 2){
