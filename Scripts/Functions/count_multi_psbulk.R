@@ -71,9 +71,16 @@ count_multi_psbulk <- function(data_lst, object){
     )[["0"]]  #<- The "0" was an inference that works
     furniture <- list.append(furniture, "AllClust" = all_tbl)
     
-    #transfers hidden 
+    #checks for hidden
     if (hidden){
-      furniture[["hidden"]] <- data_lst[["hidden"]]
+        #Users can append to hidden. This prevents the code more than 2 factors
+        #from existing in hidden when it is used. 
+        if (length(data_lst[["hidden"]]) > 2){
+            data_lst[["hidden"]] <- data_lst[["hidden"]][1:2]
+        }
+      
+        #transfers hidden to furniture
+        furniture[["hidden"]] <- data_lst[["hidden"]]
     }
     
     #returns list of count tables
