@@ -44,10 +44,10 @@ prep_mu_DESeq <- function(tbl_lst, object){
         #flags hidden as true
         hidden <- TRUE
 
-        #Users can append to hidden. This prevents the code more than 2 factors
+        #Users can append to hidden. This code prevents more than 2 factors
         #from existing in hidden when it is used. 
         if (length(data_lst[["hidden"]]) > 2){
-          data_lst[["hidden"]] <- data_lst[["hidden"]][1:2]
+          tbl_lst[["hidden"]] <- tbl_lst[["hidden"]][1:2]
         }
       
         #loops through extra fectors
