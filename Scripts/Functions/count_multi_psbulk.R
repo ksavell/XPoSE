@@ -74,7 +74,8 @@ count_multi_psbulk <- function(data_lst, object){
     #checks for hidden
     if (hidden){
         #prevents ratID use
-        tbl_lst[["hidden"]] <- tbl_lst[["hidden"]][tbl_lst[["hidden"]] != "ratID"]
+        data_lst[["hidden"]] <- data_lst[["hidden"]][data_lst[["hidden"]] != 
+                                                                         "ratID"]
         
         #Users can append to hidden. This prevents the code more than 2 factors
         #from existing in hidden when it is used.
