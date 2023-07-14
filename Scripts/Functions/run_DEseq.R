@@ -62,10 +62,11 @@ run_DEseq <- function(tbl_lst, meta_tbl, object){
                        rownames_to_column(var="gene") %>%
                        as_tibble()
 
-        #returns results
+        #appends to list of tibbles
         agg_res <- list.append(agg_res, clust_nam = results_tib)
         names(agg_res)[i] <- names(tbl_lst)[i]
     }
 
+    #returns results
     return(agg_res)
 }
