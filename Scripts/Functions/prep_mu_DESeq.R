@@ -53,22 +53,37 @@ prep_mu_DESeq <- function(tbl_lst, object){
           tbl_lst[["hidden"]] <- tbl_lst[["hidden"]][1:2]
         }
       
-        #loops through extra fectors
+        #loops through extra factors
         for (i in 1:length(tbl_lst[["hidden"]])){
             #Makes vector to store what will be in new column
-            new_col <- c()
+            new_col <- LETTERS[1:nrow(met_fram)]
             
-            #loops through list of rat names get an index
-            for (rat in rat_nams){
-                #uses the index of the ratID to get what's within factor
-                new_col <- append(new_col, 
-                                  glut@meta.data[[tbl_lst[["hidden"]][i]]][
-                                  match(rat, glut$ratID)][[1]])
+            #containers for ease of use
+            hidd_cols <- tbl_lst[["hidden"]][[i]]
+            rat_n <- rat_nams 
+            
+            #helps align the lists
+            while (length(hidd_cols) < length(rat_n)){
+               hidd_cols <- c(hidd_cols, hidd_cols)
+            }
+            
+            for (j in 1:length(hidd_cols)){
+                
+                rat_ind <- match(str_split_1(hidd_cols[j], ":")[1], rat_n)
+                
+                if(!is.na(rat_ind)){
+                    #Sets value at row to the other val of split
+                    new_col[rat_ind] <- str_split_1(hidd_cols[j], ":")[2]
+                
+                    #Erases name at row in case of dupes
+                    #rat_n[match(str_split_1(hidd_cols[j], ":")[1], rat_n)] <- ""
+                    rat_n[rat_ind] <- ""
+                }
             }
             
             #Adds vector as column and names it properly
             met_fram <- cbind(met_fram, factor = new_col)
-            colnames(met_fram)[1 + i] <- tbl_lst[["hidden"]][i]
+            colnames(met_fram)[1 + i] <- names(tbl_lst[["hidden"]])[i]
         }
       
         #Makes aggregate cols
@@ -80,21 +95,24 @@ prep_mu_DESeq <- function(tbl_lst, object){
             for (j in 1:nrow(met_fram)){
                 #makes factor-hidd pairs
                 new_col <- append(new_col, 
-                                  paste(met_fram[, factor][j], "_", 
-                                        met_fram[, tbl_lst[["hidden"]][i]][j], 
-                                        sep = ""))
+                                paste(met_fram[, factor][j], "_", 
+                                      met_fram[, names(tbl_lst[["hidden"]])[i]][j], 
+                                      sep = ""))
             }
             #Adds vector as column and names it properly
             met_fram <- cbind(met_fram, factor = new_col)
             colnames(met_fram)[1 + 
                                length(tbl_lst[["hidden"]]) + i] <- paste(factor,
-                                          "_", tbl_lst[["hidden"]][i], sep = "")
+                                          "_", names(tbl_lst[["hidden"]])[i], 
+                                          sep = "")
         }
       
         #for tri-factor sets
+        #for tri-factor sets
         if (length(tbl_lst[["hidden"]]) == 2){
-            
+            #for tracking the right column
             ind <- 1
+            
             #targets aggregate vectors
             for (agg in colnames(met_fram)[4:5]){
                 
@@ -131,9 +149,9 @@ prep_mu_DESeq <- function(tbl_lst, object){
     #Checks possible hidden columns
     if (hidden){
         for (i in 1:length(tbl_lst[["hidden"]])) {
-            cat(as.character(unique(met_fram[, 1 + i]) %in% 
+            cat(as.character(unique(met_fram[, 1 + i]) %in%
                              unique(object@meta.data[
-                             tbl_lst[["hidden"]][i]][, 1])), "\n")
+                             names(tbl_lst[["hidden"]][i])][, 1])), "\n")
         }
     }
     cat("\n")
