@@ -37,11 +37,12 @@ count_multi_psbulk <- function(data_lst, object){
         }else {
             #pseudobulks and subsets the cluster
             cnt_tbl <- to_pseudobulk(
-                        data_lst[[i]], 
-                        replicate_col = "ratID",
-                        cell_type_col = "seurat_clusters",
-                        label_col = factor
-            )[[levels(object$seurat_clusters)[i]]]
+                    data_lst[[i]], #The source of what we're generating a count
+                    replicate_col = "ratID",
+                    cell_type_col = "seurat_clusters",
+                    label_col = factor
+                    )[[levels(object$seurat_clusters)[match(names(data_lst)[i], 
+                       levels(object@active.ident))]]]
             
             #Adds table to list
             if (i != 1){
@@ -83,8 +84,27 @@ count_multi_psbulk <- function(data_lst, object){
             data_lst[["hidden"]] <- data_lst[["hidden"]][1:2]
         }
       
+        #list that will go in hidden
+        hidd_list <- list()
+        
+        #gets colnames to put in metadata
+        for (i in 1:length(data_lst[["hidden"]])){
+            #pseudobulks to get colnames
+            metas <- colnames(to_pseudobulk(
+                data_lst[[1]], #The source of what we're generating a count
+                replicate_col = "ratID",
+                cell_type_col = "seurat_clusters",
+                label_col = data_lst[["hidden"]][i]
+                )[[levels(object$seurat_clusters)[
+                match(names(data_lst)[1], levels(object@active.ident))]]])
+            
+            #appends and names 
+            hidd_list <- list.append(hidd_list, newCols = metas)
+            names(hidd_list)[i] <- data_lst[["hidden"]][i]
+        }
+        
         #transfers hidden to furniture
-        furniture[["hidden"]] <- data_lst[["hidden"]]
+        furniture[["hidden"]] <- hidd_list
     }
     
     #returns list of count tables
