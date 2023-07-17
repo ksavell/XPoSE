@@ -12,43 +12,35 @@
 #' #make list of chosen clusters within glut object
 #' clust_lst <- prep_psuedobulk(glut)
 prep_multi_psbulk <- function(object){
-    #Prompts for threshold
+    #adds space so function start is easier to see    
     cat("\n")
-    threshold = as.numeric(readline(
-    "What would you like the threshold for your object to be?: "))
+
+    #Will hold the threshold
+    threshold <- ""
     
-    #validates input
-    while (is.na(threshold)) {
-        cat("Invalid input. Please enter a number.")
-        threshold = as.numeric(readline(
-          "What would you like the threshold for your object to be?: "))
-    }
-    
-    #prompts for num of factors
-    fact_num = as.numeric(readline(
-    "How many factors would you like to use? (Max 3): "))
-    
-    #checks if user input is number
-    while (is.na(fact_num)) {
-        cat("Invalid input. Please enter a number.")
-        fact_num = as.numeric(readline(
-          "What would you like the threshold for your object to be?: "))
-    }
-    
-    #ensures fact_num is valid size
-    while (fact_num < 1 | fact_num > 3){
-        cat("Invalid num. Please put in a number between 1 and 3. \n")
-        
-        #reprompts user
-        fact_num = as.numeric(readline(
-          "How many factors would you like to use? (Max 3): "))
-        
-        #checks if number again
-        while (is.na(fact_num)) {
+    #Prompts for threshold and validates input
+    while (is.na(threshold) | threshold == "") {
+        if (is.na(threshold)){
             cat("Invalid input. Please enter a number.")
-            fact_num = as.numeric(readline(
-            "What would you like the threshold for your object to be?: "))
         }
+        threshold = as.numeric(
+          readline("What would you like the threshold for your object to be?: "))
+    }
+
+    #holds number of factors used
+    fact_num <- ""
+    
+    #prompts for num of factors and validates input
+    while (is.na(fact_num) | fact_num == "" | fact_num < 1 | fact_num > 3) {
+        #User didn't enter a number
+        if (is.na(fact_num)){
+            cat("Invalid input. Please enter a number.")
+        #User didn't put in a valid number
+        } else if ((fact_num < 1 | fact_num > 3) & fact_num != ""){
+            cat("Invalid num. Please put in a number between 1 and 3. \n")
+        }
+        fact_num = as.numeric(readline(
+                      "How many factors would you like to use? (Max 3): "))
     }
     
     #will hold factor(s)
