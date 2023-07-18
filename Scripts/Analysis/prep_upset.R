@@ -123,6 +123,7 @@ prep_upset_b <- function(res_lst, object){
     #Adds some necessary data to new tibble
     new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
     colnames(new_tbl) <- colnames(cls_frm)
+    rownames(new_tbl) <- new_tbl[, "gene"]
     #print(new_tbl)
     
     for (i in 1:nrow(new_tbl)) {
@@ -137,6 +138,7 @@ prep_upset_b <- function(res_lst, object){
     
     #returns to tibble and apppends to list
     new_tbl <- tibble(new_tbl)
+    print(new_tbl)
     
     return_lst <- list.append(return_lst, new_tbl)
   }
