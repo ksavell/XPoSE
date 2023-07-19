@@ -235,6 +235,34 @@ prep_upset_c <- function(res_lst, object){
 
 
 
+merge_results <- function(agg_lst, filter = TRUE){
+  ag <- agg_lst
+  for (i in 1:(length(ag) - 1)){
+    ag[[2]] <- merge(ag[[1]], ag[[2]], 
+                          by='gene', 
+                          all=TRUE, 
+                          no.dups = TRUE,
+                          suffixes=c(paste("_", names(ag)[1], sep = ""),
+                                     paste("_", names(ag)[2], sep = "")))
+    ag <- ag[-1]
+  }
+  
+  aggr <- ag[[1]]
+  
+  # ag$keep[ag$padj_a < 0.05 | ag$padj_0 < 0.05 | ag$padj_1 < 0.05 | ag$padj_2 < 0.05 | ag$padj_3 < 0.05 | ag$padj_ag < 0.05 | ag$padj_0g < 0.05 | ag$padj_1g < 0.05] <- 1 
+  # ag <- subset(ag, ag$keep == 1)
+  for (name in names(aggr)[str_detect(names(aggr), "padj")]){
+    aggr[, name][aggr[, name] < 0.05] <- 1
+  }
+  
+  
+  
+  
+  #return(ag[[1]])
+  return(aggr)
+}
+
+
 # timer <- proc.time()
 # for (gene in bbb){
 # match(gene, bbb)
