@@ -57,11 +57,11 @@ combined <- combined %>%
                              nfeatures = 2000) %>%
         ScaleData(verbose = FALSE) %>%
         RunPCA(ndims.print = 1:50, 
-               nfeatures.print = 50) # printed features that make up PC, can take
-                                        # this out
+               nfeatures.print = 50) # printed features that make up PC, 
+                                     # can take this out
 
 # 50 PCAs actually seems appropriate, 
-# I noticed some subtleties in gaba markers even in the 40s
+# I noticed gaba markers subtleties even in the 40s
 combined <- combined %>%
         FindNeighbors(dims = 1:50) %>%
         RunUMAP(reduction = "pca", 
@@ -72,34 +72,55 @@ combined <- FindClusters(combined,
                          resolution = 2)
 
 # Explore clusters --------------------------------------------------------
-# First check QC metrics to see if any cluster is defined by low QC
+# First check QC metrics to see if any cluster is defined by low QC measures
 VlnPlot(combined, features = c("nFeature_RNA","nCount_RNA"))
 
 # Plot excitatory, inhibitory, and glia contamination markers
-VlnPlot(combined, features = c("Slc17a7","Gad1","Snap25","Mbp","Gja"))
-
+VlnPlot(combined, features = c("Slc17a7","Gad1","Snap25","Mbp","Gja1", "Col5a3"))
 
 # Subset glut and gaba ----------------------------------------------------
 
 ## In progress ##
 glut <- subset(combined, idents = c(as.character(0:8), as.character(12:17), 
-                                    as.character(19:21), "24", as.character(28:29)))
+                                    as.character(19:21), "24", "29"))
+
+glut <- glut %>%
+        FindVariableFeatures(selection.method = "vst", 
+                             nfeatures = 2000) %>%
+        ScaleData(verbose = FALSE) %>%
+        RunPCA(ndims.print = 1:50,
+               nfeatures.print = 50)
+
+glut <- glut %>%
+        FindNeighbors(dims = 1:30) %>%
+        RunUMAP(reduction = "pca", 
+                dims = 1:30)
+
+glut <- FindClusters(glut, 
+                         resolution = 0.2)
+
+glut_ids <- c("IT_L5/6", "CT_L6", "IT_L2/3", "PT_L5", "NP_L5/6", "IT_L2/3", "CT_L6b")
+names(glut_ids) <- levels(glut)
+glut <- RenameIdents(glut, glut_ids)
+
+## gaba time
 
 gaba <- subset(combined, idents = c(as.character(9:11), "18", as.character(22:23), 
                                     "26", as.character(30:31)))
 
-glut <- glut %>%
+gaba <- gaba %>%
         FindVariableFeatures(selection.method = "vst", 
                              nfeatures = 2000) %>%
         ScaleData(verbose = FALSE) %>%
         RunPCA(ndims.print = 1:50, 
                nfeatures.print = 50)
 
-glut <- glut %>%
-        FindNeighbors(dims = 1:50) %>%
+gaba <- gaba %>%
+        FindNeighbors(dims = 1:30) %>%
         RunUMAP(reduction = "pca", 
-                dims = 1:50)
+                dims = 1:30)
 
+gaba <- FindClusters(gaba, 
+                     resolution = 0.1)
 
-glut <- FindClusters(glut, 
-                         resolution = 0.1)
+VlnPlot(gaba, features = c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b", "Meis2","Vip","Lamp5"))
