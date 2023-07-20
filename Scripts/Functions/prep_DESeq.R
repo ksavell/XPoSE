@@ -76,7 +76,6 @@ prep_DESeq <- function(tbl_lst, object){
                     new_col[rat_ind] <- str_split_1(hidd_cols[j], ":")[2]
                 
                     #Erases name at row in case of dupes
-                    #rat_n[match(str_split_1(hidd_cols[j], ":")[1], rat_n)] <- ""
                     rat_n[rat_ind] <- ""
                 }
             }
@@ -106,8 +105,7 @@ prep_DESeq <- function(tbl_lst, object){
                                           "_", names(tbl_lst[["hidden"]])[i], 
                                           sep = "")
         }
-      
-        #for tri-factor sets
+     
         #for tri-factor sets
         if (length(tbl_lst[["hidden"]]) == 2){
             #for tracking the right column
