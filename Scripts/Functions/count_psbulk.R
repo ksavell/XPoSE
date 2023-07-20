@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' #Make list of count tables for glut object
-#' my_tbls <- count_pseudobulk(clust_lst, glut)
+#' my_tbls <- count_psbulk(clust_lst, glut)
 count_psbulk <- function(data_lst, object, incl_all = FALSE){
     
     #Will hold all the tables
