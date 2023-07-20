@@ -11,7 +11,7 @@
 #' @examples
 #' #Make metadata for the glut object
 #' meta_data <- prep_DESeq(my_tbls, glut)
-prep_mu_DESeq <- function(tbl_lst, object){
+prep_DESeq <- function(tbl_lst, object){
     
     #splits names into list of the ratID's and groups
     temp <- sapply(names(tbl_lst[[1]]), strsplit, ":")
