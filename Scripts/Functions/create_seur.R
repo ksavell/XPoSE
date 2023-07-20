@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-#' create_seur(counts.C1, 1, tags.C1)
+#' create_seur(counts_c1, 1, tags_c1)
 create_seur <- function(count, cart_no, tag,
                         addSTreads = FALSE, streads = NULL, STrange = c(2:9)){
   
@@ -18,7 +18,7 @@ create_seur <- function(count, cart_no, tag,
   # Add Sample_tags as metadata to the Seurat object
   seur_obj[["Sample_tag"]] <- cbind(tag[1])
   # seur_obj$stag <- cbind(tag$Sample_tag)
-  seur_obj[["percent_mt"]] <- PercentageFeatureSet(seur_obj, pattern = "^mt.")
+  seur_obj[["percent_mt"]] <- PercentageFeatureSet(seur_obj, pattern = "^mt")
   if (addSTreads == TRUE) {
     reads_obj <- streads
     for (i in STrange) {
