@@ -10,8 +10,8 @@
 #'
 #' @examples
 #' #make list of chosen clusters within glut object
-#' clust_lst <- prep_psuedobulk(glut)
-prep_multi_psbulk <- function(object){
+#' clust_lst <- prep_psbulk(glut)
+prep_psbulk <- function(object){
     source("~/Documents/GitHub/XPoSE/Scripts/Functions/verify_factor.R")
     
     #adds space so function start is easier to see    
@@ -212,12 +212,11 @@ prep_multi_psbulk <- function(object){
                             select(cmprsn[[factor]][1], 
                                    cmprsn[[factor]][2], 
                                    cmprsn[[factor]][3])
+    #error message, this line hopefully will never trigger
     }else {
-        #These lines will probably never trigger but it's good to have
-        cat("Something goofy has occurred. You have managed to make a table",
-            "with either less than 2 or 4+ comparisons.\n",
-            "Not sure how you managed that. Please try again.\n", sep = "")
-        return()
+        stop("Something goofy has occurred. You have managed to make a table",
+            "with either less than 2 or 4+ comparisons.\n  ",
+            "Not sure how you managed that. Please try again.\n")
     }
     print(final)
     cat("\n")

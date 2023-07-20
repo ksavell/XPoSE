@@ -11,8 +11,8 @@
 #'
 #' @examples
 #' #Make list of count tables for glut object
-#' my_tbls <- count_pseudobulk(clust_lst, glut)
-count_multi_psbulk <- function(data_lst, object){
+#' my_tbls <- count_psbulk(clust_lst, glut)
+count_psbulk <- function(data_lst, object, incl_all = FALSE){
     
     #Will hold all the tables
     furniture <- list(matrix(1:length(data_lst[[1]]@assays[["RNA"]]@counts@Dimnames[[1]]),
@@ -58,19 +58,24 @@ count_multi_psbulk <- function(data_lst, object){
         }
     }
     
-    #Makes the element with all the data
-    allset <- FindClusters(object, resolution = 0)
-    Idents(allset) <- factor
-    allset <- subset(allset, idents = levels(data_lst[[1]]))
-    
-    #psuedobulks all and turns into a table to add to list
-    all_tbl <- to_pseudobulk(
-                allset, 
-                replicate_col = "ratID",
-                cell_type_col = "seurat_clusters",
-                label_col = factor
-    )[["0"]]  #<- The "0" was an inference that works
-    furniture <- list.append(furniture, "AllClust" = all_tbl)
+    if (incl_all){
+        #Makes the element with all the data
+        allset <- FindClusters(object, resolution = 0)
+        Idents(allset) <- factor
+        allset <- subset(allset, idents = levels(data_lst[[1]]))
+        
+        #psuedobulks all and turns into a table to add to list
+        all_tbl <- to_pseudobulk(
+            allset, #The source of what we're generating a count
+            replicate_col = "ratID",
+            cell_type_col = "seurat_clusters",
+            label_col = factor
+        )[["0"]]  #<- The "0" was an inference that works
+        furniture <- list.append(furniture, all = all_tbl)
+        
+        names(furniture)[match("all", names(furniture))] <- paste("all", 
+                                  toupper(deparse(substitute(object))), sep = "")
+    }
     
     #checks for hidden
     if (hidden){
