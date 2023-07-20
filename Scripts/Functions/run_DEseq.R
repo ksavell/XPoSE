@@ -42,6 +42,7 @@ run_DEseq <- function(tbl_lst, meta_tbl, object){
              cat("Please choose a factor or factors to do DESeq on. ",
                  "Options are below:\n", sep = "")
         }
+        
         #displays options and allows input
         sapply(colnames(meta_tbl), print, quote = FALSE)
         cat("Underscores denote a combination of factors, please include ",
