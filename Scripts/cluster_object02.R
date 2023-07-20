@@ -76,7 +76,7 @@ combined <- FindClusters(combined,
 VlnPlot(combined, features = c("nFeature_RNA","nCount_RNA"))
 
 # Plot excitatory, inhibitory, and glia contamination markers
-VlnPlot(combined, features = c("Slc17a7","Gad1","Snap25","Mbp","Gja1", "Col5a3"))
+VlnPlot(combined, features = c("Slc17a7","Gad1","Snap25","Mbp","Gja1", "Col5a3", "Chodl", "Meis2"))
 
 # Subset glut and gaba ----------------------------------------------------
 
@@ -106,7 +106,7 @@ glut <- RenameIdents(glut, glut_ids)
 ## gaba time
 
 gaba <- subset(combined, idents = c(as.character(9:11), "18", as.character(22:23), 
-                                    "26", as.character(30:31)))
+                                    "26", as.character(31:32)))
 
 gaba <- gaba %>%
         FindVariableFeatures(selection.method = "vst", 
@@ -116,11 +116,25 @@ gaba <- gaba %>%
                nfeatures.print = 50)
 
 gaba <- gaba %>%
-        FindNeighbors(dims = 1:30) %>%
+        FindNeighbors(dims = 1:50) %>%
         RunUMAP(reduction = "pca", 
-                dims = 1:30)
+                dims = 1:50)
 
 gaba <- FindClusters(gaba, 
-                     resolution = 0.1)
+                     resolution = 0.2)
 
-VlnPlot(gaba, features = c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b", "Meis2","Vip","Lamp5"))
+# doublet clusters 6 and 16,  exclude then recluster
+gaba <- subset(gaba, idents = c(as.character(0:5),
+                                as.character(7:15),
+                                as.character(17:18)))
+# recluster 0.2 resolution
+
+
+
+
+VlnPlot(gaba, features = c("Gad1","Kcnc2","Sst","Chodl","Ppp1r1b", "Meis2","Vip","Lamp5", "Ndnf","Cck"))
+
+gaba_ids <- c("Pvalb", "Sst", "Ppp1r1b", "Vip", "Meis2", "Lamp5", "Sst Chodl")
+names(gaba_ids) <- levels(gaba)
+gaba <- RenameIdents(gaba, gaba_ids)
+saveRDS(gaba, file = "gaba.RData")
