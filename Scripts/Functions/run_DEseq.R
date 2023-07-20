@@ -10,7 +10,7 @@
 #' @examples
 #' #Makes result tibbles for my_tbls list
 #' my_tibbs <- run_DEseq(my_tbls, meta_data, glut)
-run_DEseq_mu <- function(tbl_lst, meta_tbl, object){
+run_DEseq <- function(tbl_lst, meta_tbl, object){
     source("~/Documents/GitHub/XPoSE/Scripts/Functions/verify_factor.R")
     
     #our base list to hold tibbles, will be returned at function's end
