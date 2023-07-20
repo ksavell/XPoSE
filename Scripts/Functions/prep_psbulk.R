@@ -11,7 +11,7 @@
 #' @examples
 #' #make list of chosen clusters within glut object
 #' clust_lst <- prep_psuedobulk(glut)
-prep_multi_psbulk <- function(object){
+prep_psbulk <- function(object){
     source("~/Documents/GitHub/XPoSE/Scripts/Functions/verify_factor.R")
     
     #adds space so function start is easier to see    
