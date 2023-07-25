@@ -97,7 +97,9 @@ for (l in 1:length(seur_list)) {
 combined <- merge(seur_list[[1]],seur_list[[2]])
 
 # removed multiplet, undetermined, and ST calls not in experiment
-combined <- subset(combinednew, !(Sample_tag=="Multiplet" | 
+combined <- subset(combined, !(Sample_tag=="Multiplet" | 
                                  Sample_tag=="Undetermined" |
                                  Sample_tag=="SampleTag10_mm" |
                                  Sample_tag=="SampleTag12_mm"))
+
+save(combined, file = "combined07202023.RData")
