@@ -56,7 +56,7 @@ source("~/XPoSE/Scripts/Functions/subset_reclust.R")
 
 glut <- subset_reclust(combined, clust_tokeep = keep_glut, neigh_dim = 1:30, umap_dim = 1:30, res = 0.2)
 
-#this is what this should be doing
+# this is what this should be doing
 glut <- subset(combined, idents = c(as.character(0:8), as.character(12:17), 
                                     as.character(19:21), "24", "29"))
 
@@ -74,6 +74,8 @@ glut <- glut %>%
 
 glut <- FindClusters(glut, 
                          resolution = 0.2)
+
+# name the final clusters
 
 glut_ids <- c("IT_L5/6", "CT_L6", "IT_L2/3", "PT_L5", "NP_L5/6", "IT_L2/3", "CT_L6b")
 names(glut_ids) <- levels(glut)
