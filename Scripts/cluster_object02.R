@@ -32,7 +32,7 @@ combined <- remove_genes(combined)
 
 source("~/XPoSE/Scripts/Functions/cluster_first.R")
 
-cluster_first(combined)
+combined <- cluster_first(combined)
 
 # Explore clusters --------------------------------------------------------
 

@@ -40,5 +40,5 @@ clstr_vln <- function(seur_obj, qc = FALSE, all = FALSE,
                                                             "Ndnf","Cck"))
         }
         
-        return(plot_list)
+        print(plot_list)
 }

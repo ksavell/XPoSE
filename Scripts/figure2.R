@@ -7,16 +7,13 @@
 # Figure 2d, DEG table*
 # Figure 2e, DEG upset table*
 
-# * denotes that the final plot was made in Prism from output generated in R
+# * denotes that the final plot was made in Prism with output generated in R
 
 # Load packages -----------------------------------------------------------
 library(Seurat)
 library(ggplot2)
 
 # Load data ---------------------------------------------------------------
-
-# set working directory
-setwd("~/Documents/GitHub/XPoSE/Scripts/Output/")
 
 load("~/Input/glut.RData")
 load("~/Input/gaba.RData")
@@ -26,5 +23,28 @@ load("~/Input/gaba.RData")
 
 source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
-save_dimplot(glut, savename = "glutclusters") ##this isn't working yet
+save_dimplot(glut, file_n = "glutclusters.pdf")
 
+save_dimplot(gaba, file_n = "gabaclusters.pdf")
+
+
+# F2b cluster percentages by group ----------------------------------------
+
+# in progress
+
+
+# F2c DimPlots by group ---------------------------------------------------
+
+save_dimplot(glut, groupby = "group", file_n = "glutgroup.pdf")
+
+save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf")
+
+
+# F2d DEG table -----------------------------------------------------------
+
+# in progress, DJT! 
+
+
+# F2e Upset table ---------------------------------------------------------
+
+# in progress, DJT!
