@@ -30,7 +30,7 @@ library(tibble)
 #' @export
 #'
 #' @examples
-prep_upset_unsrtd <- function(res_lst, object){
+prep_upset_unsrtd2 <- function(res_lst, object){
     timer <- proc.time()
     #will be returned at function's end
     return_lst <- list()
@@ -52,13 +52,14 @@ prep_upset_unsrtd <- function(res_lst, object){
         #Adds some necessary data to new tibble
         new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
         colnames(new_tbl) <- colnames(cls_frm)
+        rownames(cls_frm) <- cls_frm[, "gene"]
         
-        for (i in 1:nrow(new_tbl)) {
-            if (new_tbl[i, 1] %in% cls_frm[, 1]){
+        for (i in which(res_lst[[cluster]]$gene %in% new_tbl[, 1])) {
+          #print(new_tbl[i, "gene"])
                 #replaces row with data in cluster
-                new_tbl[i, ] <- cls_frm[match(new_tbl[i, 1], cls_frm[, 1]), ]
-            }
+                new_tbl[i, ] <- cls_frm[new_tbl[i, "gene"], ]
         }
+        new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
         
         #returns to tibble and apppends to list
         new_tbl <- tibble(new_tbl)
@@ -78,6 +79,51 @@ prep_upset_unsrtd <- function(res_lst, object){
 # user  system elapsed 
 # 46.499  29.062  75.912 
 
+
+prep_upset_unsrtd <- function(res_lst, object){
+  timer <- proc.time()
+  #will be returned at function's end
+  return_lst <- list()
+  
+  ind <- 0
+  
+  for (cluster in names(res_lst)) {
+    ind <- ind + 1
+    print(paste("On Index", ind, "of list."))
+    
+    #allows us to take rows from the base tibble
+    cls_frm <- data.frame(res_lst[[cluster]])
+    
+    #makes what will be new tibble and fills genes
+    new_tbl <- data.frame(matrix(
+      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+      ncol = ncol(res_lst[[cluster]])))
+    
+    #Adds some necessary data to new tibble
+    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    colnames(new_tbl) <- colnames(cls_frm)
+    
+    for (i in 1:nrow(new_tbl)) {
+      if (new_tbl[i, 1] %in% cls_frm[, 1]){
+        #replaces row with data in cluster
+        new_tbl[i, ] <- cls_frm[match(new_tbl[i, 1], cls_frm[, 1]), ]
+      }
+    }
+    
+    #returns to tibble and apppends to list
+    new_tbl <- tibble(new_tbl)
+    
+    return_lst <- list.append(return_lst, new_tbl)
+  }
+  
+  #ensures names are same
+  names(return_lst) <- names(res_lst)
+  
+  print(proc.time() - timer)
+  
+  #returns new list
+  return(return_lst)
+}
 
 #' Binary Search
 #' 
