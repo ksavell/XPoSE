@@ -15,29 +15,27 @@ library(ggplot2)
 
 # Load data ---------------------------------------------------------------
 
-load("~/Input/glut.RData")
-load("~/Input/gaba.RData")
-
+load("~glut.RData")
+load("~gaba.RData")
 
 # F2a DimPlots ------------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
-save_dimplot(glut, file_n = "glutclusters.pdf")
+save_dimplot(glut, file_n = "glutclusters.pdf", glutcol = T)
 
-save_dimplot(gaba, file_n = "gabaclusters.pdf")
+save_dimplot(gaba, file_n = "gabaclusters.pdf", gabacol = T)
 
 
 # F2b cluster percentages by group ----------------------------------------
 
 # in progress
 
-
 # F2c DimPlots by group ---------------------------------------------------
 
-save_dimplot(glut, groupby = "group", file_n = "glutgroup.pdf")
+save_dimplot(glut, groupby = "group", file_n = "glutgroup.pdf", groupcol = T)
 
-save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf")
+save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf", groupcol = T)
 
 
 # F2d DEG table -----------------------------------------------------------
