@@ -7,19 +7,33 @@
 
 #' Make Upset
 #' 
-#' Desc
+#' Will return 4 tables to the user with inputted parameters so that an Upset plot
+#' can be easily made in Prism.
 #'
-#' @param seur_obj1 
-#' @param seur_obj2 
-#' @param factor 
-#' @param comp_vect 
-#' @param inc_all 
+#' @param seur_obj1 one of the Seurot objects to do analysis on. Order doesn't 
+#'                  matter
+#' @param seur_obj2 Same as above
+#' @param threshold minimum number of nuclei per comparison to include a cluster 
+#'                  in analysis
+#' @param factor An aspect of your data like population or sex that you will use 
+#'               to anaylze your data
+#' @param comp_vect Aspects within the factor you would like to compare. First 
+#'                  elem will become your Experimental Variable, the second will
+#'                  become your control
+#' @param p_sig Significance Value to filter by when deciding which rows to keep
+#'              when merging. Default is 0.05. 
+#' @param incl_all logical, determines whether you want to include an all 
+#'                 clusters variable in analysis. Default is FALSE.
+#' @param genes_sorted logical, marks if the faster search algorithm is usable.
+#'                     If marked as true and the gene list still isn't sorted, 
+#'                     it will act as if this was marked false. Default is FALSE.
 #'
 #' @return upset plot data
 #' @export
 #'
 #' @examples
-make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, incl_all = FALSE, genes_sorted = FALSE){
+make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, 
+                       p_sig = 0.05, incl_all = FALSE, genes_sorted = FALSE){
   #libraries
   library(dplyr)
   library(purrr)
@@ -30,6 +44,13 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, incl_
   library(stringr)
   library(tibble)
   library(DESeq2)
+  library(UpSetR)
+  library(ComplexHeatmap)
+  library(ComplexUpset)
+  library(data.table)
+  
+  #for process time checking
+  timer <- proc.time()
   
   #a series of error messages
   #code last
@@ -42,30 +63,57 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, incl_
   #list of merged objects to be merged into co-expression table
   merg_lst <- list()
   
+  ind <- 1
   for (obj in obj_list){
-    #prep pseudobulk
-    #prep_pseudobulk(obj, threshold, factor, comp_vect)
     
-    #print(obj)
-    #count pseudobulk tbl lst
-    
-    
-    #prep DESeq
-    
-    #run DEseq
-    execute_DEseq(run_pseudobulk(obj, threshold, factor, comp_vect, incl_all), 
+    #gets results tables
+    obj_rt <- execute_DEseq(run_pseudobulk(obj, threshold, factor, comp_vect, incl_all), 
                   obj, factor, comp_vect)
-    #prep merge
     
-    #merge
+    #checks if data sorted if genes_sorted is TRUE
+    if (genes_sorted & !(FALSE %in% 
+         (obj@assays[["RNA"]]@counts@Dimnames[[1]] ==
+         sort(obj@assays[["RNA"]]@counts@Dimnames[[1]], method = "quick")))){
+      #runs version w/ binary search and merges
+      obj_rt <- merge_results(prep_merge_fast(obj_rt, obj), TRUE, p_sig)
+      
+    #List unsorted or user did not specify
+    }else {
+      #run unsorted version and merges
+      obj_rt <- merge_results(prep_merge(obj_rt, obj), TRUE, p_sig)
+    }
     
-    #append to merg_lst
+    #return(obj_rt)
+    #append to merg_lst and name
+    merg_lst <- list.append(merg_lst, obj_rt)
+    names(merg_lst)[ind] <- paste("thing", ind, sep = "")
+    
+    ind <- ind + 1
   }
+  
+  #check if obj lengths same
+  
+  #merge the objs
+  
+  #make up and down data frames
+  
+  ##Paralelel vectors are your friend
+  
+  #special str detect for loop, needs to store names in another vector for later 
+  #use
+
+  
   
   #make the inter and distinct mats for all in merg
   
   #return lst that has 4 elems (disUp, disDown, interUp, interDown)
   
+  #tells user how long function took
+  elpd <- (proc.time() - timer)[[3]]
+  print(paste("Process took", round(elpd, digits = 3), "seconds"), 
+        quote = FALSE)
+  
+  return()
 }
 
 
@@ -74,7 +122,7 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, incl_
 #' General function that will take in a vector of user input and correct it using
 #' a vector of the wanted factor's names. 
 #'
-#' @param object SE
+#' @param object the Seurot object to do analysis on
 #' @param vect the vector being verified, should have at least 2 elems
 #' @param factor the factor to verify with. Within our object this will be 
 #'               'group' or 'sex'
@@ -184,13 +232,18 @@ verify_factor <- function(object, vect, factor){
 #' 
 #' gets clusters and creates count tables for them
 #'
-#' @param object 
-#' @param threshold 
-#' @param factor 
-#' @param comp_vect 
-#' @param incl_all 
+#' @param object the Seurot object to do analysis on
+#' @param threshold minimum number of nuclei per comparison to include a cluster 
+#'                  in analysis
+#' @param factor An aspect of your data like population or sex that you will use 
+#'               to anaylze your data
+#' @param comp_vect Aspects within the factor you would like to compare. First 
+#'                  elem will become your Experimental Variable, the second will
+#'                  become your control
+#' @param incl_all logical, determines whether you want to include an all 
+#'                 clusters variable in analysis
 #'
-#' @return
+#' @return count tables for each chosen cluster
 #' @export
 #'
 #' @examples
@@ -290,6 +343,20 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
 }
 
 
+#' Title
+#'
+#' @param tbl_lst a list of count tables generated from cluster data
+#' @param object the Seurot object to do analysis on
+#' @param factor the factor to verify with. Within our object this will be 
+#'               'group' or 'sex' 
+#' @param comp_vect Aspects within the factor you would like to compare. First 
+#'                  elem will become your Experimental Variable, the second will
+#'                  become your control
+#'
+#' @return a list of results tables generated from the count tables
+#' @export
+#'
+#' @examples
 execute_DEseq <- function(tbl_lst, object, factor, comp_vect){
   
   #make metadata, call it met_fram
@@ -350,13 +417,284 @@ execute_DEseq <- function(tbl_lst, object, factor, comp_vect){
       names(agg_res)[i] <- names(tbl_lst)[i]
   }
   #returns results
-  print(agg_res)
+  #print(agg_res)
   return(agg_res)
 }
 
 
+#' Prep Merge
+#' 
+#' Ensures all tibbles in result list align so they can be merged. Doesn't 
+#' requires sorted data so it is a bit slower.
+#'
+#' @param res_lst 
+#' @param object 
+#'
+#' @return the corrected result list
+#' @export
+#'
+#' @examples
+prep_merge <- function(res_lst, object){
+  timer <- proc.time()
+  #will be returned at function's end
+  return_lst <- list()
+  
+  ind <- 0
+  
+  for (cluster in names(res_lst)) {
+    ind <- ind + 1
+    print(paste("On Index", ind, "of list."))
+    
+    #allows us to take rows from the base tibble
+    cls_frm <- data.frame(res_lst[[cluster]])
+    
+    #makes what will be new tibble and fills genes
+    new_tbl <- data.frame(matrix(
+      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+      ncol = ncol(res_lst[[cluster]])))
+    
+    #Adds some necessary data to new tibble
+    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    colnames(new_tbl) <- colnames(cls_frm)
+    rownames(cls_frm) <- cls_frm[, "gene"]
+    
+    for (i in which(res_lst[[cluster]]$gene %in% new_tbl[, 1])) {
+      #print(new_tbl[i, "gene"])
+      #replaces row with data in cluster
+      new_tbl[i, ] <- cls_frm[new_tbl[i, "gene"], ]
+    }
+    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    
+    #returns to tibble and apppends to list
+    new_tbl <- tibble(new_tbl)
+    
+    return_lst <- list.append(return_lst, new_tbl)
+  }
+  
+  #ensures names are same
+  names(return_lst) <- names(res_lst)
+  
+  #tells user how long function took
+  elpd <- (proc.time() - timer)[[3]]
+  print(paste("Process took", round(elpd, digits = 3), "seconds"), 
+        quote = FALSE)
+  
+  #returns new list
+  return(return_lst)
+}
 
 
+#' Binary Search
+#' 
+#' Recursively finds target elem's index within the container using a binary 
+#' search algorithm
+#' If we release this in a package, I will need to verify it's an atomic vector
+#'
+#' @param cntnr an atomic vector containing the target
+#' @param target elem of cntnr you're trying to find index of
+#' @param left first index of wanted range (default is 1)
+#' @param right last index of wanted range (default is length(cntnr))
+#'
+#' @return the index of the target
+#' @export
+#'
+#' @examples
+#' #Find index of "O" in LETTERS
+#' bi_search(LETTERS, "O")
+#' #Find index of "O" in a specific range (27-53)
+#' bi_search(c(LETTERS, LETTERS, LETTERS), "O", 27, 53)
+bi_search <- function(cntnr, target, left = 1, right = length(cntnr)){
+  
+  if (right >= 2 & left <= right){
+    #finds middle
+    mid <- as.integer((right + left)/2)
+    
+    #target found
+    if (cntnr[mid] == target){
+      return(mid)
+      
+      #target greater
+    } else if (cntnr[mid] < target){
+      return(bi_search(cntnr, target, mid + 1, right))
+      
+      #target lesser
+    } else {
+      return(bi_search(cntnr, target, left, mid - 1))
+    }
+    
+    #object not found
+  }else {
+    return(NA)
+  }
+}
+
+
+#' Prep Merge (Fast)
+#' 
+#' Ensures all tibbles in result list align so they can be merged. Requires 
+#' sorted data as it uses a binary search algorithm.
+#'
+#' @param res_lst a list of result tibbles
+#' @param object Seurat object analysis was performed on
+#'
+#' @return the corrected result list
+#' @export
+#'
+#' @examples
+#' #Prepares tibbles in res object.
+#' res <- prep_merge(res, gs)
+prep_merge_fast <- function(res_lst, object){
+  timer <- proc.time()
+  #will be returned at function's end
+  return_lst <- list()
+  
+  ind <- 0
+  
+  #goes through entire results list
+  for (cluster in names(res_lst)) {
+    #Tells user where function is in correction process
+    ind <- ind + 1
+    print(paste("On Index ", ind, "/", length(res_lst), sep = ""), quote = FALSE)
+    
+    #allows us to take rows from the base tibble
+    cls_frm <- data.frame(res_lst[[cluster]])
+    
+    #new tibble that will added to list
+    new_tbl <- data.frame(matrix(
+      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+      ncol = ncol(res_lst[[cluster]])))
+    
+    #Adds necessary data to new tibble
+    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    colnames(new_tbl) <- colnames(cls_frm)
+    rownames(cls_frm) <- cls_frm[, "gene"]
+    
+    #fills shared rows w/ base data
+    for (i in 1:nrow(new_tbl)) {
+      if(!is.na(bi_search(cls_frm[, 1], new_tbl[i, 1]))){
+        #replaces row
+        new_tbl[i, ] <- cls_frm[bi_search(cls_frm[, 1], new_tbl[i, 1]), ]
+      }
+    }
+    
+    #returns to tibble and apppends to list
+    new_tbl <- tibble(new_tbl)
+    return_lst <- list.append(return_lst, new_tbl)
+  }
+  
+  #ensures names are same
+  names(return_lst) <- names(res_lst)
+  
+  #tells user how long function took
+  elpd <- (proc.time() - timer)[[3]]
+  print(paste("Process took", round(elpd, digits = 3), "seconds"), 
+        quote = FALSE)
+  
+  #returns new list
+  return(return_lst)
+}
+
+
+#' Merge Results
+#' 
+#' This merges result tables generated by DEseq. It can further filter the data
+#' based on a user's chosen significance number. 
+#'
+#' @param agg_lst a list of results tibbles generated by DEseq
+#' @param filter TRUE/FALSE that tells function whether you want to filter out
+#'               certain rows. Set to true by default
+#' @param thres a value to check for significance with. Default is 0.05
+#'
+#' @return a merged result table
+#' @export
+#'
+#' @examples
+merge_results <- function(agg_lst, filter = TRUE, thres = 0.05){
+  #modifies list 
+  ag <- agg_lst
+  
+  #checks length
+  if (length(agg_lst) > 1){
+    
+    #error marker
+    diff_cnts_flag <- FALSE
+    
+    #checks to see is all row counts are the same
+    for (clustA in agg_lst[1:(length(agg_lst) - 1)]) {
+      for (clustB in agg_lst[2:length(agg_lst)]){
+        if (nrow(clustA) != nrow(clustB)){
+          diff_cnts_flag <- TRUE
+        }
+      }
+    }
+    
+    #error thrown to stop potential errors
+    if (diff_cnts_flag){
+      stop("List '", deparse(substitute(agg_lst)), "' has tibbles with ",
+           "different row counts.\n  ", 
+           "Please use a function like 'prep_merge' to ensure rows are all same",
+           "number\n")
+    }
+    
+    
+    
+    #list performs a bit funky with odd numbered lists, this prevents small issues
+    #that can occur because of that
+    odd <- FALSE
+    if (length(ag) %% 2 == 1){
+      ag[["dupe"]] <- ag[[1]]
+      odd <- TRUE
+    }
+    
+    #loops through list and merges
+    for (i in 1:(length(ag) - 1)){
+      ag[[2]] <- merge(ag[[1]], ag[[2]], 
+                       by='gene', all=TRUE, 
+                       no.dups = TRUE,
+                       suffixes=c(paste("_", names(ag)[1], sep = ""),
+                                  paste("_", names(ag)[2], sep = "")))
+      ag <- ag[-1]
+    }
+    
+    #removes extra column created so merging isn't funky
+    if(odd){
+      ag[[1]] <- ag[[1]][!(str_detect(names(ag[[1]]), "dupe"))]
+    }
+    
+    aggr <- ag[[1]]
+  }
+  else {
+    aggr <- as.data.frame(agg_lst[[1]])
+  }
+  
+  #marks rows 
+  rownames(aggr) <- as.data.frame(ag[[1]])[, "gene"]
+  aggr <- aggr[, colnames(aggr) != "gene"] 
+  
+  #filters data if user wants it to be done
+  if (filter){
+    #creates new column
+    aggr$keep <- FALSE
+    
+    #marks significant rows as TRUE
+    for (name in names(aggr)[str_detect(names(aggr), "padj")]){
+      aggr$keep[aggr[, name] < thres] <- TRUE
+    }
+    
+    #removes unmarked rows
+    aggr <- aggr[aggr$keep, ]
+    
+    #small check
+    cat("There should be a TRUE under this line\n",
+        !(FALSE %in% aggr$keep), "\n", sep = "")
+    
+    #removes extra col
+    aggr <- aggr[, colnames(aggr) != "keep"] 
+  }
+  
+  #returns the big table as data frame
+  return(aggr)
+}
 
 
 #make_upset(glut, gaba, 100,  "group", c("positive", "negative"))
