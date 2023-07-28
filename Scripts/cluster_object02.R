@@ -56,9 +56,6 @@ glut <- subset_reclust(combined, clust_tokeep = keep_glut, neigh_dim = 1:30, uma
 glut_ids <- c("IT_L5/6", "IT_L2/3", "CT_L6", "PT_L5", "NP_L5/6", "CT_L6b")
 names(glut_ids) <- levels(glut)
 glut <- RenameIdents(glut, glut_ids)
-glut_hex <- c("IT L5/6" = "#64C7C8","IT L2/3"='#41B75F',"CT L6" = '#2C8CB9',"PT L5" = '#0A5B8C',
-               "NP L5/6" = '#3C9E64',"CT L6b" = '#6F499D')
-
 save(glut, file = "glut.RData")
 
 ## gaba time
