@@ -60,27 +60,56 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
   names(obj_list) <- c(deparse(substitute(seur_obj1)), 
                        deparse(substitute(seur_obj1)))
   
+  #In the case that the gene lists are not the same, this ensures the merge 
+  #doesn't cause any errors
+  gene_vect <- c()
+  gene_lngth_s <- TRUE
+  print("eeeee")
+  #checks for different lengths or different genes within
+  if ((length(seur_obj1@assays[["RNA"]]@counts@Dimnames[[1]]) != 
+       length(seur_obj2@assays[["RNA"]]@counts@Dimnames[[1]])) |
+      (FALSE %in% (seur_obj1@assays[["RNA"]]@counts@Dimnames[[1]] == 
+                  seur_obj2@assays[["RNA"]]@counts@Dimnames[[1]]))){
+    print("wa")
+    #gene vectors are not same length
+    gene_lngth_s <- FALSE
+    
+    #make the unique of c(obj1, obj2) and sorts 
+    gene_vect <- sort(unique(c(seur_obj1@assays[["RNA"]]@counts@Dimnames[[1]], 
+                               seur_obj2@assays[["RNA"]]@counts@Dimnames[[1]])), 
+                      method = "quick")
+    
+    #return(gene_vect)
+  }
+  
   #list of merged objects to be merged into co-expression table
   merg_lst <- list()
   
   ind <- 1
+  #pseudobulks, runs DESeq and merges tables
   for (obj in obj_list){
+    #differing lengths or genes within
+    if (gene_lngth_s){
+      gene_vect <- obj@assays[["RNA"]]@counts@Dimnames[[1]]
+    }
     
     #gets results tables
     obj_rt <- execute_DEseq(run_pseudobulk(obj, threshold, factor, comp_vect, incl_all), 
                   obj, factor, comp_vect)
     
     #checks if data sorted if genes_sorted is TRUE
-    if (genes_sorted & !(FALSE %in% 
-         (obj@assays[["RNA"]]@counts@Dimnames[[1]] ==
-         sort(obj@assays[["RNA"]]@counts@Dimnames[[1]], method = "quick")))){
+    if (genes_sorted & 
+        !(FALSE %in% (obj@assays[["RNA"]]@counts@Dimnames[[1]] == 
+                      sort(obj@assays[["RNA"]]@counts@Dimnames[[1]], 
+                           method = "quick")))){
       #runs version w/ binary search and merges
-      obj_rt <- merge_results(prep_merge_fast(obj_rt, obj), TRUE, p_sig)
+      #obj_rt <- merge_results(prep_merge_fast(obj_rt, obj, gene_vect), TRUE, p_sig)
+      obj_rt <- prep_merge_fast(obj_rt, obj, gene_vect)
       
     #List unsorted or user did not specify
     }else {
       #run unsorted version and merges
-      obj_rt <- merge_results(prep_merge(obj_rt, obj), TRUE, p_sig)
+      obj_rt <- prep_merge(obj_rt, obj, gene_vect)
     }
     
     #return(obj_rt)
@@ -89,10 +118,15 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
     names(merg_lst)[ind] <- paste("thing", ind, sep = "")
     
     ind <- ind + 1
+    #return(merg_lst)
   }
   
-  #check if obj lengths same
+  merg_lst <- append(merg_lst[[1]], merg_lst[[2]])
+  #return(merg_lst)
   
+  coexp <- merge_results(merg_lst, thres = p_sig)
+  #return(coexp)
+  #return(merg_lst)
   #merge the objs
   
   #make up and down data frames
@@ -101,8 +135,8 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
   
   #special str detect for loop, needs to store names in another vector for later 
   #use
-
   
+  print(names(coexp))
   
   #make the inter and distinct mats for all in merg
   
@@ -113,7 +147,7 @@ make_upset <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
   print(paste("Process took", round(elpd, digits = 3), "seconds"), 
         quote = FALSE)
   
-  return()
+  return(coexp)
 }
 
 
@@ -434,7 +468,7 @@ execute_DEseq <- function(tbl_lst, object, factor, comp_vect){
 #' @export
 #'
 #' @examples
-prep_merge <- function(res_lst, object){
+prep_merge <- function(res_lst, object, gene_vect = object@assays[["RNA"]]@counts@Dimnames[[1]]){
   timer <- proc.time()
   #will be returned at function's end
   return_lst <- list()
@@ -442,28 +476,41 @@ prep_merge <- function(res_lst, object){
   ind <- 0
   
   for (cluster in names(res_lst)) {
+    #Tells user where function is in correction process
     ind <- ind + 1
-    print(paste("On Index", ind, "of list."))
+    print(paste("On Index ", ind, "/", length(res_lst), sep = ""), quote = FALSE)
     
     #allows us to take rows from the base tibble
     cls_frm <- data.frame(res_lst[[cluster]])
     
     #makes what will be new tibble and fills genes
     new_tbl <- data.frame(matrix(
-      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+      nrow = length(gene_vect),
       ncol = ncol(res_lst[[cluster]])))
     
     #Adds some necessary data to new tibble
-    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    new_tbl[, 1] <- gene_vect
     colnames(new_tbl) <- colnames(cls_frm)
     rownames(cls_frm) <- cls_frm[, "gene"]
     
-    for (i in which(res_lst[[cluster]]$gene %in% new_tbl[, 1])) {
+    #print("Vgf" %in% gene_vect)
+    #print(match("Vgf",  new_tbl[, 1]))
+    #print(new_tbl[28708 , 1] == "Vgf")
+    #print(28708 %in% which(new_tbl[, 1] %in% res_lst[[cluster]]$gene))
+    #print(which(res_lst[[cluster]]$gene %in% new_tbl[, 1]))
+    #for (i in which(res_lst[[cluster]]$gene %in% new_tbl[, 1])) {
+    #for (i in 1:length(res_lst[[cluster]]$gene %in% object@assays[["RNA"]]@counts@Dimnames[[1]])) {
+    for (i in which(new_tbl[, 1] %in% res_lst[[cluster]]$gene)) {
+      # if (new_tbl[i , 1] == "Vgf"){
+      #   print(cls_frm[new_tbl[i, "gene"], ])
+      #   print(new_tbl[i, "gene"])
+      # }
       #print(new_tbl[i, "gene"])
       #replaces row with data in cluster
+      #new_tbl[i, ] <- cls_frm[new_tbl[i, "gene"], ]
       new_tbl[i, ] <- cls_frm[new_tbl[i, "gene"], ]
     }
-    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    new_tbl[, 1] <- gene_vect
     
     #returns to tibble and apppends to list
     new_tbl <- tibble(new_tbl)
@@ -543,7 +590,7 @@ bi_search <- function(cntnr, target, left = 1, right = length(cntnr)){
 #' @examples
 #' #Prepares tibbles in res object.
 #' res <- prep_merge(res, gs)
-prep_merge_fast <- function(res_lst, object){
+prep_merge_fast <- function(res_lst, object, gene_vect = object@assays[["RNA"]]@counts@Dimnames[[1]]){
   timer <- proc.time()
   #will be returned at function's end
   return_lst <- list()
@@ -561,11 +608,11 @@ prep_merge_fast <- function(res_lst, object){
     
     #new tibble that will added to list
     new_tbl <- data.frame(matrix(
-      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+      nrow = length(gene_vect),
       ncol = ncol(res_lst[[cluster]])))
     
     #Adds necessary data to new tibble
-    new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+    new_tbl[, 1] <- gene_vect
     colnames(new_tbl) <- colnames(cls_frm)
     rownames(cls_frm) <- cls_frm[, "gene"]
     
