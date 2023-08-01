@@ -16,7 +16,8 @@
 save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1, 
                          file_n = NULL, glutcol = FALSE,
                          gabacol = FALSE, groupcol = FALSE,
-                         sexcol = FALSE, feature = "nCount_RNA"){
+                         sexcol = FALSE, 
+                         feature = "nCount_RNA", vln_max = NULL){
       
         glut_hex <- c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
                        '#3C9E64','#6F499D')
@@ -31,64 +32,39 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
         sex_hex <- c("#2C5F2D","#97BC62FF")
         
         if (glutcol == TRUE) {
-                pdf(file = file_n,
-                    width = 2*splitl,
-                    height = 2)
-                print(VlnPlot(seur_obj, 
+                data <- VlnPlot(seur_obj, 
                               group.by = groupby, 
                               split.by = splitby, 
                               cols = glut_hex,
                               features = feature,
                               pt.size = 0, 
-                              ncol = 1,
-                              flip = T) + 
-                        coord_flip() + 
-                        theme(legend.position = "none") + 
-                        theme(axis.title = element_blank()) +
-                        ggtitle(NULL))
-                dev.off()
+                              y.max = vln_max) +
+                        theme(legend.position = "none",
+                              axis.title = element_blank()) +
+                        ggtitle(NULL)
         }
-        
-        if (gabacol == TRUE) {
-                pdf(file = file_n,
-                    width = 2*splitl,
-                    height = 2)
-                print(VlnPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = gaba_hex,
-                              features = feature) + 
-                        theme_void() + 
-                        theme(legend.position = "none") + 
-                        ggtitle(NULL))
-                dev.off()
-        }
-        if (groupcol == TRUE) {
-                pdf(file = file_n,
-                    width = 2*splitl,
-                    height = 2)
-                print(VlnPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = group_hex,
-                              features = feature) + 
-                        theme_void() + 
-                        theme(legend.position = "none") + 
-                        ggtitle(NULL))
-                dev.off()
-        }
-        if (sexcol == TRUE) {
+
+          # now save the pdf
           pdf(file = file_n,
               width = 2*splitl,
               height = 2)
-          print(VlnPlot(seur_obj, 
-                        group.by = groupby, 
-                        split.by = splitby, 
-                        cols = sex_hex,
-                        features = feature) + 
-                  theme_void() + 
-                  theme(legend.position = "none") + 
-                  ggtitle(NULL))
           dev.off()
-        }
+        
 }
+
+## This is Kareem's original code for this
+pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
+    width = 2,
+    height = 2)
+VlnPlot(gaba.subset2, 
+        features = c("nCount_RNA"), 
+        pt.size = 0, 
+        ncol = 1, 
+        flip = T,     
+        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
+        y.max = 15000)+ 
+  coord_flip() + 
+  theme(legend.position = "none") + 
+  theme(axis.title = element_blank()) +
+  ggtitle(NULL)
+dev.off()
