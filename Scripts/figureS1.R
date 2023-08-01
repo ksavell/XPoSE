@@ -1,9 +1,8 @@
 # Figure S1 plots
 
 # This script generates:
-# Figure S1a Excitatory UMAP split by cartridge, percent plot
-# Figure S1b Inhibitory UMAP split by cartridge, percent plot
-
+# Figure S1a Excitatory UMAP split by cartridge, percent plot*
+# Figure S1b Inhibitory UMAP split by cartridge, percent plot*
 
 # * denotes that the final plot was made in Prism with output generated in R
 
@@ -11,6 +10,8 @@
 
 load("~glut.RData")
 load("~gaba.RData")
+
+library(Seurat)
 
 # FS1b Exc. Cart QC -------------------------------------------------------
 
