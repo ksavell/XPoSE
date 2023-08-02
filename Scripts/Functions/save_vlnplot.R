@@ -51,6 +51,57 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
             ggtitle(NULL)
         }
         
+        if (gabacol == TRUE) {
+          data <- VlnPlot(seur_obj, 
+                          group.by = groupby, 
+                          split.by = splitby, 
+                          cols = gaba_hex,
+                          features = feature,
+                          pt.size = 0, 
+                          y.max = vln_max) +
+            coord_flip() + 
+            #theme_void() +
+            theme(legend.position = "none",
+                  axis.title = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank()) +
+            ggtitle(NULL)
+        }
+        
+        if (groupcol == TRUE) {
+          data <- VlnPlot(seur_obj, 
+                          group.by = groupby, 
+                          split.by = splitby, 
+                          cols = grp_hex,
+                          features = feature,
+                          pt.size = 0, 
+                          y.max = vln_max) +
+            coord_flip() + 
+            #theme_void() +
+            theme(legend.position = "none",
+                  axis.title = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank()) +
+            ggtitle(NULL)
+        }
+        
+        if (sexcol == TRUE) {
+          data <- VlnPlot(seur_obj, 
+                          group.by = groupby, 
+                          split.by = splitby, 
+                          cols = sex_hex,
+                          features = feature,
+                          pt.size = 0, 
+                          y.max = vln_max) +
+            coord_flip() + 
+            #theme_void() +
+            theme(legend.position = "none",
+                  axis.title = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank()) +
+            ggtitle(NULL)
+        }
+        
           # now save the pdf
           pdf(file = file_n,
               width = plotw,
