@@ -12,6 +12,17 @@
 # Load packages -----------------------------------------------------------
 library(Seurat)
 library(ggplot2)
+library(dplyr)
+library(purrr)
+library(Libra)
+library(rlist)
+library(stringr)
+library(tibble)
+library(DESeq2)
+library(UpSetR)
+library(ComplexHeatmap)
+library(ComplexUpset)
+library(data.table)
 
 # Load data ---------------------------------------------------------------
 
