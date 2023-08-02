@@ -1,10 +1,11 @@
-#' Prep Merge
+#' Prep Merge (Fast)
 #' 
 #' Ensures all tibbles in result list align so they can be merged. Requires 
 #' sorted data as it uses a binary search algorithm.
 #'
 #' @param res_lst a list of result tibbles
 #' @param object Seurat object analysis was performed on
+#' @param gene_vect names of genes to use as rows
 #'
 #' @return the corrected result list
 #' @export
@@ -12,17 +13,16 @@
 #' @examples
 #' #Prepares tibbles in res object.
 #' res <- prep_merge(res, gs)
-prep_merge <- function(res_lst, object){
+prep_merge_fast <- function(res_lst, object, gene_vect = object@assays[["RNA"]]@counts@Dimnames[[1]]){
 
     source("~/Documents/GitHub/XPoSE/Scripts/Functions/bi_search.R")
     #Tracks time function took to run
     timer <- proc.time()
-    
     #will be returned at function's end
     return_lst <- list()
     
     ind <- 0
-
+    
     #goes through entire results list
     for (cluster in names(res_lst)) {
         #Tells user where function is in correction process
@@ -33,12 +33,11 @@ prep_merge <- function(res_lst, object){
         cls_frm <- data.frame(res_lst[[cluster]])
         
         #new tibble that will added to list
-        new_tbl <- data.frame(matrix(
-                      nrow = length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
-                      ncol = ncol(res_lst[[cluster]])))
+        new_tbl <- data.frame(matrix(nrow = length(gene_vect),
+                                     ncol = ncol(res_lst[[cluster]])))
         
         #Adds necessary data to new tibble
-        new_tbl[, 1] <- object@assays[["RNA"]]@counts@Dimnames[[1]]
+        new_tbl[, 1] <- gene_vect
         colnames(new_tbl) <- colnames(cls_frm)
         rownames(cls_frm) <- cls_frm[, "gene"]
         
