@@ -1,4 +1,5 @@
 
+
 #' Calculate count tables for populations
 #'
 #' @param seur_obj seurat object
@@ -23,12 +24,22 @@ calc_counts <- function(seur_obj, fact1 = NULL, fact2 = NULL,
                 #                        seur_obj@meta.data[[fact2]])
         #}
        # else {
+        
+        if(is.null(fact3)){
                 data <- data.frame(table(seur_obj@meta.data[[fact1]],
-                              seur_obj@meta.data[[fact2]],
-                              seur_obj@meta.data[[fact3]]))
+                                         seur_obj@meta.data[[fact2]]))
+                colnames(data) <- c(fact1, fact2, "count")
+        }
+        else {
+                data <- data.frame(table(seur_obj@meta.data[[fact1]],
+                                         seur_obj@meta.data[[fact2]],
+                                         seur_obj@meta.data[[fact3]]))
                 colnames(data) <- c(fact1, fact2, fact3, "count")
+        }
+        
         #}
         
         write.csv(data, file = file_n)
+        return(data)
 }
 
