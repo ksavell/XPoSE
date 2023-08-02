@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-execute_DEseq <- function(tbl_lst, object, factor, comp_vect){
+execute_DESeq <- function(tbl_lst, object, factor, comp_vect){
   
   #splits names into list of the ratID's and groups
   temp <- sapply(names(tbl_lst[[1]]), strsplit, ":")
