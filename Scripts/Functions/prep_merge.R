@@ -12,6 +12,7 @@
 #'
 #' @examples
 prep_merge <- function(res_lst, object, gene_vect = object@assays[["RNA"]]@counts@Dimnames[[1]]){
+    #Tracks time taken to complete function
     timer <- proc.time()
     
     #will be returned at function's end
