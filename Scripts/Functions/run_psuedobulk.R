@@ -18,96 +18,92 @@
 #'
 #' @examples
 run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
-  #Makes base data table so we can import the data to the frame
-  data_tbl <- table(object$seurat_clusters, object[[factor]][, 1])
-  
-  #Makes data frame to store
-  clust_tab <- data.frame(matrix(ncol = length(unique(object[[factor]][, 1])), 
-                                 nrow = length(rownames(data_tbl))))
-  
-  #labels the frame's rows and columns
-  colnames(clust_tab) <- unique(object[[factor]][, 1])
-  rownames(clust_tab) <- unique(levels(object@active.ident))
-  
-  #populates data frame
-  for (i in 1:length(unique(object[[factor]][, 1]))){
-    clust_tab[, unique(object[[factor]][, 1])[i]] <- data_tbl[, i]
-  }
-  
-  #Prints table for user pleasure
-  cat("\nTable:\n")
-  final <- clust_tab[clust_tab[, comp_vect[1]] > threshold &
-                       clust_tab[, comp_vect[2]] > threshold, ] %>% 
-                       select(comp_vect[1], comp_vect[2])
-  
-  print(final)
-  cat("\n")
-  
-  incl_clust <- rownames(final)
-  
-  data_lst <- list()
-  #Makes cluster subsets derived from user input
-  for (i in 1:length(incl_clust)) {
+    #Makes base data table so we can import the data to the frame
+    data_tbl <- table(object$seurat_clusters, object[[factor]][, 1])
     
-    #Makes val of data_lst the subset
-    data_lst[[incl_clust[i]]] <- subset(object, idents = incl_clust[i])
+    #Makes data frame to store
+    clust_tab <- data.frame(matrix(ncol = length(unique(object[[factor]][, 1])), 
+                                   nrow = length(rownames(data_tbl))))
     
-    #Splitting stuff
-    Idents(data_lst[[incl_clust[i]]]) <- factor
-    data_lst[[incl_clust[i]]] <- subset(data_lst[[incl_clust[i]]], 
-                                   idents = comp_vect)
-  }
- 
-  #returns list
-  #return(data_lst)
-  #print(data_lst)
-  
-  furniture <- list(matrix(1:length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
-                           ncol = 1))
-  
-  #makes a count table for each cluster
-  for (i in 1:length(data_lst)){
-    #pseudobulks and subsets the cluster
-    cnt_tbl <- to_pseudobulk(
-      data_lst[[i]], #The source of what we're generating a count
-      replicate_col = "ratID",
-      cell_type_col = "seurat_clusters",
-      label_col = factor
-    )[[levels(object$seurat_clusters)[match(names(data_lst)[i], 
-                                            levels(object@active.ident))]]]
+    #labels the frame's rows and columns
+    colnames(clust_tab) <- unique(object[[factor]][, 1])
+    rownames(clust_tab) <- unique(levels(object@active.ident))
     
-    #Adds table to list
-    if (i != 1){
-      furniture <- list.append(furniture, clust_nam = cnt_tbl)
-      
-    }else {
-      #First col = special case as mat is unpopulated
-      furniture[[1]] <- cnt_tbl
+    #populates data frame
+    for (i in 1:length(unique(object[[factor]][, 1]))){
+      clust_tab[, unique(object[[factor]][, 1])[i]] <- data_tbl[, i]
     }
     
-    #Ensures table has correct name
-    names(furniture)[i] <- names(data_lst)[i]
-  }
- 
-  if (incl_all){
-    #Makes the element with all the data
-    allset <- FindClusters(object, resolution = 0)
-    Idents(allset) <- factor
-    allset <- subset(allset, idents = levels(data_lst[[1]]))
+    #Prints table for user pleasure
+    cat("\nTable:\n")
+    final <- clust_tab[clust_tab[, comp_vect[1]] > threshold &
+                         clust_tab[, comp_vect[2]] > threshold, ] %>% 
+                         select(comp_vect[1], comp_vect[2])
     
-    #psuedobulks all and turns into a table to add to list
-    all_tbl <- to_pseudobulk(
-      allset, #The source of what we're generating a count
-      replicate_col = "ratID",
-      cell_type_col = "seurat_clusters",
-      label_col = factor
-    )[["0"]]  #<- The "0" was an inference that works
-    furniture <- list.append(furniture, all = all_tbl)
+    print(final)
+    cat("\n")
     
-    names(furniture)[match("all", names(furniture))] <- paste("all", 
-                              toupper(deparse(substitute(object))), sep = "")
-  }
-  
-  #print(furniture)
-  return(furniture)
+    incl_clust <- rownames(final)
+    
+    data_lst <- list()
+    #Makes cluster subsets derived from user input
+    for (i in 1:length(incl_clust)) {
+        
+        #Makes val of data_lst the subset
+        data_lst[[incl_clust[i]]] <- subset(object, idents = incl_clust[i])
+        
+        #Splitting stuff
+        Idents(data_lst[[incl_clust[i]]]) <- factor
+        data_lst[[incl_clust[i]]] <- subset(data_lst[[incl_clust[i]]], 
+                                       idents = comp_vect)
+    }
+    
+    furniture <- list(matrix(1:length(object@assays[["RNA"]]@counts@Dimnames[[1]]),
+                             ncol = 1))
+    
+    #makes a count table for each cluster
+    for (i in 1:length(data_lst)){
+        #pseudobulks and subsets the cluster
+        cnt_tbl <- to_pseudobulk(
+          data_lst[[i]], #The source of what we're generating a count
+          replicate_col = "ratID",
+          cell_type_col = "seurat_clusters",
+          label_col = factor
+        )[[levels(object$seurat_clusters)[match(names(data_lst)[i], 
+                                                levels(object@active.ident))]]]
+        
+        #Adds table to list
+        if (i != 1){
+            furniture <- list.append(furniture, clust_nam = cnt_tbl)
+          
+        }else {
+            #First col = special case as mat is unpopulated
+            furniture[[1]] <- cnt_tbl
+        }
+        
+        #Ensures table has correct name
+        names(furniture)[i] <- names(data_lst)[i]
+    }
+   
+    if (incl_all){
+        #Makes the element with all the data
+        allset <- FindClusters(object, resolution = 0)
+        Idents(allset) <- factor
+        allset <- subset(allset, idents = levels(data_lst[[1]]))
+        
+        #psuedobulks all and turns into a table to add to list
+        all_tbl <- to_pseudobulk(
+            allset, #The source of what we're generating a count
+            replicate_col = "ratID",
+            cell_type_col = "seurat_clusters",
+            label_col = factor
+        )[["0"]]  #<- The "0" was an inference that works
+        furniture <- list.append(furniture, all = all_tbl)
+        
+        names(furniture)[match("all", names(furniture))] <- paste("all", 
+                                  toupper(deparse(substitute(object))), sep = "")
+    }
+    
+    #print(furniture)
+    return(furniture)
 }
