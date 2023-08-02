@@ -5,6 +5,8 @@
 
 # Load packages -----------------------------------------------------------
 library(Seurat)
+library(plotly)
+library(tidyverse)
 
 # Load data ---------------------------------------------------------------
 
@@ -15,26 +17,31 @@ combined <- merge(glut, gaba)
 # Make df of sample tag reads and relevant metadata
 
 make_stdf <- function(seur_obj) {
-IDs <- data.frame(seur_obj@assays[["RNA"]]@data@Dimnames[[2]],
-                  cart = seur_obj@meta.data[["orig.ident"]])
-IDs$cart <- seur_obj@meta.data[["orig.ident"]]
-IDs$rat <- seur_obj@meta.data[["ratID"]]
-IDs$st <- seur_obj@meta.data[["Sample_tag"]]
-IDs$st2 <- seur_obj@meta.data[["ST2_reads"]]
-IDs$st3 <- seur_obj@meta.data[["ST3_reads"]]
-IDs$st4 <- seur_obj@meta.data[["ST4_reads"]]
-IDs$st5 <- seur_obj@meta.data[["ST5_reads"]]
-IDs$st6 <- seur_obj@meta.data[["ST6_reads"]]
-IDs$st7 <- seur_obj@meta.data[["ST7_reads"]]
-IDs$st8 <- seur_obj@meta.data[["ST8_reads"]]
-IDs$st9 <- seur_obj@meta.data[["ST9_reads"]]
-rownames(IDs) <- IDs$seur_obj.assays...RNA....data.Dimnames..2..
+        IDs <- data.frame(seur_obj@assays[["RNA"]]@data@Dimnames[[2]],
+                          cart = seur_obj@meta.data[["orig.ident"]])
+        
+        IDs$cart <- seur_obj@meta.data[["orig.ident"]]
+        IDs$rat <- seur_obj@meta.data[["ratID"]]
+        IDs$st <- seur_obj@meta.data[["Sample_tag"]]
+        IDs$st2 <- seur_obj@meta.data[["ST2_reads"]]
+        IDs$st3 <- seur_obj@meta.data[["ST3_reads"]]
+        IDs$st4 <- seur_obj@meta.data[["ST4_reads"]]
+        IDs$st5 <- seur_obj@meta.data[["ST5_reads"]]
+        IDs$st6 <- seur_obj@meta.data[["ST6_reads"]]
+        IDs$st7 <- seur_obj@meta.data[["ST7_reads"]]
+        IDs$st8 <- seur_obj@meta.data[["ST8_reads"]]
+        IDs$st9 <- seur_obj@meta.data[["ST9_reads"]]
+        
+        rownames(IDs) <- IDs$seur_obj.assays...RNA....data.Dimnames..2..
+        IDs <- IDs %>% select(cart, rat, st)
+        
+        return(IDs)
 }
 
 df <- make_stdf(combined)
 
 #Check sample tag reads for nuclei in rest of figures
-IDslist <- split(IDs, IDs$st)
+IDslist <- split(df, df$st)
 
 mean <- sapply(IDslist, function(x) {
         # Find the names of the numeric columns
