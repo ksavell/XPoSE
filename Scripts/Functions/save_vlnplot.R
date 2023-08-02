@@ -8,6 +8,8 @@
 #' @param gabacol logical, T for gaba cluster colors
 #' @param groupcol logical, T for group cluster colors
 #' @param groupby factor to group the plot
+#' @param plotw plot width
+#' @param ploth plot height
 #'
 #' @return saves PDF with specific colors and split/group settings
 #' @export
@@ -17,7 +19,8 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                          file_n = NULL, glutcol = FALSE,
                          gabacol = FALSE, groupcol = FALSE,
                          sexcol = FALSE, 
-                         feature = "nCount_RNA", vln_max = NULL){
+                         feature = "nCount_RNA", vln_max = NULL,
+                         plotw = 2, ploth = 2){
       
         glut_hex <- c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
                        '#3C9E64','#6F499D')
@@ -50,8 +53,8 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
         
           # now save the pdf
           pdf(file = file_n,
-              width = 2*splitl,
-              height = 2)
+              width = plotw,
+              height = ploth)
           print(data)
           dev.off()
         
