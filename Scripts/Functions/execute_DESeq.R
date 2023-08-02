@@ -1,4 +1,6 @@
-#' Title
+#' Execute DESeq
+#'
+#'Converts a list of count tables into a list of result tibbles
 #'
 #' @param tbl_lst a list of count tables generated from cluster data
 #' @param object the Seurot object to do analysis on
