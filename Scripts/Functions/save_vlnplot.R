@@ -32,22 +32,27 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
         sex_hex <- c("#2C5F2D","#97BC62FF")
         
         if (glutcol == TRUE) {
-                data <- VlnPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = glut_hex,
-                              features = feature,
-                              pt.size = 0, 
-                              y.max = vln_max) +
-                        theme(legend.position = "none",
-                              axis.title = element_blank()) +
-                        ggtitle(NULL)
+          data <- VlnPlot(seur_obj, 
+                          group.by = groupby, 
+                          split.by = splitby, 
+                          cols = glut_hex,
+                          features = feature,
+                          pt.size = 0, 
+                          y.max = vln_max) +
+            coord_flip() + 
+            #theme_void() +
+            theme(legend.position = "none",
+                  axis.title = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank()) +
+            ggtitle(NULL)
         }
-
+        
           # now save the pdf
           pdf(file = file_n,
               width = 2*splitl,
               height = 2)
+          print(data)
           dev.off()
         
 }
