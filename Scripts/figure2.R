@@ -58,8 +58,10 @@ save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf", groupcol = T)
 
 # F2d DEG table -----------------------------------------------------------
 
-# in progress, DJT! 
+source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
+coexp <- make_coexp(glut, gaba, 100, factor = 'group', 
+                    comp_vect = c("positive","negative"))
 
 # F2e Upset table ---------------------------------------------------------
 
