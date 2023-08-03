@@ -1,12 +1,10 @@
-
-
 #' Calculate count tables for populations
 #'
 #' @param seur_obj seurat object
 #' @param fact1 first factor, rows
 #' @param fact2 second factor, columns
 #' @param fact3 third factor, final splitter
-#' @param clstr_split logical to split fact1 by cluster
+#' @param # clstr_split logical to split fact1 by cluster
 #' @param file_n file name, include .csv
 #'
 #' @return csv file of counts

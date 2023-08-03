@@ -60,9 +60,32 @@ save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf", groupcol = T)
 
 source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
-coexp <- make_coexp(glut, gaba, 100, factor = 'group', 
-                    comp_vect = c("positive","negative"))
+coexp_NH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
+                       threshold = 100, factor = 'group', 
+                       comp_vect = c("Non-active","Homecage"))
+
+write.csv(coexp_NH, file = "~/Output/coexp_NH.csv")
+
+coexp_AH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
+                       threshold = 100, factor = 'group', 
+                       comp_vect = c("Active","Homecage"))
+
+write.csv(coexp_AH, file = "~/Output/coexp_AH.csv")
+
+coexp_AN <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
+                    threshold = 100, factor = 'group', 
+                    comp_vect = c("Active","Non-active"))
+
+write.csv(coexp_AN, file = "~/Output/coexp_AN.csv")
 
 # F2e Upset table ---------------------------------------------------------
 
-# in progress, DJT!
+source("~/XPoSE/Scripts/Functions/prep_upset.R")
+source("~/XPoSE/Scripts/Functions/make_upset.R")
+
+upset_ANp <- prep_upset(coexp_AN, p_thres = 0.05)
+
+# this isn't working yet
+make_upset(upset_ANp, 
+           order_vect = c("IT_L2/3","IT_L5/6","CT_L6","PT_L5","Pvalb","Sst"))
+
