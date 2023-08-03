@@ -1,8 +1,5 @@
 # Cluster object
 
-# By: Katherine Savell
-
-
 # Info --------------------------------------------------------------------
 
 # This script creates
@@ -15,12 +12,11 @@
 # loads all required packages
 library(Seurat)
 library(tidyverse)
-#library(here)
 
 ## Data loading ------------------------------------------------------------
 # load in initial 'combined' object that is output of create_object01.R
 
-load("~/MakeObject/combined07202023.RData")
+load("~/MakeObject/combined08032023.RData")
 
 # First clustering ------------------------------------------------------
 
