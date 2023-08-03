@@ -110,20 +110,3 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
           dev.off()
         
 }
-
-## This is Kareem's original code for this
-pdf(file = "/Users/woodskad/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/S2_panels/Gaba/GabaVln_transcripts_AAcols.pdf",
-    width = 2,
-    height = 2)
-VlnPlot(gaba.subset2, 
-        features = c("nCount_RNA"), 
-        pt.size = 0, 
-        ncol = 1, 
-        flip = T,     
-        cols = c("#E66027", "#F8991D", "#C03C82", "#A669AB", "#C52126", "#DB808C", "#B0B235"),
-        y.max = 15000)+ 
-  coord_flip() + 
-  theme(legend.position = "none") + 
-  theme(axis.title = element_blank()) +
-  ggtitle(NULL)
-dev.off()

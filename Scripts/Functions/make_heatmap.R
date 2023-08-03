@@ -1,15 +1,15 @@
 #' Creates Heatmap and writes the CSV file of the top markers
 #'
-#' @param data Seurat object of interest
+#' @param seur_obj Seurat object of interest
 #' @param csvfilen file name for the CSV
 #' @param pdffilen file name for the Heatmap PDF
 #' @param groupcol a vector of colors to use for the heatmap according to cluster
 #'
 #' @return csv file + pdf of heatmap
 #' @export
-make_heatmap <- function(data, csvfilen = "topgenemarkers", pdffilen = "heatmap", groupcol){
+make_heatmap <- function(seur_obj, csvfilen = "topgenemarkers", pdffilen = "heatmap", groupcol){
     
-    data.markers <- FindAllMarkers(data, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+    data.markers <- FindAllMarkers(seur_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
     data.markers %>% 
         group_by(cluster) %>% 
         top_n(n = 10, wt = avg_log2FC) -> top10.data
@@ -25,7 +25,7 @@ make_heatmap <- function(data, csvfilen = "topgenemarkers", pdffilen = "heatmap"
     pdf(file = paste0(pdffilen,".pdf"),
         width = 3.5,
         height = 4.5)
-    data.heatmap <- DoHeatmap(object = data, 
+    data.heatmap <- DoHeatmap(object = seur_obj, 
                               features = top10.data$gene,
                               label = (FALSE),
                               group.colors = groupcol,

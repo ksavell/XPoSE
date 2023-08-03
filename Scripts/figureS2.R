@@ -1,9 +1,8 @@
 # Figure S2 plots
 
 # This script generates:
-# Figure S3a Excitatory Vlnplot
-# Figure S2b Inhibitory Vlnplot 
-# Figure S2
+# Figure S2a Excitatory UMAP split by cartridge, percent plot*
+# Figure S2b Inhibitory UMAP split by cartridge, percent plot*
 
 # * denotes that the final plot was made in Prism with output generated in R
 
@@ -12,17 +11,28 @@
 load("~glut.RData")
 load("~gaba.RData")
 
-# Load packages -----------------------------------------------------------
+library(Seurat)
+library(ggplot2)
 
-library(seurat)
+# FS1b Exc. Cart QC -------------------------------------------------------
 
-# FS2a Exc. Cart QC -------------------------------------------------------
+source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
-source("~/XPoSE/Scripts/Functions/save_vlnplot.R")
+save_dimplot(glut, file_n = "glutcart.pdf", glutcol = T, 
+             splitby = "orig.ident", splitl = 2)
 
-save_vlnplot(glut, file_n = "QCglut.pdf", glutcol = T, feature = "nCount_RNA")
-save_vlnplot(glut, file_n = "nFeature_glut.pdf", glutcol = T, feature = "nFeature_RNA")
+source("~/XPoSE/Scripts/Functions/calc_counts.R")
 
-save_vlnplot(gaba, file_n = "QCgaba.pdf", gabacol = T, feature = "nCount_RNA")
-save_vlnplot(gaba, file_n = "nFeature_gaba.pdf", gabacol = T, feature = "nFeature_RNA")
+calc_counts(seur_obj = glut, fact1 = 'ratID',
+                 fact2 = 'seurat_clusters',
+                 fact3 = 'orig.ident', file_n = "cart_glut.csv")
+
+# FS1b Inh. Cart QC -------------------------------------------------------
+
+save_dimplot(gaba, file_n = "gabacart.pdf", gabacol = T, 
+             splitby = "orig.ident", splitl = 2)
+
+calc_counts(seur_obj = gaba, fact1 = 'ratID',
+            fact2 = 'seurat_clusters',
+            fact3 = 'orig.ident', file_n = "cart_gaba.csv")
 
