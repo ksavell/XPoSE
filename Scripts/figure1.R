@@ -1,42 +1,25 @@
 # Figure 1 plots
 
 # This script generates:
-# Panel G: sample tag read averages
+# Panel G: sample tag read averages*
+
+# * denotes that the final plot was made in Prism with output generated in R
 
 # Load packages -----------------------------------------------------------
+
 library(Seurat)
 library(plotly)
 library(tidyverse)
 
 # Load data ---------------------------------------------------------------
 
-# Combine seurat objects
+setwd("~/Output")
 
-combined <- merge(glut, gaba)
+load("~/MakeObject/combined08032023all.RData")
 
 # Make df of sample tag reads and relevant metadata
 
-make_stdf <- function(seur_obj) {
-        IDs <- data.frame(seur_obj@assays[["RNA"]]@data@Dimnames[[2]],
-                          cart = seur_obj@meta.data[["orig.ident"]])
-        
-        IDs$cart <- seur_obj@meta.data[["orig.ident"]]
-        IDs$rat <- seur_obj@meta.data[["ratID"]]
-        IDs$st <- seur_obj@meta.data[["Sample_tag"]]
-        IDs$st2 <- seur_obj@meta.data[["SampleTag02_reads"]]
-        IDs$st3 <- seur_obj@meta.data[["SampleTag03_reads"]]
-        IDs$st4 <- seur_obj@meta.data[["SampleTag04_reads"]]
-        IDs$st5 <- seur_obj@meta.data[["SampleTag05_reads"]]
-        IDs$st6 <- seur_obj@meta.data[["SampleTag06_reads"]]
-        IDs$st7 <- seur_obj@meta.data[["SampleTag07_reads"]]
-        IDs$st8 <- seur_obj@meta.data[["SampleTag08_reads"]]
-        IDs$st9 <- seur_obj@meta.data[["SampleTag09_reads"]]
-        
-        rownames(IDs) <- IDs$seur_obj.assays...RNA....data.Dimnames..2..
-        #IDs <- IDs %>% select(cart, rat, st)
-        
-        return(IDs)
-}
+source("~/XPoSE/Scripts/Functions/make_stdf.R")
 
 df <- make_stdf(combined)
 
