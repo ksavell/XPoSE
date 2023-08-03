@@ -52,7 +52,7 @@ glut <- subset_reclust(combined, clust_tokeep = keep_glut, neigh_dim = 1:30, uma
 glut_ids <- c("IT_L5/6", "IT_L2/3", "CT_L6", "PT_L5", "NP_L5/6", "CT_L6b")
 names(glut_ids) <- levels(glut)
 glut <- RenameIdents(glut, glut_ids)
-glut$cluster_names <- paste(glut@active.ident)
+glut$cluster_name <- paste(glut@active.ident)
 save(glut, file = "glut.RData")
 
 ## gaba time
@@ -70,5 +70,5 @@ gaba <- subset_reclust(gaba, clust_tokeep = keep_gaba2, neigh_dim = 1:30, umap_d
 gaba_ids <- c("Pvalb", "Sst", "Ppp1r1b", "Vip", "Meis2", "Lamp5", "Sst Chodl")
 names(gaba_ids) <- levels(gaba)
 gaba <- RenameIdents(gaba, gaba_ids)
-gaba$cluster_names <- paste(gaba@active.ident)
+gaba$cluster_name <- paste(gaba@active.ident)
 save(gaba, file = "gaba.RData")

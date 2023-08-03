@@ -2,7 +2,7 @@
 
 # This script generates:
 # Figure 2a, excitatory/inhibitory DimPlots
-# Figure 2b, cluster percentages by group table*
+# Figure 2b, nuclei counts by group table*
 # Figure 2c, excitatory/inhibitory DimPlots grouped by group
 # Figure 2d, DEG table*
 # Figure 2e, DEG upset table*
@@ -12,6 +12,17 @@
 # Load packages -----------------------------------------------------------
 library(Seurat)
 library(ggplot2)
+library(dplyr)
+library(purrr)
+library(Libra)
+library(rlist)
+library(stringr)
+library(tibble)
+library(DESeq2)
+library(UpSetR)
+library(ComplexHeatmap)
+library(ComplexUpset)
+library(data.table)
 
 # Load data ---------------------------------------------------------------
 
@@ -26,10 +37,17 @@ save_dimplot(glut, file_n = "glutclusters.pdf", glutcol = T)
 
 save_dimplot(gaba, file_n = "gabaclusters.pdf", gabacol = T)
 
-
 # F2b cluster percentages by group ----------------------------------------
 
-# in progress
+source("~/XPoSE/Scripts/Functions/calc_counts.R")
+
+calc_counts(seur_obj = glut, fact1 = 'ratID',
+            fact2 = 'cluster_name',
+            fact3 = 'group', file_n = "group_glut.csv")
+
+calc_counts(seur_obj = gaba, fact1 = 'ratID',
+            fact2 = 'cluster_name',
+            fact3 = 'group', file_n = "group_gaba.csv")
 
 # F2c DimPlots by group ---------------------------------------------------
 

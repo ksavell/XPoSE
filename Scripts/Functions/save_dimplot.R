@@ -64,7 +64,7 @@ save_dimplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                 print(DimPlot(seur_obj, 
                               group.by = groupby, 
                               split.by = splitby, 
-                              cols = group_hex) + 
+                              cols = grp_hex) + 
                         theme_void() + 
                         theme(legend.position = "none") + 
                         ggtitle(NULL))
