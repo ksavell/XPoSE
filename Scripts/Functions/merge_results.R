@@ -13,6 +13,9 @@
 #'
 #' @examples
 merge_results <- function(agg_lst, filter = TRUE, thres = 0.05){
+    #modifies list 
+    ag <- agg_lst
+        
     #checks length
     if (length(agg_lst) > 1){
         
@@ -36,8 +39,7 @@ merge_results <- function(agg_lst, filter = TRUE, thres = 0.05){
                  "number\n")
         }
         
-        #modifies list 
-        ag <- agg_lst
+        
         
         #list performs a bit funky with odd numbered lists, this prevents small issues
         #that can occur because of that
@@ -67,9 +69,9 @@ merge_results <- function(agg_lst, filter = TRUE, thres = 0.05){
     else {
         aggr <- as.data.frame(agg_lst[[1]])
     }
-  
+    
     #marks rows 
-    rownames(aggr) <- ag[[1]][, "gene"]
+    rownames(aggr) <- as.data.frame(ag[[1]])[, "gene"]
     aggr <- aggr[, colnames(aggr) != "gene"] 
     
     #filters data if user wants it to be done
