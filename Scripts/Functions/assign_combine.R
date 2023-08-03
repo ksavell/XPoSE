@@ -21,22 +21,22 @@ assign_combine <- function(seur_list, cart_no, ratIDs, st_list, rat_sex){
   
   for (s in 2:length(st_list)) {
     if (s %in% c(2,4,6,8)) {
-      temp$group[temp$Sample_tag==st_list[s]] <- "homecage"
+      temp$group[temp$Sample_tag==st_list[s]] <- "Homecage"
     }
     else if(s %in% c(3,7)){
       if (cart_no == 1) {
-        temp$group[temp$Sample_tag==st_list[s]] <- "negative"
+        temp$group[temp$Sample_tag==st_list[s]] <- "Non-active"
       }
       else {
-        temp$group[temp$Sample_tag==st_list[s]] <- "positive"
+        temp$group[temp$Sample_tag==st_list[s]] <- "Active"
       }
     }
     else if (s %in% c(5,9)) {
       if (cart_no == 1) {
-        temp$group[temp$Sample_tag==st_list[s]] <- "positive"
+        temp$group[temp$Sample_tag==st_list[s]] <- "Active"
       }
       else {
-        temp$group[temp$Sample_tag==st_list[s]] <- "negative"
+        temp$group[temp$Sample_tag==st_list[s]] <- "Non-active"
       }
     }
     
