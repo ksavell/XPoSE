@@ -1,8 +1,9 @@
-# Figure S2 plots
+# Figure S3 plots
 
 # This script generates:
-# Figure S2a Excitatory UMAP split by cartridge, percent plot*
-# Figure S2b Inhibitory UMAP split by cartridge, percent plot*
+# Figure S3a Genes Vlnplot
+# Figure S3b Transcripts Vlnplot 
+# Figure S2c Heatmaps
 
 # * denotes that the final plot was made in Prism with output generated in R
 
@@ -11,28 +12,39 @@
 load("~glut.RData")
 load("~gaba.RData")
 
-library(Seurat)
+# Load packages -----------------------------------------------------------
+
+library(seurat)
 library(ggplot2)
 
-# FS1b Exc. Cart QC -------------------------------------------------------
+# FS3a Gene VlnPlots ------------------------------------------------------
 
-source("~/XPoSE/Scripts/Functions/save_dimplot.R")
+source("~/XPoSE/Scripts/Functions/save_vlnplot.R")
 
-save_dimplot(glut, file_n = "glutcart.pdf", glutcol = T, 
-             splitby = "orig.ident", splitl = 2)
+save_vlnplot(glut, file_n = "nFeature_glut.pdf", 
+             glutcol = T, feature = "nFeature_RNA")
+save_vlnplot(gaba, file_n = "nFeature_gaba.pdf", 
+             gabacol = T, feature = "nFeature_RNA")
 
-source("~/XPoSE/Scripts/Functions/calc_counts.R")
+# FS3b Transcript VlnPlots ------------------------------------------------
 
-calc_counts(seur_obj = glut, fact1 = 'ratID',
-                 fact2 = 'seurat_clusters',
-                 fact3 = 'orig.ident', file_n = "cart_glut.csv")
+save_vlnplot(glut, file_n = "nCount_glut.pdf", 
+             glutcol = T, feature = "nCount_RNA")
+save_vlnplot(gaba, file_n = "nCount_gaba.pdf", 
+             gabacol = T, feature = "nCount_RNA")
 
-# FS1b Inh. Cart QC -------------------------------------------------------
+# FS3c Heatmaps -----------------------------------------------------------
 
-save_dimplot(gaba, file_n = "gabacart.pdf", gabacol = T, 
-             splitby = "orig.ident", splitl = 2)
+source("~/XPoSE/Scripts/Functions/make_heatmap.R")
 
-calc_counts(seur_obj = gaba, fact1 = 'ratID',
-            fact2 = 'seurat_clusters',
-            fact3 = 'orig.ident', file_n = "cart_gaba.csv")
+make_heatmap(glut, groupcol = c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
+                                '#3C9E64','#6F499D'), 
+             pdffilen = "heatmap_glut",
+             csvfilen = "glutmarkers")
 
+make_heatmap(gaba, groupcol = c('#E66027','#F8991D',
+                                '#C03C82','#A669AB',
+                                '#C52126','#DB808C',
+                                '#B0B235'), 
+             pdffilen = "heatmap_glut",
+             csvfilen = "glutmarkers")
