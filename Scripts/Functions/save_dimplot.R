@@ -26,7 +26,7 @@ save_dimplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                         '#C52126','#DB808C',
                          '#B0B235')
         
-        grp_hex <- c('#e6e6e6','gray60','#ae1e5b')
+        grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
         
         sex_hex <- c("#2C5F2D","#97BC62FF")
         
