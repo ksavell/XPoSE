@@ -1,8 +1,8 @@
-# Figure S3 plots
+# Figure S2 plots
 
 # This script generates:
-# Figure S3a Genes Vlnplot
-# Figure S3b Transcripts Vlnplot 
+# Figure S2a Genes Vlnplot
+# Figure S2b Transcripts Vlnplot 
 # Figure S2c Heatmaps
 
 # * denotes that the final plot was made in Prism with output generated in R
@@ -17,7 +17,7 @@ load("~gaba.RData")
 library(seurat)
 library(ggplot2)
 
-# FS3a Gene VlnPlots ------------------------------------------------------
+# FS2a Gene VlnPlots ------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/save_vlnplot.R")
 
@@ -26,14 +26,14 @@ save_vlnplot(glut, file_n = "nFeature_glut.pdf",
 save_vlnplot(gaba, file_n = "nFeature_gaba.pdf", 
              gabacol = T, feature = "nFeature_RNA")
 
-# FS3b Transcript VlnPlots ------------------------------------------------
+# FS2b Transcript VlnPlots ------------------------------------------------
 
 save_vlnplot(glut, file_n = "nCount_glut.pdf", 
              glutcol = T, feature = "nCount_RNA")
 save_vlnplot(gaba, file_n = "nCount_gaba.pdf", 
              gabacol = T, feature = "nCount_RNA")
 
-# FS3c Heatmaps -----------------------------------------------------------
+# FS2c Heatmaps -----------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/make_heatmap.R")
 
@@ -46,5 +46,5 @@ make_heatmap(gaba, groupcol = c('#E66027','#F8991D',
                                 '#C03C82','#A669AB',
                                 '#C52126','#DB808C',
                                 '#B0B235'), 
-             pdffilen = "heatmap_glut",
-             csvfilen = "glutmarkers")
+             pdffilen = "heatmap_gaba",
+             csvfilen = "gabamarkers")

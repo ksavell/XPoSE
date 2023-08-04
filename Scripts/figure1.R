@@ -23,7 +23,7 @@ source("~/XPoSE/Scripts/Functions/make_stdf.R")
 
 df <- make_stdf(combined)
 
-#Check sample tag reads for nuclei in rest of figures
+# split by sample tag and find mean
 IDslist <- split(df, df$st)
 
 mean <- sapply(IDslist, function(x) {
@@ -41,4 +41,5 @@ mean <- sapply(IDslist, function(x) {
         return(means)
 })
 
+# save the table
 write.csv(mean, '~/Output/stReadsMean.csv')

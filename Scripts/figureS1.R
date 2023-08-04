@@ -1,8 +1,8 @@
-# Figure S2 plots
+# Figure S1 plots
 
 # This script generates:
-# Figure S2a Excitatory UMAP split by cartridge, percent plot*
-# Figure S2b Inhibitory UMAP split by cartridge, percent plot*
+# Figure S1a Excitatory UMAP split by cartridge, percent plot*
+# Figure S1b Inhibitory UMAP split by cartridge, percent plot*
 
 # * denotes that the final plot was made in Prism with output generated in R
 
@@ -14,7 +14,7 @@ load("~gaba.RData")
 library(Seurat)
 library(ggplot2)
 
-# FS1b Exc. Cart QC -------------------------------------------------------
+# FS1a Exc. Cart QC -------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
