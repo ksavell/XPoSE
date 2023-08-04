@@ -65,7 +65,7 @@ gaba <- subset_reclust(combined, clust_tokeep = keep_gaba, neigh_dim = 1:30, uma
 
 keep_gaba2 <- as.character(c(0:2,4:7))
 
-gaba <- subset_reclust(gaba, clust_tokeep = keep_gaba2, neigh_dim = 1:30, umap_dim = 1:30, res = 0.2)
+gaba <- subset_reclust(gaba, clust_tokeep = keep_gaba2, neigh_dim = 1:25, umap_dim = 1:25, res = 0.2)
 
 gaba_ids <- c("Pvalb", "Sst", "Ppp1r1b", "Vip", "Meis2", "Lamp5", "Sst Chodl")
 names(gaba_ids) <- levels(gaba)
