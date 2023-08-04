@@ -51,11 +51,16 @@ save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf", groupcol = T)
 
 # F2d DEG table -----------------------------------------------------------
 
+source("~/XPoSE/Scripts/Functions/make_coexp.R")
+
 coexp_PN <- make_coexp(glut, gaba, 100,  "group", c("positive", "negative"))
 coexp_NH <- make_coexp(glut, gaba, 100,  "group", c("negative", "homecage"))
 coexp_PN <- make_coexp(glut, gaba, 100,  "group", c("positive", "homecage"))
 
 
 # F2e Upset table ---------------------------------------------------------
+
+source("~/XPoSE/Scripts/Functions/prep_upset.R")
+source("~/XPoSE/Scripts/Functions/make_upset.R")
 
 make_upset(prep_upset(coexp_PN), c("CT L6", "IT L2/3", "IT L5/6", "PT L5", "Pvalb", "Sst"))
