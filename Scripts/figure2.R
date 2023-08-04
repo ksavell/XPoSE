@@ -83,9 +83,6 @@ write.csv(coexp_AN, file = "~/Output/coexp_AN.csv")
 source("~/XPoSE/Scripts/Functions/prep_upset.R")
 source("~/XPoSE/Scripts/Functions/make_upset.R")
 
-upset_ANp <- prep_upset(coexp_AN, p_thres = 0.05)
-
-# this isn't working yet
-make_upset(upset_ANp, 
-           order_vect = c("IT_L2/3","IT_L5/6","CT_L6","PT_L5","Pvalb","Sst"))
+make_upset(prep_upset(coexp_AN), 
+           order_vect = c("IT-L2/3","IT-L5/6","CT-L6","PT-L5","Pvalb","Sst"))
 
