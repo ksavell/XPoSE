@@ -17,70 +17,70 @@ save_dimplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                          file_n = NULL, glutcol = FALSE,
                          gabacol = FALSE, groupcol = FALSE,
                          sexcol = FALSE){
-      
-        glut_hex <- c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
-                       '#3C9E64','#6F499D')
-        
-        gaba_hex <- c('#E66027','#F8991D',
-                       '#C03C82','#A669AB',
-                        '#C52126','#DB808C',
-                         '#B0B235')
-        
-        grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
-        
-        sex_hex <- c("#2C5F2D","#97BC62FF")
-        
-        if (glutcol == TRUE) {
-                pdf(file = file_n,
-                    width = 10*splitl,
-                    height = 10)
-                print(DimPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = glut_hex) + 
-                        theme_void() + 
-                        theme(legend.position = "none") + 
-                        ggtitle(NULL))
-                dev.off()
-        }
-        
-        if (gabacol == TRUE) {
-                pdf(file = file_n,
-                    width = 10*splitl,
-                    height = 10)
-                print(DimPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = gaba_hex) + 
-                        theme_void() + 
-                        theme(legend.position = "none") + 
-                        ggtitle(NULL))
-                dev.off()
-        }
-        if (groupcol == TRUE) {
-                pdf(file = file_n,
-                    width = 10*splitl,
-                    height = 10)
-                print(DimPlot(seur_obj, 
-                              group.by = groupby, 
-                              split.by = splitby, 
-                              cols = grp_hex) + 
-                        theme_void() + 
-                        theme(legend.position = "none") + 
-                        ggtitle(NULL))
-                dev.off()
-        }
-        if (sexcol == TRUE) {
-          pdf(file = file_n,
-              width = 10*splitl,
-              height = 10)
-          print(DimPlot(seur_obj, 
-                        group.by = groupby, 
-                        split.by = splitby, 
-                        cols = sex_hex) + 
-                  theme_void() + 
-                  theme(legend.position = "none") + 
-                  ggtitle(NULL))
-          dev.off()
-        }
+  
+  glut_hex <- c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
+                '#3C9E64','#6F499D')
+  
+  gaba_hex <- c('#E66027','#F8991D',
+                '#C03C82','#A669AB',
+                '#C52126','#DB808C',
+                '#B0B235')
+  
+  grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
+  
+  sex_hex <- c("#2C5F2D","#97BC62FF")
+  
+  # Open the PDF file
+  pdf(file = file_n,
+      width = 10*splitl,
+      height = 10)
+  
+  plot_list <- list()  # Create a list to store modified plots
+  
+  if (glutcol == TRUE) {
+    plot <- DimPlot(seur_obj, 
+                    group.by = groupby, 
+                    split.by = splitby, 
+                    cols = glut_hex)
+    plot_list[["glut"]] <- plot
+  }
+  
+  if (gabacol == TRUE) {
+    plot <- DimPlot(seur_obj, 
+                    group.by = groupby, 
+                    split.by = splitby, 
+                    cols = gaba_hex)
+    plot_list[["gaba"]] <- plot
+  }
+  
+  if (groupcol == TRUE) {
+    plot <- DimPlot(seur_obj, 
+                    group.by = groupby, 
+                    split.by = splitby, 
+                    cols = grp_hex)
+    plot_list[["group"]] <- plot
+  }
+  
+  if (sexcol == TRUE) {
+    plot <- DimPlot(seur_obj, 
+                    group.by = groupby, 
+                    split.by = splitby, 
+                    cols = sex_hex)
+    plot_list[["sex"]] <- plot
+  }
+  
+  # Customize and print the modified plots
+  for (i in names(plot_list)) {
+    modified_plot <- plot_list[[i]] +
+      theme_void() + 
+      theme(legend.position = "none") + 
+      ggtitle(NULL)
+    print(modified_plot)
+  }
+  
+  # Close the PDF file
+  dev.off()
 }
+
+
+
