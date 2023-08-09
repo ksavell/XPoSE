@@ -18,13 +18,14 @@ save_dimplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                          gabacol = FALSE, groupcol = FALSE,
                          sexcol = FALSE){
   
-  glut_hex <- c("#64C7C8",'#41B75F','#2C8CB9','#0A5B8C',
-                '#3C9E64','#6F499D')
+  glut_hex <- c('#0A5B8C','#64C7C8',
+                '#2C8CB9','#41B75F',
+                '#6F499D','#3C9E64')
   
-  gaba_hex <- c('#E66027','#F8991D',
-                '#C03C82','#A669AB',
-                '#C52126','#DB808C',
-                '#B0B235')
+  gaba_hex <- c('#F8991D','#E66027',
+                '#C03C82','#C52126',
+                '#B0B235','#DB808C',
+                '#A669AB')
   
   grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
   
