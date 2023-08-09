@@ -79,8 +79,8 @@ ratIDs <- c(NA, "HC-3", "NC-4", "HC-2", "NC-2", "HC-4",
             "NC-3", "HC-1", "NC-1")
 
 # input sex of each rat
-rat_sex <- c(NA, "male", "male", "female", "female", "male",
-             "male", "female", "female")
+rat_sex <- c(NA, "Male", "Male", "Female", "Female", "Male",
+             "Male", "Female", "Female")
 
 # creates sample tag list
 st_list <- c(NA)
