@@ -16,28 +16,60 @@ IDslist <- split(glut_group, glut_group[["ratIDgroup"]])
 for (i in 1:length(IDslist)) {
         current_group <- IDslist[[i]]
         
-        # Calculate the total count within the current group
         total_count <- sum(current_group[["count"]])
-        
-        # Calculate the percentage for each cluster within the current group
         current_group[["percent"]] <- current_group[["count"]] / total_count
         
-        # Replace the modified group back in the list
         IDslist[[i]] <- current_group
 }
 
+# Combine the modified groups back into a single data frame
 combined_df <- do.call(rbind, IDslist)
+combined_df <- combined_df[complete.cases(combined_df[c("count", "percent")]), ]
 
-# Want to calculate z scores (homecage populations as the control)
+# Z score -----------------------------------------------------------------
 
-# this I was testing from the manual proportion table I made in excel :O
+# Choose the reference group for calculating z-scores
+reference_group <- "Homecage"  # Replace with the name of the reference group
 
+clust_list <- split(combined_df, combined_df[["cluster_name"]])
 
-anova_results <- aov(IT.L5.6 ~ group, data = glutT)
+anovas <- list()
+anova_sum <- list()
+posthoc_results <- list()
 
-summary(anova_results)
+for (j in 1:length(clust_list)) {
+        current_clust <- clust_list[[j]]
+        
+        # Subset the data for the reference group
+        reference_subset <- subset(current_clust, group == reference_group)
+        
+        reference_mean <- mean(reference_subset[["percent"]])
+        
+        reference_sd <- sd(reference_subset[["percent"]])
+        
+        current_clust[["z_score"]] <- (current_clust[["percent"]] - reference_mean) / reference_sd
+        
+        #Run ANOVA
+        current_aov <- clust_list[[j]]
+        current_aov <- aov(z_score ~ group, data = current_clust)
+        
+        current_sum <- clust_list[[j]]
+        current_sum <- summary(current_aov)
+        
+        current_posthoc <- clust_list[[j]]
+        current_posthoc <- TukeyHSD(current_aov)
+        
+        clust_list[[j]] <- current_clust
+        anovas[[j]] <- current_aov
+        anova_sum[[j]] <- current_sum 
+        #posthoc_results[[j]] <- current_posthoc
+}
 
-posthoc_results <- TukeyHSD(anova_results)
+name <- names(clust_list)
+names(anovas) <- name
+names(anova_sum) <- name
+#names(posthoc_results) <- name
 
-print(posthoc_results)
+combined_df2 <- do.call(rbind, clust_list)
+
 
