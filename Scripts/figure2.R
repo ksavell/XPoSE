@@ -12,6 +12,7 @@
 # Load packages -----------------------------------------------------------
 library(Seurat)
 library(ggplot2)
+library(patchwork)
 library(dplyr)
 library(purrr)
 library(Libra)
@@ -37,26 +38,39 @@ save_dimplot(glut, file_n = "glutclusters.pdf", glutcol = T)
 
 save_dimplot(gaba, file_n = "gabaclusters.pdf", gabacol = T)
 
-# F2b cluster percentages by group ----------------------------------------
+# F2b,d DimPlots and proportions by group ---------------------------------
 
-source("~/XPoSE/Scripts/Functions/calc_counts.R")
-
-calc_counts(seur_obj = glut, fact1 = 'ratID',
-            fact2 = 'cluster_name',
-            fact3 = 'group', file_n = "group_glut.csv")
-
-calc_counts(seur_obj = gaba, fact1 = 'ratID',
-            fact2 = 'cluster_name',
-            fact3 = 'group', file_n = "group_gaba.csv")
-
-# F2c DimPlots by group ---------------------------------------------------
+# left, group distribution 
 
 save_dimplot(glut, groupby = "group", file_n = "glutgroup.pdf", groupcol = T)
 
 save_dimplot(gaba, groupby = "group", file_n = "gabagroup.pdf", groupcol = T)
 
+# right, proportion calculation
 
-# F2d DEG table -----------------------------------------------------------
+# first calculate the proportions for each cluster on individual rat/group level
+# calculate the zscore for stats
+source("~/XPoSE/Scripts/Functions/calc_prop.R")
+source("~/XPoSE/Scripts/Functions/calc_zscore.R")
+
+glut_group <- calc_prop(seur_obj = glut, fact1 = 'ratID',
+                          fact2 = 'cluster_name',
+                          fact3 = 'group',
+                          file_n = "glut_group.csv")
+
+glut_group_zscored <- calc_zscore(glut_group, "Homecage", 
+                                  file_n = "glut_group_zscored.csv")
+
+gaba_group <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
+                          fact2 = 'cluster_name',
+                          fact3 = 'group',
+                          file_n = "gaba_group.csv")
+
+gaba_group_zscored <- calc_zscore(gaba_group, "Homecage", 
+                                  file_n = "gaba_group_zscored.csv")
+
+
+# F2e DEG table -----------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
@@ -78,7 +92,7 @@ coexp_AN <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba,
 
 write.csv(coexp_AN, file = "~/Output/coexp_AN.csv")
 
-# F2e Upset table ---------------------------------------------------------
+# F2f Upset table ---------------------------------------------------------
 
 source("~/XPoSE/Scripts/Functions/prep_upset.R")
 source("~/XPoSE/Scripts/Functions/make_upset.R")
