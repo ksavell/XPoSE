@@ -21,18 +21,20 @@ source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 save_dimplot(glut, file_n = "glutcart.pdf", glutcol = T, 
              splitby = "orig.ident", splitl = 2)
 
-source("~/XPoSE/Scripts/Functions/calc_counts.R")
+source("~/XPoSE/Scripts/Functions/calc_prop.R")
 
-calc_counts(seur_obj = glut, fact1 = 'ratID',
-                 fact2 = 'seurat_clusters',
-                 fact3 = 'orig.ident', file_n = "cart_glut.csv")
+glut_cart <- calc_prop(seur_obj = glut, fact1 = 'ratID',
+                        fact2 = 'cluster_name',
+                        fact3 = 'orig.ident',
+                        file_n = "glut_cart.csv")
 
 # FS1b Inh. Cart QC -------------------------------------------------------
 
 save_dimplot(gaba, file_n = "gabacart.pdf", gabacol = T, 
              splitby = "orig.ident", splitl = 2)
 
-calc_counts(seur_obj = gaba, fact1 = 'ratID',
-            fact2 = 'seurat_clusters',
-            fact3 = 'orig.ident', file_n = "cart_gaba.csv")
+gaba_cart <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
+                       fact2 = 'cluster_name',
+                       fact3 = 'orig.ident',
+                       file_n = "gaba_cart.csv")
 

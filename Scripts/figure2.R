@@ -58,7 +58,8 @@ glut_group <- calc_prop(seur_obj = glut, fact1 = 'ratID',
                           fact3 = 'group',
                           file_n = "glut_group.csv")
 
-glut_group_zscored <- calc_zscore(glut_group, "Homecage", 
+glut_group_zscored <- calc_zscore(glut_group, reference_group = "Homecage",
+                                  val_col = "percent",
                                   file_n = "glut_group_zscored.csv")
 
 gaba_group <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
@@ -66,7 +67,8 @@ gaba_group <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
                           fact3 = 'group',
                           file_n = "gaba_group.csv")
 
-gaba_group_zscored <- calc_zscore(gaba_group, "Homecage", 
+gaba_group_zscored <- calc_zscore(gaba_group, reference_group = "Homecage", 
+                                  val_col = "percent",
                                   file_n = "gaba_group_zscored.csv")
 
 

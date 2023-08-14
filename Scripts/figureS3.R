@@ -20,20 +20,22 @@ library(ggplot2)
 
 source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
-save_dimplot(glut, file_n = "glutsec.pdf", glutcol = T, 
+save_dimplot(glut, file_n = "glutsex.pdf", glutcol = T, 
              splitby = "sex", splitl = 2)
 
-source("~/XPoSE/Scripts/Functions/calc_counts.R")
+source("~/XPoSE/Scripts/Functions/calc_prop.R")
 
-calc_counts(seur_obj = glut, fact1 = 'ratID',
-            fact2 = 'seurat_clusters',
-            fact3 = 'sex', file_n = "sex_glut.csv")
+glut_sex <- calc_prop(seur_obj = glut, fact1 = 'ratID',
+                      fact2 = 'cluster_name',
+                      fact3 = 'sex',
+                      file_n = "glut_sex.csv")
 
 # FS1b Inh. by sex --------------------------------------------------------
 
 save_dimplot(gaba, file_n = "gabasex.pdf", gabacol = T, 
              splitby = "sex", splitl = 2)
 
-calc_counts(seur_obj = gaba, fact1 = 'ratID',
-            fact2 = 'seurat_clusters',
-            fact3 = 'sex', file_n = "sex_gaba.csv")
+gaba_sex <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
+                       fact2 = 'cluster_name',
+                       fact3 = 'sex',
+                       file_n = "gaba_sex.csv")
