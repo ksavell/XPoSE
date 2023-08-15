@@ -22,91 +22,80 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                          feature = "nCount_RNA", vln_max = NULL,
                          plotw = 2, ploth = 2){
       
-        glut_hex <- c('#0A5B8C',"#64C7C8",'#2C8CB9',
-                      '#41B75F','#6F499D','#3C9E64')
-        
-        gaba_hex <- c('#F8991D','#E66027',
-                      '#C03C82','#C52126',
-                      '#B0B235','#DB808C',
-                      '#A669AB')
+  glut_hex <- c('#0A5B8C','#64C7C8',
+                '#2C8CB9','#41B75F',
+                '#6F499D','#3C9E64')
+  
+  gaba_hex <- c('#F8991D','#E66027',
+                '#C03C82','#C52126',
+                '#B0B235','#DB808C',
+                '#A669AB')
         
         grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
         
         sex_hex <- c("#2C5F2D","#97BC62FF")
         
+        plot_list <- list()  # Create a list to store modified plots
+        
         if (glutcol == TRUE) {
-          data <- VlnPlot(seur_obj, 
+          plot <- VlnPlot(seur_obj, 
                           group.by = groupby, 
                           split.by = splitby, 
                           cols = glut_hex,
                           features = feature,
                           pt.size = 0, 
-                          y.max = vln_max) +
-            coord_flip() + 
-            #theme_void() +
-            theme(legend.position = "none",
-                  axis.title = element_blank(),
-                  axis.text.x = element_blank(),
-                  axis.text.y = element_blank()) +
-            ggtitle(NULL)
+                          y.max = vln_max) 
+          plot_list[["glut"]] <- plot
         }
         
         if (gabacol == TRUE) {
-          data <- VlnPlot(seur_obj, 
+          plot <- VlnPlot(seur_obj, 
                           group.by = groupby, 
                           split.by = splitby, 
                           cols = gaba_hex,
                           features = feature,
                           pt.size = 0, 
-                          y.max = vln_max) +
-            coord_flip() + 
-            #theme_void() +
-            theme(legend.position = "none",
-                  axis.title = element_blank(),
-                  axis.text.x = element_blank(),
-                  axis.text.y = element_blank()) +
-            ggtitle(NULL)
+                          y.max = vln_max) 
+          plot_list[["gaba"]] <- plot
         }
         
         if (groupcol == TRUE) {
-          data <- VlnPlot(seur_obj, 
+          plot <- VlnPlot(seur_obj, 
                           group.by = groupby, 
                           split.by = splitby, 
                           cols = grp_hex,
                           features = feature,
                           pt.size = 0, 
-                          y.max = vln_max) +
-            coord_flip() + 
-            #theme_void() +
-            theme(legend.position = "none",
-                  axis.title = element_blank(),
-                  axis.text.x = element_blank(),
-                  axis.text.y = element_blank()) +
-            ggtitle(NULL)
+                          y.max = vln_max) 
+          plot_list[["group"]] <- plot
         }
         
         if (sexcol == TRUE) {
-          data <- VlnPlot(seur_obj, 
+          plot <- VlnPlot(seur_obj, 
                           group.by = groupby, 
                           split.by = splitby, 
                           cols = sex_hex,
                           features = feature,
                           pt.size = 0, 
-                          y.max = vln_max) +
+                          y.max = vln_max) 
+        }
+          
+        for (i in names(plot_list)) {
+          modified_plot <- plot_list[[i]] +
             coord_flip() + 
-            #theme_void() +
+            ggtitle(NULL) +
             theme(legend.position = "none",
                   axis.title = element_blank(),
                   axis.text.x = element_blank(),
-                  axis.text.y = element_blank()) +
-            ggtitle(NULL)
+                  axis.text.y = element_blank())
+            
         }
         
           # now save the pdf
           pdf(file = file_n,
               width = plotw,
               height = ploth)
-          print(data)
+          print(modified_plot)
           dev.off()
         
 }

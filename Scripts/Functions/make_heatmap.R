@@ -31,9 +31,9 @@ make_heatmap <- function(seur_obj, csvfilen = "topgenemarkers", pdffilen = "heat
                               group.colors = groupcol,
                               raster = TRUE) +
         theme(axis.title = element_blank(),
-              axis.text.y = element_text(face = "italic", size = 5),
-              legend.position = "none")
-    
+              axis.text.y = element_text(face = "italic", size = 5)
+              #legend.position = "none")
+        )
     print(data.heatmap)
     dev.off()
 }
