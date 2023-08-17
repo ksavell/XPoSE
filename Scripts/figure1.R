@@ -1,7 +1,7 @@
 # Figure 1 plots
 
 # This script generates:
-# Panel G: sample tag read averages*
+# Panel 1H, sample tag read averages*
 
 # * denotes that the final plot was made in Prism with output generated in R
 
@@ -16,6 +16,9 @@ library(tidyverse)
 setwd("~/Output")
 
 load("~/MakeObject/combined08032023all.RData")
+
+
+# Figure 1H, sample tag reads ---------------------------------------------
 
 # Make df of sample tag reads and relevant metadata
 

@@ -51,7 +51,7 @@ glut <- subset_reclust(combined, clust_tokeep = keep_glut, neigh_dim = 1:30,
 clstr_vln(glut, glut = T)
 
 # name the final clusters and save
-glut_ids <- c("IT_L5/6", "IT_L2/3", "CT_L6", "PT_L5", "NP_L5/6", "CT_L6b")
+glut_ids <- c("ITL56", "ITL23", "CTL6", "PTL5", "NPL56", "CTL6b")
 names(glut_ids) <- levels(glut)
 glut <- RenameIdents(glut, glut_ids)
 glut$cluster_name <- paste(glut@active.ident)
@@ -77,7 +77,7 @@ gaba <- subset_reclust(gaba, clust_tokeep = keep_gaba2, neigh_dim = 1:25,
 clstr_vln(gaba, gaba = T)
 
 # name final clusters and save
-gaba_ids <- c("Pvalb", "Sst", "Ppp1r1b", "Vip", "Meis2", "Lamp5", "Sst Chodl")
+gaba_ids <- c("Pvalb", "Sst", "Ppp1r1b", "Vip", "Meis2", "Lamp5", "SstChodl")
 names(gaba_ids) <- levels(gaba)
 gaba <- RenameIdents(gaba, gaba_ids)
 gaba$cluster_name <- paste(gaba@active.ident)
