@@ -11,6 +11,13 @@
 #'
 #' @examples
 cluster_first <- function(seur_obj, pca_dim = 1:50, neigh_dim = 1:50, umap_dim = 1:50, res = 2) {
+       
+        mitogenes <- c("ATP6","COX1","COX2","CYTB","ND1","ND2","ND4","ND5","ND6")
+        seur_obj$percMito <- PercentageFeatureSet(seur_obj,
+                                                  features = mitogenes)
+        seur_obj <- subset(seur_obj, subset = percMito < 10)
+        seur_obj$percMito <- NULL
+        
         seur_obj <- seur_obj %>%
                 NormalizeData() %>%
                 FindVariableFeatures(selection.method = "vst", 
