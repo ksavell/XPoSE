@@ -89,3 +89,50 @@ source("~/XPoSE/Scripts/Functions/make_upset.R")
 make_upset(prep_upset(coexp_AN), 
            order_vect = c("ITL23","ITL56","CTL6","PTL5","Pvalb","Sst"))
 
+
+# F2g examples ------------------------------------------------------------
+
+source("~/XPoSE/Scripts/Functions/find_top10.R")
+load("~/XPoSE/coexp_AN.RData")
+
+load("~/XPoSE/dds0.RData")
+find_top10(dds0, coexp_AN, "ITL56")
+
+load("~/XPoSE/dds1.RData")
+find_top10(dds1, coexp_AN, "ITL23")
+
+load("~/XPoSE/dds2.RData")
+find_top10(dds2, coexp_AN, "CTL6")
+
+load("~/XPoSE/dds3.RData")
+find_top10(dds3, coexp_AN, "PTL5")
+
+load("~/XPoSE/dds0g.RData")
+find_top10(dds0g, coexp_AN, "Pvalb")
+
+source("~/XPoSE/Scripts/Functions/find_DEcounts.R")
+
+highlights <- c("Vgf", 
+                "Scg2", 
+                "Lingo1",
+                "Homer1",
+                "Arc",
+                "Nptx2",
+                "Reln",
+                "Fosb", 
+                "Bdnf",
+                "Synpr",
+                "Lingo2",
+                "Actb",
+                "Dnmt3a",
+                "Gadd45b",
+                "Npas4")
+
+find_DEcounts(dds0, coexp_AN, "ITL56", highlights)
+find_DEcounts(dds1, coexp_AN, "ITL23", highlights)
+find_DEcounts(dds2, coexp_AN, "CTL6", highlights)
+find_DEcounts(dds3, coexp_AN, "PTL5", highlights)
+find_DEcounts(dds0g, coexp_AN, "Pvalb", highlights)
+load("~/XPoSE/dds1g.RData")
+find_DEcounts(dds1g, coexp_AN, "Sst", highlights)
+
