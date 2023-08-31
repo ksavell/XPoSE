@@ -87,5 +87,5 @@ source("~/XPoSE/Scripts/Functions/prep_upset.R")
 source("~/XPoSE/Scripts/Functions/make_upset.R")
 
 make_upset(prep_upset(coexp_AN), 
-           order_vect = c("IT-L2/3","IT-L5/6","CT-L6","PT-L5","Pvalb","Sst"))
+           order_vect = c("ITL23","ITL56","CTL6","PTL5","Pvalb","Sst"))
 
