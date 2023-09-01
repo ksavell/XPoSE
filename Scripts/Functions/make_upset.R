@@ -40,8 +40,8 @@ make_upset <- function(matrc_lst, order_vect, export = TRUE, dest = getwd()){
         #exports to file
         if (export){
             pdf(file = paste(dest, "/", names(matrc_lst)[i], ".pdf", sep = ""),
-                width = 4,
-                height = 4)
+                width = 10,
+                height = 10)
             UpSet(t(matrc_lst[[i]]), set_order = order_vect)
             print(new_upS)
             dev.off()
