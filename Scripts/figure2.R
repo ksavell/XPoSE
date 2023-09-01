@@ -64,20 +64,23 @@ gaba_group <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
 
 source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
+# Non-active vs Homecage (between subject)
 coexp_NH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
                        threshold = 80, factor = 'group', 
                        comp_vect = c("Non-active","Homecage"))
 
 write.csv(coexp_NH, file = "~/Output/coexp_NH.csv")
 
+# Active vs Homecage (between subject)
 coexp_AH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
-                       threshold = 100, factor = 'group', 
+                       threshold = 75, factor = 'group', 
                        comp_vect = c("Active","Homecage"))
 
 write.csv(coexp_AH, file = "~/Output/coexp_AH.csv")
 
+# Active vs. Non-active (within subject)
 coexp_AN <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
-                    threshold = 100, factor = 'group', 
+                    threshold = 75, factor = 'group', 
                     comp_vect = c("Active","Non-active"))
 
 write.csv(coexp_AN, file = "~/Output/coexp_AN.csv")
@@ -88,46 +91,15 @@ source("~/XPoSE/Scripts/Functions/prep_upset.R")
 source("~/XPoSE/Scripts/Functions/make_upset.R")
 
 make_upset(prep_upset(coexp_AN), 
-           order_vect = c("ITL23","ITL56","CTL6","PTL5","Pvalb","Sst"))
-
+           order_vect = c("PTL5","ITL23","ITL56","CTL6","Pvalb","Sst"))
 
 # F2g examples ------------------------------------------------------------
 
-source("~/XPoSE/Scripts/Functions/find_top10.R")
-load("~/XPoSE/coexp_AN.RData")
-
-load("~/XPoSE/dds0.RData")
-find_top10(dds0, coexp_AN, "ITL56")
-
-load("~/XPoSE/dds1.RData")
-find_top10(dds1, coexp_AN, "ITL23")
-
-load("~/XPoSE/dds2.RData")
-find_top10(dds2, coexp_AN, "CTL6")
-
-load("~/XPoSE/dds3.RData")
-find_top10(dds3, coexp_AN, "PTL5")
-
-load("~/XPoSE/dds0g.RData")
-find_top10(dds0g, coexp_AN, "Pvalb")
-
 source("~/XPoSE/Scripts/Functions/find_DEcounts.R")
 
-highlights <- c("Vgf", 
-                "Scg2", 
-                "Lingo1",
-                "Homer1",
-                "Arc",
-                "Nptx2",
-                "Reln",
-                "Fosb", 
-                "Bdnf",
-                "Synpr",
-                "Lingo2",
-                "Actb",
-                "Dnmt3a",
-                "Gadd45b",
-                "Npas4")
+highlights <- c("Vgf", "Scg2", "Lingo1", "Homer1", "Arc", "Nptx2", "Reln",
+                "Fosb", "Bdnf", "Synpr", "Lingo2", "Actb", "Dnmt3a",
+                "Gadd45b", "Npas4")
 
 find_DEcounts(dds0, coexp_AN, "ITL56", highlights)
 find_DEcounts(dds1, coexp_AN, "ITL23", highlights)

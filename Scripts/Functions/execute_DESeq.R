@@ -52,12 +52,15 @@ execute_DESeq <- function(tbl_lst, object, factor, comp_vect){
       #Filters out insignificant parts
       cluster <- cluster[ rowSums(counts(cluster)) > 5, ]
       cluster <- DESeq(cluster)
+      objectname <- 
+      assign(paste0(names(tbl_lst)[i],"_dds_", i), cluster, envir = .GlobalEnv)
       
       #Makes results obj
       results <- results(cluster,
                          contrast = contrast_vect,
                          alpha = 0.05,
-                         pAdjustMethod = "fdr")
+                         cooksCutoff = FALSE,
+                         independentFiltering = FALSE)
       
       #Turns results into a Tibble
       results_tib <- results %>%

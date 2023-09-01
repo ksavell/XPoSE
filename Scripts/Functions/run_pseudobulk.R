@@ -30,8 +30,8 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
     rownames(clust_tab) <- rownames(data_tbl)
     
     #populates data frame
-    for (i in 1:length(unique(object[[factor]][, 1]))){
-      clust_tab[, unique(object[[factor]][, 1])[i]] <- data_tbl[, i]
+    for (i in 1:length(colnames(clust_tab))){
+      clust_tab[, colnames(clust_tab)[i]] <- data_tbl[, i]
     }
     
     #Prints table for user pleasure
@@ -51,12 +51,9 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
     for (i in 1:length(incl_clust)) {
         
         #Makes val of data_lst the subset
-        print(subset(object, idents = rownames(final)[i]))  
-        print(data_lst[[rownames(final)[i]]])
         data_lst[[rownames(final)[i]]] <- subset(object, idents = rownames(final)[i])
         
         #Splitting stuff
-        print("tree")
         Idents(data_lst[[incl_clust[i]]]) <- factor
         data_lst[[incl_clust[i]]] <- subset(data_lst[[incl_clust[i]]], 
                                        idents = comp_vect)
@@ -71,11 +68,10 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
         cnt_tbl <- to_pseudobulk(
           data_lst[[i]], #The source of what we're generating a count
           replicate_col = "ratID",
-          cell_type_col = "seurat_clusters",
+          cell_type_col = "cluster_name",
           label_col = factor
-        )[[levels(object$seurat_clusters)[match(names(data_lst)[i], 
-                                                levels(object$cluster_name))]]]
-        
+        )[[unique(object$cluster_name)[match(names(data_lst)[i], 
+                                                unique(object$cluster_name))]]]
         #Adds table to list
         if (i != 1){
             furniture <- list.append(furniture, clust_nam = cnt_tbl)
