@@ -16,7 +16,7 @@ make_coexp <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
     #list of objects for abstraction purposes
     obj_list <- list(obj1 = seur_obj1, obj2 = seur_obj2)
     names(obj_list) <- c(deparse(substitute(seur_obj1)),
-                         deparse(substitute(seur_obj1)))
+                         deparse(substitute(seur_obj2)))
     
     #In the case that the gene lists are not the same, this ensures the merge
     #doesn't cause any errors

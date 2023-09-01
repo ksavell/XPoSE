@@ -53,7 +53,7 @@ execute_DESeq <- function(tbl_lst, object, factor, comp_vect){
       cluster <- cluster[ rowSums(counts(cluster)) > 5, ]
       cluster <- DESeq(cluster)
       objectname <- 
-      assign(paste0(names(tbl_lst)[i],"_dds_", i), cluster, envir = .GlobalEnv)
+      assign(paste0(names(tbl_lst)[i],"_dds"), cluster, envir = .GlobalEnv)
       
       #Makes results obj
       results <- results(cluster,
