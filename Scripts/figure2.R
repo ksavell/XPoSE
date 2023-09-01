@@ -27,8 +27,9 @@ library(data.table)
 
 # Load data ---------------------------------------------------------------
 
-load("~glut.RData")
-load("~gaba.RData")
+load("glut.RData")
+load("gaba.RData")
+setwd("~/XPoSE/Output")
 
 # F2a DimPlots ------------------------------------------------------------
 
@@ -64,7 +65,7 @@ gaba_group <- calc_prop(seur_obj = gaba, fact1 = 'ratID',
 source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
 coexp_NH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
-                       threshold = 100, factor = 'group', 
+                       threshold = 80, factor = 'group', 
                        comp_vect = c("Non-active","Homecage"))
 
 write.csv(coexp_NH, file = "~/Output/coexp_NH.csv")

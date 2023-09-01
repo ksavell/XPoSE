@@ -19,15 +19,15 @@
 #' @examples
 run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
     #Makes base data table so we can import the data to the frame
-    data_tbl <- table(object$seurat_clusters, object[[factor]][, 1])
+    data_tbl <- table(object$cluster_name, object[[factor]][, 1])
     
     #Makes data frame to store
     clust_tab <- data.frame(matrix(ncol = length(unique(object[[factor]][, 1])), 
                                    nrow = length(rownames(data_tbl))))
     
     #labels the frame's rows and columns
-    colnames(clust_tab) <- unique(object[[factor]][, 1])
-    rownames(clust_tab) <- unique(levels(object@active.ident))
+    colnames(clust_tab) <- colnames(data_tbl)
+    rownames(clust_tab) <- rownames(data_tbl)
     
     #populates data frame
     for (i in 1:length(unique(object[[factor]][, 1]))){
@@ -46,13 +46,17 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
     incl_clust <- rownames(final)
     
     data_lst <- list()
+    Idents(object) <- "cluster_name"
     #Makes cluster subsets derived from user input
     for (i in 1:length(incl_clust)) {
         
         #Makes val of data_lst the subset
-        data_lst[[incl_clust[i]]] <- subset(object, idents = incl_clust[i])
+        print(subset(object, idents = rownames(final)[i]))  
+        print(data_lst[[rownames(final)[i]]])
+        data_lst[[rownames(final)[i]]] <- subset(object, idents = rownames(final)[i])
         
         #Splitting stuff
+        print("tree")
         Idents(data_lst[[incl_clust[i]]]) <- factor
         data_lst[[incl_clust[i]]] <- subset(data_lst[[incl_clust[i]]], 
                                        idents = comp_vect)
@@ -70,7 +74,7 @@ run_pseudobulk <- function(object, threshold, factor, comp_vect, incl_all){
           cell_type_col = "seurat_clusters",
           label_col = factor
         )[[levels(object$seurat_clusters)[match(names(data_lst)[i], 
-                                                levels(object@active.ident))]]]
+                                                levels(object$cluster_name))]]]
         
         #Adds table to list
         if (i != 1){
