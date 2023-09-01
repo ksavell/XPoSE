@@ -66,7 +66,7 @@ source("~/XPoSE/Scripts/Functions/make_coexp.R")
 
 # Non-active vs Homecage (between subject)
 coexp_NH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
-                       threshold = 80, factor = 'group', 
+                       threshold = 75, factor = 'group', 
                        comp_vect = c("Non-active","Homecage"))
 
 write.csv(coexp_NH, file = "~/Output/coexp_NH.csv")
@@ -101,11 +101,10 @@ highlights <- c("Vgf", "Scg2", "Lingo1", "Homer1", "Arc", "Nptx2", "Reln",
                 "Fosb", "Bdnf", "Synpr", "Lingo2", "Actb", "Dnmt3a",
                 "Gadd45b", "Npas4")
 
-find_DEcounts(dds0, coexp_AN, "ITL56", highlights)
-find_DEcounts(dds1, coexp_AN, "ITL23", highlights)
-find_DEcounts(dds2, coexp_AN, "CTL6", highlights)
-find_DEcounts(dds3, coexp_AN, "PTL5", highlights)
-find_DEcounts(dds0g, coexp_AN, "Pvalb", highlights)
-load("~/XPoSE/dds1g.RData")
-find_DEcounts(dds1g, coexp_AN, "Sst", highlights)
+find_DEcounts(ITL56_dds, coexp_AN, "ITL56", highlights)
+find_DEcounts(ITL23_dds, coexp_AN, "ITL23", highlights)
+find_DEcounts(CTL6_dds, coexp_AN, "CTL6", highlights)
+find_DEcounts(PTL5_dds, coexp_AN, "PTL5", highlights)
+find_DEcounts(Pvalb_dds, coexp_AN, "Pvalb", highlights)
+find_DEcounts(Sst_dds, coexp_AN, "Sst", highlights)
 
