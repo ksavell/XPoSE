@@ -26,10 +26,9 @@ save_vlnplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1,
                 '#2C8CB9','#41B75F',
                 '#6F499D','#3C9E64')
   
-  gaba_hex <- c('#F8991D','#E66027',
-                '#C03C82','#C52126',
-                '#B0B235','#DB808C',
-                '#A669AB')
+  gaba_hex <- c('#E66027','#F8991D',
+                '#C52126','#B0B235',
+                '#DB808C','#A669AB')
         
         grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
         

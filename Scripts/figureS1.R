@@ -8,14 +8,16 @@
 
 # Load data ---------------------------------------------------------------
 
-load("~glut.RData")
-load("~gaba.RData")
+setwd("~/XPoSE")
+load("glut.RData")
+load("gaba.RData")
 
 library(Seurat)
 library(ggplot2)
 
 # FS1a Exc. Cart QC -------------------------------------------------------
 
+setwd("~/XPoSE/Output")
 source("~/XPoSE/Scripts/Functions/save_dimplot.R")
 
 save_dimplot(glut, file_n = "glutcart.pdf", glutcol = T, 

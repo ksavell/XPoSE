@@ -9,16 +9,19 @@
 
 # Load data ---------------------------------------------------------------
 
-load("~glut.RData")
-load("~gaba.RData")
+setwd("~/XPoSE")
+load("glut.RData")
+load("gaba.RData")
 
 # Load packages -----------------------------------------------------------
 
-library(seurat)
+library(Seurat)
 library(ggplot2)
 library(dplyr)
 
 # FS2a Gene VlnPlots ------------------------------------------------------
+
+setwd("~/XPoSE/Output")
 
 source("~/XPoSE/Scripts/Functions/save_vlnplot.R")
 
@@ -48,9 +51,8 @@ make_heatmap(glut, groupcol = c('#0A5B8C','#64C7C8',
              pdffilen = "heatmap_glut",
              csvfilen = "glutmarkers")
 
-make_heatmap(gaba, groupcol = c('#F8991D','#E66027',
-                                '#C03C82','#C52126',
-                                '#B0B235','#DB808C',
-                                '#A669AB'), 
+make_heatmap(gaba, groupcol = c('#E66027','#F8991D',
+                                '#C52126','#B0B235',
+                                '#DB808C','#A669AB'), 
              pdffilen = "heatmap_gaba",
              csvfilen = "gabamarkers")
