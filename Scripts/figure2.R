@@ -97,9 +97,8 @@ make_upset(prep_upset(coexp_AN),
 
 source("~/XPoSE/Scripts/Functions/find_DEcounts.R")
 
-highlights <- c("Vgf", "Scg2", "Lingo1", "Homer1", "Arc", "Nptx2", "Reln",
-                "Fosb", "Bdnf", "Synpr", "Lingo2", "Actb", "Dnmt3a",
-                "Gadd45b", "Npas4")
+highlights <- c("Vgf", "Ptprn", "Homer1", "Lingo1", "Fosb", "Nptx2", "Scg2",
+                "Bdnf","Arc","Pcdh15","Lingo2")
 
 find_DEcounts(ITL56_dds, coexp_AN, "ITL56", highlights)
 find_DEcounts(ITL23_dds, coexp_AN, "ITL23", highlights)
