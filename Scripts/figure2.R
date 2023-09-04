@@ -27,6 +27,7 @@ library(data.table)
 
 # Load data ---------------------------------------------------------------
 
+setwd("~/XPoSE")
 load("glut.RData")
 load("gaba.RData")
 setwd("~/XPoSE/Output")
