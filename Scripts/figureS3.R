@@ -1,8 +1,8 @@
-# Figure S1 plots
+# Figure S3 plots
 
 # This script generates:
-# Figure S1a Excitatory UMAP split by cartridge
-# Figure S1b Inhibitory UMAP split by cartridge
+# Figure S3a Excitatory UMAP split by cartridge
+# Figure S3b Inhibitory UMAP split by cartridge
 
 # * denotes that the final plot was made in Prism with output generated in R
 
