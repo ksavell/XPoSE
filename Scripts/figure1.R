@@ -15,7 +15,7 @@ library(tidyverse)
 
 setwd("~/Output")
 
-load("~/MakeObject/combined08032023all.RData")
+load("combined08032023all.RData")
 
 
 # Figure 1H, sample tag reads ---------------------------------------------
