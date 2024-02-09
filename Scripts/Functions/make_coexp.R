@@ -1,5 +1,6 @@
 make_coexp <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, 
-                       p_thres = 0.05, incl_all = FALSE, genes_sorted = FALSE){
+                       filter, p_thres = 0.05, incl_all = FALSE, 
+                       genes_sorted = FALSE){
     #Necessary scripts for function
     source("~/XPoSE/Scripts/Functions/run_pseudobulk.R")
     source("~/XPoSE/Scripts/Functions/execute_DESeq.R")
@@ -84,5 +85,5 @@ make_coexp <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect,
           quote = FALSE)
     
     #merge the objs
-    return(merge_results(merg_lst, thres = p_thres))
+    return(merge_results(merg_lst, thres = p_thres, filter = filter))
 }
