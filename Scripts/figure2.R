@@ -73,14 +73,16 @@ write.csv(coexp_NH, file = "~/Output/coexp_NH.csv")
 # Active vs Homecage (between subject)
 coexp_AH <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
                        threshold = 75, factor = 'group', 
-                       comp_vect = c("Active","Homecage"))
+                       comp_vect = c("Active","Homecage"),
+                       TRUE)
 
 write.csv(coexp_AH, file = "~/Output/coexp_AH.csv")
 
 # Active vs. Non-active (within subject)
 coexp_AN <- make_coexp(seur_obj1 = glut, seur_obj2 = gaba, 
                     threshold = 75, factor = 'group', 
-                    comp_vect = c("Active","Non-active"))
+                    comp_vect = c("Active","Non-active"),
+                    TRUE)
 
 write.csv(coexp_AN, file = "~/Output/coexp_AN.csv")
 
