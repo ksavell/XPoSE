@@ -1,11 +1,11 @@
 make_coexp <- function(seur_obj1, seur_obj2, threshold, factor, comp_vect, 
                        p_thres = 0.05, incl_all = FALSE, genes_sorted = FALSE){
     #Necessary scripts for function
-    source("~/XPoSE/Scripts/Functions/run_pseudobulk.R")
-    source("~/XPoSE/Scripts/Functions/execute_DESeq.R")
-    source("~/XPoSE/Scripts/Functions/prep_merge_fast.R")
-    source("~/XPoSE/Scripts/Functions/prep_merge.R")
-    source("~/XPoSE/Scripts/Functions/merge_results.R")
+    source("Scripts/Functions/run_pseudobulk.R")
+    source("Scripts/Functions/execute_DESeq.R")
+    source("Scripts/Functions/prep_merge_fast.R")
+    source("Scripts/Functions/prep_merge.R")
+    source("Scripts/Functions/merge_results.R")
   
     #for process time checking
     timer <- proc.time()

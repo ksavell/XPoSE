@@ -9,7 +9,6 @@
 
 # Load data ---------------------------------------------------------------
 
-setwd("~/XPoSE")
 load("glut.RData")
 load("gaba.RData")
 
@@ -21,9 +20,7 @@ library(dplyr)
 
 # FS2a Gene VlnPlots ------------------------------------------------------
 
-setwd("~/XPoSE/Output")
-
-source("~/XPoSE/Scripts/Functions/save_vlnplot.R")
+source("Scripts/Functions/save_vlnplot.R")
 
 save_vlnplot(glut, file_n = "nFeature_glut.pdf", 
              glutcol = T, feature = "nFeature_RNA",
@@ -43,7 +40,7 @@ save_vlnplot(gaba, file_n = "nCount_gaba.pdf",
 
 # FS2c Heatmaps -----------------------------------------------------------
 
-source("~/XPoSE/Scripts/Functions/make_heatmap.R")
+source("Scripts/Functions/make_heatmap.R")
 
 make_heatmap(glut, groupcol = c('#0A5B8C','#64C7C8',
                                 '#2C8CB9','#41B75F',

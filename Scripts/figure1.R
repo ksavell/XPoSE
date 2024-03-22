@@ -13,16 +13,13 @@ library(tidyverse)
 
 # Load data ---------------------------------------------------------------
 
-setwd("~/Output")
-
 load("combined08032023all.RData")
-
 
 # Figure 1H, sample tag reads ---------------------------------------------
 
 # Make df of sample tag reads and relevant metadata
 
-source("~/XPoSE/Scripts/Functions/make_stdf.R")
+source("Scripts/Functions/make_stdf.R")
 
 df <- make_stdf(combined)
 
@@ -45,4 +42,4 @@ mean <- sapply(IDslist, function(x) {
 })
 
 # save the table
-write.csv(mean, '~/Output/stReadsMean.csv')
+write.csv(mean, 'Output/stReadsMean.csv')

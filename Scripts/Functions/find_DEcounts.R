@@ -1,6 +1,6 @@
 find_DEcounts <- function(dds, coexp, cluster, feature_list){
         
-        source("~/XPoSE/Scripts/Functions/sort_df.R")
+        source("Scripts/Functions/sort_df.R")
         
         # extract all normalized counts for each sample
         count <- counts(dds, normalized=TRUE)

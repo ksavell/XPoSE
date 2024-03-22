@@ -16,7 +16,6 @@ cluster_first <- function(seur_obj, pca_dim = 1:50, neigh_dim = 1:50, umap_dim =
         seur_obj$percMito <- PercentageFeatureSet(seur_obj,
                                                   features = mitogenes)
         seur_obj <- subset(seur_obj, subset = percMito < 10)
-        seur_obj$percMito <- NULL
         
         seur_obj <- seur_obj %>%
                 NormalizeData() %>%

@@ -8,7 +8,6 @@
 
 # Load data ---------------------------------------------------------------
 
-setwd("~/XPoSE")
 load("glut.RData")
 load("gaba.RData")
 
@@ -17,13 +16,12 @@ library(ggplot2)
 
 # FS1a Exc. Cart QC -------------------------------------------------------
 
-setwd("~/XPoSE/Output")
-source("~/XPoSE/Scripts/Functions/save_dimplot.R")
+source("Scripts/Functions/save_dimplot.R")
 
-save_dimplot(glut, file_n = "glutcart.pdf", glutcol = T, 
+save_dimplot(glut, file_n = "Output/glutcart.pdf", glutcol = T, 
              splitby = "orig.ident", splitl = 2)
 
 # FS1b Inh. Cart QC -------------------------------------------------------
 
-save_dimplot(gaba, file_n = "gabacart.pdf", gabacol = T, 
+save_dimplot(gaba, file_n = "Output/gabacart.pdf", gabacol = T, 
              splitby = "orig.ident", splitl = 2)
