@@ -23,9 +23,9 @@ calc_prop <- function(seur_obj, fact1 = 'ratID', fact2 = 'cluster_name',
                 colnames(count_df) <- c(fact1, fact2, fact3, "count")
         }
         
-        count_df[[paste0(fact1,"_",fact3)]] <- paste0(count_df[[fact1]], count_df[[fact3]])
+        count_df[[paste0(fact1,"_",fact2)]] <- paste0(count_df[[fact1]], count_df[[fact2]])
         
-IDslist <- split(count_df, count_df[[paste0(fact1,"_",fact3)]])
+IDslist <- split(count_df, count_df[[paste0(fact1,"_",fact2)]])
 
 for (i in 1:length(IDslist)) {
         current_group <- IDslist[[i]]

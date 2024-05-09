@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-merge_results <- function(agg_lst, filter = TRUE, thres = 0.05){
+merge_results <- function(agg_lst, filter = FALSE, thres = 0.05){
     #modifies list 
     ag <- agg_lst
         
