@@ -8,31 +8,32 @@
 # count table RSEC_MolsPerCell.csv
 # sample tag reads Sample_Tag_ReadsPerCell.csv
 # sample tag calls Sample_Tag_Calls.csv
+# Add these files to a folder within the XPoSE directory called MakeObject
+# do not commit these files to the repository
 
 # Load packages -----------------------------------------------------------
 library(Seurat)
 
 # Load data ---------------------------------------------------------------
 
-# set working directory where the raw data files are found
-setwd("~/MakeObject")
-
 # Read gene count tables
-counts_c1 <- read.csv("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
-                      skip = 7, row.names = 1)
-counts_c2 <- read.csv("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
-                      skip = 7, row.names = 1)
+counts_c1 <- read.csv("MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
+                      skip = 7, 
+                      row.names = 1) 
+counts_c2 <- read.csv("MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
+                      skip = 7, 
+                      row.names = 1)
 
 # Read sample tag calls
-tags_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
+tags_c1 <- read.csv("MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
-tags_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
+tags_c2 <- read.csv("MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
 
-#Read Sample tag reads
-streads_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+# Read Sample tag reads
+streads_c1 <- read.csv("MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
-streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c2 <- read.csv("MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
 
 # Reorder all input files -------------------------------------------------
@@ -40,7 +41,7 @@ streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv
 # current objects in environment to order
 objects <- ls()
 
-source("~/XPoSE/Scripts/Functions/sort_df.R")
+source("Scripts/Functions/sort_df.R")
 
 #order them
 invisible(lapply(objects, function(name) {
