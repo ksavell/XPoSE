@@ -223,9 +223,12 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
                                         colData = temp,  #metaData
                                         design = form_fact)
     
+    # runs DESseq2
+    clust_tbl <- DESeq(clust_tbl[ rowSums(counts(clust_tbl)) > 
+                                   min_cell, ])
+    
     #populates list
-    ret_list <- list(DESeq_obj = DESeq(clust_tbl[ rowSums(counts(clust_tbl)) > 
-                                                      min_cell, ]), 
+    ret_list <- list(DESeq_obj = clust_tbl, 
                      results = results(clust_tbl, 
                                        contrast = comp_vect,
                                        alpha = 0.05,

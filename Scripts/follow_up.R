@@ -4,7 +4,8 @@
 
 # # Run DEGs with 100%, 50%, or 25% of the Active population
 
-
+# suggestion through reading:
+  # calculate delta-variance for each biological replicate through the Libra package
 
 # Load libraries ----------------------------------------------------------
 
@@ -37,8 +38,6 @@ glut_group <- calc_prop(seur_obj = glut, fact1 = 'ratID',
 # correct vs not for animal representation --------------------------------
 
 table(glut$ratID,glut$cluster_name)
-
-# Assuming 'glut' is your Seurat object
 
 # Create an empty list to store the subset Seurat objects
 subset_seurat_objs <- list()
@@ -76,3 +75,33 @@ glut_downsampled <- group_downsample(seur_obj = glut,
 
 source("Scripts/Functions/single_factor_DESeq.R")
 
+# Run DESeq2 on the downsampled object
+
+# need a loop for this for cluster
+ITL23 <- single_factor_DESeq(object = glut_downsampled,
+                                        comp_vect = c("group", "Active", "Non-active"),
+                                        cluster = "ITL23")
+
+# suggestion for iteration
+
+# Run 100 iterations and save the indices of the cells chosen
+iterations <- 100
+all_indices <- list()
+
+for (i in 1:iterations) {
+  seed <- i # You can change the seed if needed
+  chosen_cells <- group_downsample(glut, 
+                                   group_to_subset = "Active", 
+                                   frac = 0.5, 
+                                   bio_rep = "ratID", 
+                                   seed = 222)
+  all_indices[[i]] <- chosen_cells
+}
+
+# Save the indices to a file if needed
+save(all_indices, file = "downsampled_indices.RData")
+
+# If you need to use any specific iteration for further analysis
+iteration_to_use <- 1
+chosen_cells <- all_indices[[iteration_to_use]]
+seurat_subset <- subset(seurat_object, cells = chosen_cells)
