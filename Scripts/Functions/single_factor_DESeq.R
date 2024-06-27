@@ -27,7 +27,7 @@
 #'
 #' @examples
 single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10, 
-                                min_rat = 2){
+                                min_rat = 2, keep_dds = FALSE){
     library(Seurat)
     library(Libra)
     library(dplyr) 
@@ -227,22 +227,25 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     clust_tbl <- DESeq(clust_tbl[ rowSums(counts(clust_tbl)) > 
                                    min_cell, ])
     
-    #populates list
-    ret_list <- list(DESeq_obj = clust_tbl, 
-                     results = results(clust_tbl, 
-                                       contrast = comp_vect,
-                                       alpha = 0.05,
-                                       cooksCutoff = FALSE,
-                                       independentFiltering = FALSE))
-    #labels the columns to be consistent with the cluster
-    colnames(ret_list[["results"]]) <- paste(colnames(ret_list[["results"]]), cluster, sep = "_")
-   
+    # now to add option to save the DESeq object
+    if (keep_dds == TRUE){
+        save(clust_tbl, file = paste("DESeq2_", cluster, ".rds", sep = ""))
+    }
+    
+    #populates results
+  
+results = results(clust_tbl, 
+                  contrast = comp_vect,
+                  alpha = 0.05,
+                  cooksCutoff = FALSE,
+                  independentFiltering = FALSE)
+
     #turns into tibble
-    ret_list[["results"]] <- ret_list[["results"]] %>%
+ results <- results %>%
         data.frame() %>%
         rownames_to_column(var="gene") %>%
         as_tibble()
     
     #returns
-    return(ret_list)
+    return(results)
 }
