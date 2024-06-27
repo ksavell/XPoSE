@@ -13,6 +13,7 @@ library(Seurat)
 library(ggplot2)
 library(patchwork)
 library(tidyverse)
+library(reshape2)
 
 
 # Load data ---------------------------------------------------------------
@@ -64,44 +65,58 @@ for (i in 1:iterations) {
 
 table(glut$group, glut$ratID)
 
+# run the non-subset results
+
+deseq2_results <- single_factor_DESeq(object = glut,
+                                      comp_vect = c("group", "Active", "Non-active"),
+                                      cluster = "ITL23",
+)
+
+deseq2_results$score_column <- ifelse(deseq2_results$padj < 0.05 & deseq2_results$log2FoldChange > 0, 1,
+                                      ifelse(deseq2_results$padj < 0.05 & deseq2_results$log2FoldChange < 0, -1, 0))
+
+# now time to downsample
+
 source("Scripts/Functions/group_downsample.R")
-
-# downsample group:active to 50% 
-
-glut_downsampled <- group_downsample(seur_obj = glut, 
-                                     group_to_subset = "Active", 
-                                     frac = 0.5, 
-                                     bio_rep = "ratID")
 
 source("Scripts/Functions/single_factor_DESeq.R")
 
-# Run DESeq2 on the downsampled object
-
-# need a loop for this for cluster
-ITL23 <- single_factor_DESeq(object = glut_downsampled,
-                                        comp_vect = c("group", "Active", "Non-active"),
-                                        cluster = "ITL23")
-
-# suggestion for iteration
-
-# Run 100 iterations and save the indices of the cells chosen
 iterations <- 100
 all_indices <- list()
+all_seeds <- numeric(iterations)
 
 for (i in 1:iterations) {
-  seed <- i # You can change the seed if needed
+  seed <- sample(1:10000, 1)  # Use a random seed for each iteration to ensure distinct subsets
+  all_seeds[i] <- seed
   chosen_cells <- group_downsample(glut, 
                                    group_to_subset = "Active", 
-                                   frac = 0.5, 
+                                   frac = 0.5, # change fraction here
                                    bio_rep = "ratID", 
-                                   seed = 222)
+                                   seed = seed)
   all_indices[[i]] <- chosen_cells
 }
 
-# Save the indices to a file if needed
-save(all_indices, file = "downsampled_indices.RData")
+# Save the indices and seeds to a file
+save(all_indices, all_seeds, file = "downsampled_indices_and_seeds.RData")
 
-# If you need to use any specific iteration for further analysis
-iteration_to_use <- 1
-chosen_cells <- all_indices[[iteration_to_use]]
-seurat_subset <- subset(seurat_object, cells = chosen_cells)
+# now to run subset and deseq2 on each iteration
+
+
+# ITL23 as example, 0.5 ---------------------------------------------------
+
+itl23_results <- list()
+
+for (i in 1:iterations) {
+  chosen_cells <- all_indices[[i]]
+  seurat_subset <- subset(glut, # change Seurat object here
+                          cells = chosen_cells) 
+  deseq2_results <- single_factor_DESeq(object = seurat_subset,
+                                        comp_vect = c("group", "Active", "Non-active"),
+                                        cluster = "ITL23",
+                                        )
+  itl23_results[[i]] <- deseq2_results
+}
+
+source("Scripts/Functions/tally_iterations.R")
+
+tally_iterations(itl23_results, "ITL23")

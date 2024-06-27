@@ -11,7 +11,14 @@
 #' @export
 #'
 #' @examples
-group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "ratID") {
+library(Seurat)
+library(dplyr)
+
+# Define the downsampling function
+group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "ratID", seed = NULL) {
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   
   # Extract metadata
   metadata <- seur_obj@meta.data
@@ -49,9 +56,7 @@ group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "rat
   # Combine all desired cells
   all_cells <- c(cells_to_subset, other_groups_cells)
   
-  # Subset the Seurat object
-  seurat_subset <- subset(seur_obj, cells = all_cells)
-  
-  return(seurat_subset)
+  # Return the indices of the cells chosen
+  return(all_cells)
 }
 
