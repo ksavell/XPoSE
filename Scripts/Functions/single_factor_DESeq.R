@@ -224,8 +224,7 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
                                         design = form_fact)
     
     # runs DESseq2
-    clust_tbl <- DESeq(clust_tbl[ rowSums(counts(clust_tbl)) > 
-                                   min_cell, ])
+    clust_tbl <- DESeq(clust_tbl)
     
     # now to add option to save the DESeq object
     if (keep_dds == TRUE){
