@@ -69,7 +69,7 @@ table(glut$group, glut$ratID)
 
 deseq2_results <- single_factor_DESeq(object = glut,
                                       comp_vect = c("group", "Active", "Non-active"),
-                                      cluster = "ITL23",
+                                      cluster = "ITL23"
 )
 
 deseq2_results$score_column <- ifelse(deseq2_results$padj < 0.05 & deseq2_results$log2FoldChange > 0, 1,
