@@ -5,7 +5,6 @@
 #' @param seur_obj seurat object
 #' @param group_to_subset group that you want to downsample
 #' @param frac the proportion that you want to keep of the group to subset
-#' @param bio_rep metadata associated with biological replicate identity
 #'
 #' @return
 #' @export
@@ -14,8 +13,8 @@
 library(Seurat)
 library(dplyr)
 
-# Define the downsampling function
-group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "ratID", seed = NULL) {
+# Define the down sampling function
+group_downsample <- function(seur_obj, group_to_subset, frac = 1, seed = NULL) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -27,26 +26,10 @@ group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "rat
   metadata_group <- metadata %>%
     filter(group == group_to_subset)
   
-  # Get unique rats within the group to subset
-  ids <- unique(metadata_group[[bio_rep]])
-  
-  # Initialize list to store subsets
-  subset_list <- list()
-  
-  # Loop through each rat
-  for (rep_id in ids) {
-    # Filter cells for the current rat within the specific group
-    cells_subset <- metadata_group %>%
-      filter(.data[[bio_rep]] == rep_id) %>%
-      slice_sample(prop = frac) %>%
-      rownames()
-    
-    # Add subset to list
-    subset_list[[rep_id]] <- cells_subset
-  }
-  
-  # Combine all subsets for the specific group
-  cells_to_subset <- unlist(subset_list)
+  # Downsample the cells in the specified group
+  cells_subset <- metadata_group %>%
+    slice_sample(prop = frac) %>%
+    rownames()
   
   # Get cells from other groups
   other_groups_cells <- metadata %>%
@@ -54,7 +37,7 @@ group_downsample <- function(seur_obj, group_to_subset, frac = 1, bio_rep = "rat
     rownames()
   
   # Combine all desired cells
-  all_cells <- c(cells_to_subset, other_groups_cells)
+  all_cells <- c(cells_subset, other_groups_cells)
   
   # Return the indices of the cells chosen
   return(all_cells)

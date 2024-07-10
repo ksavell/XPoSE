@@ -87,21 +87,23 @@ iterations <- 100
 all_indices <- list()
 all_seeds <- numeric(iterations)
 
-# ITL23 as example, 0.5 ---------------------------------------------------
-
 for (i in 1:iterations) {
   seed <- sample(1:10000, 1)  # Use a random seed for each iteration to ensure distinct subsets
   all_seeds[i] <- seed
   chosen_cells <- group_downsample(glut, 
                                    group_to_subset = "Active", 
-                                   frac = 0.5, # change fraction here
-                                   bio_rep = "ratID", 
+                                   frac = 0.035, # change fraction here
                                    seed = seed)
   all_indices[[i]] <- chosen_cells
 }
 
 # Save the indices and seeds to a file
-save(all_indices, all_seeds, file = "downsampled_indices_and_seeds_ITL23_0-5.RData")
+save(all_indices, all_seeds, file = "downsampled_indices_and_seeds_0p035.RData")
+
+
+
+
+
 
 itl23_results <- list()
 
@@ -118,33 +120,3 @@ for (i in 1:iterations) {
 
 tally_iterations(itl23_results, "ITL23_0-5_")
 
-# ITL23 as example, 0.25 ---------------------------------------------------
-
-for (i in 1:iterations) {
-  seed <- sample(1:10000, 1)  # Use a random seed for each iteration to ensure distinct subsets
-  all_seeds[i] <- seed
-  chosen_cells <- group_downsample(glut, 
-                                   group_to_subset = "Active", 
-                                   frac = 0.25, # change fraction here
-                                   bio_rep = "ratID", 
-                                   seed = seed)
-  all_indices[[i]] <- chosen_cells
-}
-
-# Save the indices and seeds to a file
-save(all_indices, all_seeds, file = "downsampled_indices_and_seeds_ITL23_0-25.RData")
-
-itl23_results <- list()
-
-for (i in 1:iterations) {
-  chosen_cells <- all_indices[[i]]
-  seurat_subset <- subset(glut, # change Seurat object here
-                          cells = chosen_cells) 
-  deseq2_results <- single_factor_DESeq(object = seurat_subset,
-                                        comp_vect = c("group", "Active", "Non-active"),
-                                        cluster = "ITL23",
-  )
-  itl23_results[[i]] <- deseq2_results
-}
-
-tally_iterations(itl23_results, "ITL23_0-25_")
