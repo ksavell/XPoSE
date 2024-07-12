@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-tally_iterations <- function(results_list, cluster) {
+tally_iterations <- function(results_list, cluster, prop_frac) {
 
 # Initialize a list to store DESeq2 results with scores for each iteration
 scored_results <- list()
@@ -43,30 +43,30 @@ merged_results_df <- merged_results_df[, -which(names(merged_results_df) == "gen
 
 # save the merged results to a file
 
-write.csv(merged_results_df, file = paste0(cluster,"iteration_tally.csv"))
+write.csv(merged_results_df, file = paste0(cluster,prop_frac,"iteration_tally.csv"))
 
 # make a table that counts 1, 0, and -1 values for each iteration
 # this is not working yet...
 
-# Initialize a data frame to store the counts
-summary <- data.frame(count_minus1 = 0,
-                            count_0 = 0,
-                            count_1 = 0)
-
-# Iterate over each column and compute the frequency table
-for (col in names(merged_results_df)) {  
-  # Compute frequency table for the current column
-  col_table <- as.data.frame(table(merged_results_df[[col]]))
-  
-  # Update summary table for the current column
-  summary[col, "count_minus1"] <- col_table[col_table$Var1 == -1, "Freq"]
-  summary[col, "count_0"] <- col_table[col_table$Var1 == 0, "Freq"]
-  summary[col, "count_1"] <- col_table[col_table$Var1 == 1, "Freq"]
-}
-
-summary <- summary[-1,]
-
-# Print the consolidated summary table
-write.csv(summary, file = paste0(cluster,"iteration_summary.csv"))
+# # Initialize a data frame to store the counts
+# summary <- data.frame(count_minus1 = 0,
+#                             count_0 = 0,
+#                             count_1 = 0)
+# 
+# # Iterate over each column and compute the frequency table
+# for (col in names(merged_results_df)) {  
+#   # Compute frequency table for the current column
+#   col_table <- as.data.frame(table(merged_results_df[[col]]))
+#   
+#   # Update summary table for the current column
+#   summary[col, "count_minus1"] <- col_table[col_table$Var1 == -1, "Freq"]
+#   summary[col, "count_0"] <- col_table[col_table$Var1 == 0, "Freq"]
+#   summary[col, "count_1"] <- col_table[col_table$Var1 == 1, "Freq"]
+# }
+# 
+# summary <- summary[-1,]
+# 
+# # Print the consolidated summary table
+# write.csv(summary, file = paste0(prop_frac,cluster,"iteration_summary.csv"))
 
 }
