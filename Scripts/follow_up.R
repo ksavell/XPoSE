@@ -46,6 +46,8 @@ deseq2_results <- single_factor_DESeq(object = glut,
 deseq2_results$score_column <- ifelse(deseq2_results$padj < 0.05 & deseq2_results$log2FoldChange > 0, 1,
                                       ifelse(deseq2_results$padj < 0.05 & deseq2_results$log2FoldChange < 0, -1, 0))
 
+write.csv(deseq2_results, file = paste0("ITL23_experience_tally.csv"))
+
 # 0.035 prop ----------------------------------------------------------------
 
 iterations <- 100
