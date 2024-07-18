@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-tally_iterations <- function(results_list, cluster, prop_frac) {
+tally_iterations <- function(results_list, i, prop_frac) {
 
 # Initialize a list to store DESeq2 results with scores for each iteration
 scored_results <- list()
@@ -23,8 +23,8 @@ for (i in 1:length(results_list)) {
   rownames(deseq2_df) <- deseq2_df$gene
   
   # Add a score column based on the conditions
-  score_column <- ifelse(deseq2_df$padj < 0.05 & deseq2_df$log2FoldChange > 0, 1,
-                         ifelse(deseq2_df$padj < 0.05 & deseq2_df$log2FoldChange < 0, -1, 0))
+  score_column <- ifelse(deseq2_df$padj < 0.05 , 1,
+                         no = 0)
   
   # Add the score column to the data frame with a unique name for the iteration
   col_name <- paste0("score_iteration_", i)
@@ -43,7 +43,7 @@ merged_results_df <- merged_results_df[, -which(names(merged_results_df) == "gen
 
 # save the merged results to a file
 
-write.csv(merged_results_df, file = paste0(cluster,prop_frac,"iteration_tally.csv"))
+write.csv(merged_results_df, file = paste0(i,"/iteration_tally",prop_frac,".csv"))
 
 # make a table that counts 1, 0, and -1 values for each iteration
 # this is not working yet...
