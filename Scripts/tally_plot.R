@@ -7,31 +7,35 @@ library(dplyr)
 source("Scripts/Functions/tally_iterations.R")
 
 # load results first 
-files <- list.files("ITL23", pattern = "^results_.*\\.RData$", full.names = TRUE)
+
+clstr <- "ITL23"
+
+files <- list.files(clstr, pattern = "^results_.*\\.RData$", full.names = TRUE)
 data_list <- lapply(files, function(file) {
   env <- new.env()
   load(file, envir = env)
   as.list(env)
 })
 
+names(data_list) <- basename(files)
+
+# remove the file extension from the names
+names(data_list) <- sub("\\.RData$", "", names(data_list))
+
 # now tally the results
-for (j in 1:length(data_list)) {
-  results <- data_list[[j]]
-  tally_iterations(results)
-  write.csv(merged_results_df, file = paste0(i,"/iteration_tally.csv"))
+for (j in names((data_list))) {
+  merged_results_df <- tally_iterations(data_list, j)
+  write.csv(merged_results_df, file = paste0(clstr,"/",j,"_iteration_tally.csv"))
 }
 
-tally_iterations(results, i, prop_frac = "p_035")
 
-ITL23p_75iteration_tally <- read.csv("ITL23p_75iteration_tally.csv", row.names = 1, header = TRUE)
-ITL23p_50iteration_tally <- read.csv("ITL23p_50iteration_tally.csv", row.names = 1, header = TRUE)
-ITL23p_25iteration_tally <- read.csv("ITL23p_25iteration_tally.csv", row.names = 1, header = TRUE)
-ITL23p_10iteration_tally <- read.csv("ITL23p_10iteration_tally.csv", row.names = 1, header = TRUE)
-ITL23p_035iteration_tally <- read.csv("ITL23p_035iteration_tally.csv", row.names = 1, header = TRUE)
-ITL23_100iteration_tally <- read.csv("ITL23_experience_tally.csv", row.names = 1, header = TRUE)
 
-# order ITL23_100iteration_tally by gene column name
-ITL23_100iteration_tally <- ITL23_100iteration_tally[order(ITL23_100iteration_tally$gene),]
+
+
+
+
+
+
 
 
 # count occurrence of +1 in each row for each tally and write into a new df
