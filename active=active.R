@@ -7,23 +7,23 @@ library(devtools)
 library(pROC)
 
 # load Seurat object/data
-load("/Users/holmesar/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/DataForFigures/Robjects/glut.RData")
+load("~/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/DataForFigures/Robjects/glut.RData")
 
-glut_subset <- subset(glut, subset = group %in% c("Homecage", "Active", "Non-active"))
+#glut_subset <- subset(glut, subset = group %in% c("Homecage", "Active", "Non-active"))
 
-unique(glut_subset@meta.data$group)
+unique(glut@meta.data$group)
 
-DimPlot(glut_subset, group.by = "group")
+DimPlot(glut, group.by = "group")
 
-glut_subset$experience <- ifelse(glut_subset@meta.data$group %in% c("Non-active", "Homecage"), "Control", "Active")
+glut$experience <- ifelse(glut@meta.data$group %in% c("Non-active", "Active"), "NC", "HC")
 
-Idents(glut_subset) <- glut_subset$experience
+Idents(glut) <- glut$experience
 
-roc <- FindMarkers(glut_subset, ident.1 = "Active", ident.2 = "Control", test.use = "roc")
+roc <- FindMarkers(glut, ident.1 = "NC", ident.2 = "HC", test.use = "roc")
 
 top_genes <- rownames(roc)[1:10]
-top_genes_df <- as.data.frame(t(glut_subset@assays$RNA@data[top_genes, ]))
-top_genes_df$experience <- glut_subset@meta.data$experience
+top_genes_df <- as.data.frame(t(glut@assays$RNA@data[top_genes, ]))
+top_genes_df$experience <- glut@meta.data$experience
 
 set.seed(150)
 trainIndex <- createDataPartition(top_genes_df$experience, p = 0.8, list = FALSE)
@@ -49,9 +49,29 @@ print(conf_matrix)
 accuracy <- sum(predictions == test_labels) / length(test_labels)
 print(paste("Accuracy:", accuracy))
 
-full_features <- as.data.frame(t(GetAssayData(glut_subset, slot = 'counts')[top_genes, ]))
+full_features <- as.data.frame(t(GetAssayData(glut, layer = 'counts')[top_genes, ]))
 predictions <- predict(model, full_features)
 
-glut_subset$predicted_group <- predictions
+glut$predicted_group <- predictions
 
-DimPlot(glut_subset, group.by = "predicted_group")
+DimPlot(glut, group.by = "predicted_group")
+
+
+# Augur package,  ---------------------------------------------------------
+# why try this: is roc to find features appropriate? what is augur doing
+
+obj <- glut
+
+# extract the counts
+obj_counts <- (obj[["RNA"]]$counts)
+
+# now extract the metadata
+obj_meta <- obj@meta.data
+
+augur = calculate_auc(obj_counts, obj_meta, 
+                      cell_type_col = "cluster_name", label_col = "experience",
+                      rf_params = list(trees = 15, mtry = 100, min_n = NULL, importance = "accuracy")) # this line I got off a message board, using random forest
+
+# plot the AUC values into umap
+Idents(obj) <- "experience"
+plot_umap(augur, obj, mode = "rank", palette = "Spectral", cell_type_col = "cluster_name") # this doesn't work.
