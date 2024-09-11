@@ -3,8 +3,8 @@
 # Info --------------------------------------------------------------------
 
 # This script creates
-#       * glut subset object
-#       * gaba subset object
+#       * hc only object
+#       * hc/nc combined object
 
 # Loading -----------------------------------------------------------------
 ## Load packages -----------------------------------------------------------
@@ -15,68 +15,81 @@ library(tidyverse)
 ## Data loading ------------------------------------------------------------
 # load in initial 'combined' object that is output of create_object01.R
 
-load("~/Library/CloudStorage/Box-Box/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/DataForFigures/Robjects/combined08032023.RData")
+load("combined08032023.RData")
 
-# First clustering ------------------------------------------------------
+# Assign MapMyCells metadata ----------------------------------------------
 
-source("~/XPoSE/Scripts/Functions/cluster_first.R")
+mapping <- read.csv("combinedcounts_10xWholeMouseBrain(CCN20230722)_HierarchicalMapping_UTC_1726072259014.csv",
+                    comment.char = "#")
+head(data.frame(mapping))
+
+combined$class <- mapping$class_name
+combined$subclass <- mapping$subclass_name
+
+# ID neurons vs non-neurons
+
+# Extract the class column from the metadata
+metadata <- combined@meta.data
+
+# Extract the numeric part of the 'class' column
+metadata$numeric_part <- as.numeric(sub(" .*", "", metadata$class))
+
+# Assign 'other' if the numeric part is 30 or greater, else 'neuron'
+metadata$celltype <- ifelse(metadata$numeric_part >= 30, 'other', 'neuron')
+
+# Update the Seurat object's metadata
+combined@meta.data <- metadata
+
+# Optionally, drop the helper column 'numeric_part'
+combined@meta.data$numeric_part <- NULL
+
+save(combined, file = "combined_withmmmannotation_09112024.RData")
+
+# Subset out other cell types  ------------------------------
+
+combined <- subset(combined, subset = celltype == 'neuron')
+
+# Explore homecage clusters ----------------------------------------------
+
+combined <- subset(combined, subset = group == 'Homecage')
+
+source("Scripts/Functions/cluster_first.R")
 
 combined <- cluster_first(combined)
 
-# Explore clusters --------------------------------------------------------
-
 # First check QC metrics to see if any cluster is defined by low QC measures
 
-source("~/XPoSE/Scripts/Functions/clstr_vln.R")
+source("Scripts/Functions/clstr_vln.R")
 
 clstr_vln(combined, qc = T)
 
 # Plot excitatory, inhibitory, and glia contamination markers
 clstr_vln(combined, all = T)
 
-# 26, 27, 29 are minor glia contamination
-# 24 is clustering by lower QC measures
+# 26 is minor glia contamination
+# 21 is clustering by lower QC measures
 
-# Subset glut -------------------------------------------------------------
+keep <- as.character(c(0:20,22:25,27))
 
-#Specify which clusters to keep
-keep_glut <- as.character(c(0:8,12:16,18:19,22:23,28))
+source("Scripts/Functions/subset_reclust.R")
 
-source("~/XPoSE/Scripts/Functions/subset_reclust.R")
+combined_f <- subset_reclust(combined, clust_tokeep = keep, neigh_dim = 1:30, 
+                       umap_dim = 1:30, res = 0.5)
 
-glut <- subset_reclust(combined, clust_tokeep = keep_glut, neigh_dim = 1:30, 
-                       umap_dim = 1:30, res = 0.2)
+keep2 <- as.character(c(0:12)) # got rid of undetermined accessory cluster
 
-# check glut clusters for known markers
-clstr_vln(glut, glut = T)
+combined_f <- subset_reclust(combined_f, clust_tokeep = keep2, neigh_dim = 1:30, 
+                             umap_dim = 1:30, res = 0.5)
 
-# name the final clusters and save
-glut_ids <- c("ITL56", "CTL6", "ITL23", "PTL5", "NPL56", "ITL23", "CTL6b")
-names(glut_ids) <- levels(glut)
-glut <- RenameIdents(glut, glut_ids)
-glut$cluster_name <- paste(glut@active.ident)
-save(glut, file = "glut.RData")
+hc_ids <- c("CTL6","ITL23", "ITL5","PTL5", "ITL6","Sst","Meis2","Pvalb",
+            "NPL56","ITL23","CTL6b","Vip","Lamp5","SstChodl","PvalbChand")
 
-# Subset gaba -------------------------------------------------------------
+names(hc_ids) <- levels(combined_f)
+combined_f <- RenameIdents(combined_f, hc_ids)
+combined_f$cluster_name <- paste(combined_f@active.ident)
+save(combined_f, file = "hc_combined_09112024.RData")
 
-keep_gaba <- as.character(c(9:11,17, 20:21,25,30,31))
 
-gaba <- subset_reclust(combined, clust_tokeep = keep_gaba, neigh_dim = 1:30, 
-                       umap_dim = 1:30, res = 0.2)
+# Combined clustering -----------------------------------------------------
 
-# one more refinement
 
-keep_gaba2 <- as.character(c(0:2,4:6))
-
-gaba <- subset_reclust(gaba, clust_tokeep = keep_gaba2, neigh_dim = 1:25, 
-                       umap_dim = 1:25, res = 0.2)
-
-# check gaba clusters for known markers
-clstr_vln(gaba, gaba = T)
-
-# name final clusters and save
-gaba_ids <- c("Pvalb", "Sst", "Meis2", "Vip", "Lamp5", "SstChodl")
-names(gaba_ids) <- levels(gaba)
-gaba <- RenameIdents(gaba, gaba_ids)
-gaba$cluster_name <- paste(gaba@active.ident)
-save(gaba, file = "gaba.RData")
