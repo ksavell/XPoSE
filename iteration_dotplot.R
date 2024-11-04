@@ -122,10 +122,6 @@ colnames(scores_df) <- c("Observation", "Variable", "Mean", "SD")
 
 # dotplot time ------------------------------------------------------------
 
-# Assuming average_sums_df and sd_sums_df are already created
-library(ggplot2)
-library(reshape2)
-
 # Convert both average and SD data frames to long format
 average_sums_df$Observation <- rownames(average_sums_df)
 average_long <- melt(average_sums_df, id.vars = "Observation", variable.name = "Variable", value.name = "Mean")
@@ -158,11 +154,17 @@ custom_colors <- c(
 )
 
 # Plot with custom colors
+pdf("enrichment_plot.pdf",
+    width = 2,
+    height = 2)
 ggplot(plot_data, aes(x = Variable, y = Mean, group = Observation, color = Observation)) +
   geom_line() +
-  geom_point(data = subset(plot_data, !is.na(Mean)), size = 2) +  # Points for non-zero values
+  geom_point(data = subset(plot_data, !is.na(Mean)), size = 0.5) +  # Points for non-zero values
   geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = 0, alpha = 0.5, data = plot_data) +  # SD error bars
   labs(x = "Enrichment", y = "Mean ± SD") +
   scale_color_manual(values = custom_colors) +  # Apply custom colors
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 0))+
+  theme(legend.position = "none")
+dev.off()
+
