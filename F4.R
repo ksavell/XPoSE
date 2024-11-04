@@ -1,4 +1,4 @@
-# Figure 1
+# Figure 4
 
 # Info --------------------------------------------------------------------
 
@@ -10,27 +10,12 @@
 library(Seurat)
 library(tidyverse)
 
-# Count neuron/non-neuron by rat/capture  ---------------------------------
-
-load("combined_withmmmannotation_09112024.RData")
-
-source("Scripts/Functions/calc_prop.R")
-
-obj_celltype <- calc_prop(seur_obj = combined, 
-                          fact1 = 'ratID',
-                          fact2 = 'celltype',
-                          fact3 = 'orig.ident')
-
-write.csv(obj_celltype, file = "celltype_by_rat_cart.csv")
-
-
-# HC exp DimPlots ---------------------------------------------------------
-
-load("hc_combined_09112024.RData")
-
-hc <- combined_f
+load("all_10312024.RData")
 
 source("Scripts/Functions/save_dimplot.R")
+
+all$experience <- ifelse(all$group == "Homecage", "HC",
+                          "NC")
 
 # Custom groupby-hex combinations
 hex_list <- list(
@@ -49,30 +34,48 @@ hex_list <- list(
                      'SstChodl' = '#B0B235',
                      'PvalbChand' = '#AD6C49'),
   'orig.ident' = c('C1' = '#22677A', 
-                   'C2' = '#D4A841'),
+                'C2' = '#D4A841'),
   'sex' = c('male' = "#2C5F2D", 
-            'female' = "#97BC62")
+            'female' = "#97BC62"),
+  'experience' =  c('HC' = '#c0c0c0',
+                    'NC' = '#ae1e5b'),
+  'group' = c('Non-active' = '#e37a9e',
+              'Active' = '#801743')
 )
 
-save_dimplot(hc, 
+save_dimplot(all, 
              groupby = 'cluster_name',
-             file_n = 'hc',
+             file_n = 'all',
              hex_list = hex_list)
 
-save_dimplot(hc, 
-             groupby = 'orig.ident',
+save_dimplot(all, 
+             groupby = 'experience',
+             file_n = 'all',
+             hex_list = hex_list)
+
+# nc plots 
+
+nc <- subset(all, subset = experience == 'NC')
+
+save_dimplot(nc, 
+             groupby = 'group',
              splitby = 'ratID',
-             file_n = 'hc',
+             file_n = 'nc',
              hex_list = hex_list)
-
 
 # Cluster prop by rat/capture ---------------------------------------------
 
-clust_prop_cart <- calc_prop(seur_obj = hc, 
+source("Scripts/Functions/calc_prop.R")
+
+obj_celltype <- calc_prop(seur_obj = nc, 
                           fact1 = 'ratID',
-                          fact2 = 'cluster_name',
-                          fact3 = 'capture') 
+                          fact2 = 'orig.ident')
 
-write.csv(clust_prop_cart, file = "clust_prop_cart.csv")
+write.csv(obj_celltype, file = "NC_counts_by_rat_cart.csv")
 
+clust_prop_cart <- calc_prop(seur_obj = all, 
+                             fact1 = 'ratID',
+                             fact2 = 'cluster_name',
+                             fact3 = 'group')
 
+write.csv(clust_prop_cart, file = "all_clust_prop_cart.csv")

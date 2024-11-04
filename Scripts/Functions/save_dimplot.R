@@ -1,86 +1,85 @@
-#' Plot DimPlot with no formatting for Figures
+#' save dimplots for figures with specified colors
 #'
 #' @param seur_obj seurat object
-#' @param splitby factor to split umap plot
-#' @param splitl number of splits so the width is calculated correctly
-#' @param file_n name the file, must include .PDF
-#' @param glutcol logical, T for glut cluster colors
-#' @param gabacol logical, T for gaba cluster colors
-#' @param groupcol logical, T for group cluster colors
-#' @param groupby factor to group the umap plot
+#' @param groupby 
+#' @param splitby 
+#' @param file_n file name, if applying split or group it will auto incorportate
+#' @param hex_list list of hex codes that are named by a 'groupby' value
 #'
-#' @return saves PDF with specific colors and split/group settings
+#' @return
 #' @export
 #'
 #' @examples
-save_dimplot <- function(seur_obj, groupby = NULL, splitby = NULL, splitl = 1, 
-                         file_n = NULL, glutcol = FALSE,
-                         gabacol = FALSE, groupcol = FALSE,
-                         sexcol = FALSE){
+save_dimplot <- function(seur_obj, 
+                         groupby = NULL,  # Explicit groupby argument
+                         splitby = NULL, 
+                         file_n = NULL, 
+                         hex_list = NULL) {
   
-  glut_hex <- c('#0A5B8C','#64C7C8',
-                '#2C8CB9','#41B75F',
-                '#6F499D','#3C9E64')
-  
-  gaba_hex <- c('#E66027','#F8991D',
-                '#C52126','#B0B235',
-                '#DB808C','#A669AB')
-  
-  grp_hex <- c('#ae1e5b','#e6e6e6','gray60')
-  
-  sex_hex <- c("#2C5F2D","#97BC62FF")
-  
-  # Open the PDF file
-  pdf(file = file_n,
-      width = 10*splitl,
-      height = 10)
-  
-  plot_list <- list()  # Create a list to store modified plots
-  
-  if (glutcol == TRUE) {
-    plot <- DimPlot(seur_obj, 
-                    group.by = groupby, 
-                    split.by = splitby, 
-                    cols = glut_hex)
-    plot_list[["glut"]] <- plot
+  # Ensure groupby and hex_list are provided
+  if (is.null(groupby)) {
+    stop("You must specify a groupby argument.")
+  }
+  if (is.null(hex_list) || !groupby %in% names(hex_list)) {
+    stop("You must provide a valid hex list for the specified groupby.")
   }
   
-  if (gabacol == TRUE) {
-    plot <- DimPlot(seur_obj, 
-                    group.by = groupby, 
-                    split.by = splitby, 
-                    cols = gaba_hex)
-    plot_list[["gaba"]] <- plot
-  }
+  # Get the hex color mapping for the specified groupby
+  hex_colors <- hex_list[[groupby]]
   
-  if (groupcol == TRUE) {
-    plot <- DimPlot(seur_obj, 
-                    group.by = groupby, 
-                    split.by = splitby, 
-                    cols = grp_hex)
-    plot_list[["group"]] <- plot
-  }
+  # Get the unique values from the splitby column if it exists
+  split_values <- if (!is.null(splitby)) unique(seur_obj@meta.data[[splitby]]) else NULL
   
-  if (sexcol == TRUE) {
-    plot <- DimPlot(seur_obj, 
-                    group.by = groupby, 
-                    split.by = splitby, 
-                    cols = sex_hex)
-    plot_list[["sex"]] <- plot
+  # Handle cases where splitby is NULL (no splitting) or has a valid value
+  if (!is.null(split_values)) {
+    # Loop through each value in the split.by field
+    for (split_val in split_values) {
+      # Subset the Seurat object for each split value
+      subset_obj <- seur_obj[, seur_obj@meta.data[[splitby]] == split_val]
+      
+      # Generate the DimPlot for the specific groupby and split
+      current_plot <- DimPlot(subset_obj, 
+                              group.by = groupby, 
+                              cols = hex_colors[names(hex_colors) %in% unique(subset_obj@meta.data[[groupby]])],
+                              pt.size = 0.5,
+                              shuffle = T) + 
+        ggtitle(paste(groupby, "-", split_val)) +
+        theme_void() +
+        theme(legend.position = "none")
+      
+      # Define the output file name with the current split value and groupby
+      output_file <- paste0(file_n, "_", split_val, "_", groupby, ".pdf")
+      
+      # Open a PDF file for each split and save the plot
+      pdf(file = output_file, width = 10, height = 10)  # Set a fixed size for the PDFs
+      
+      # Print the specific plot to the PDF
+      print(current_plot)
+      
+      # Close the PDF file
+      dev.off()
+    }
+  } else {
+    # If no splitting, generate a single plot for the groupby column
+    current_plot <- DimPlot(seur_obj, 
+                            group.by = groupby, 
+                            cols = hex_colors[names(hex_colors) %in% unique(seur_obj@meta.data[[groupby]])],
+                            pt.size = 0.5,
+                            shuffle = T) + 
+      ggtitle(groupby) +
+      theme_void() +
+      theme(legend.position = "none")
+    
+    # Define the output file name without splitting
+    output_file <- paste0(file_n, "_", groupby, ".pdf")
+    
+    # Open a PDF file and save the specific plot
+    pdf(file = output_file, width = 10, height = 10)  # Set a fixed size for the PDFs
+    
+    # Print the specific plot to the PDF
+    print(current_plot)
+    
+    # Close the PDF file
+    dev.off()
   }
-  
-  # Customize and print the modified plots
-  for (i in names(plot_list)) {
-    modified_plot <- plot_list[[i]] +
-      theme_void() + 
-      theme(legend.position = "none") + 
-      ggtitle(NULL)
-    print(modified_plot)
-  }
-  
-  # Close the PDF file
-  dev.off()
 }
-
-
-

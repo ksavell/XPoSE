@@ -5,10 +5,14 @@ library(reshape2)
 library(dplyr)
 
 source("Scripts/Functions/tally_iterations.R")
+load("all_10312024.RData")
 
-# load results first 
+clusters <- unique(all$cluster_name)
 
-clstr <- "ITL23" # change clusters here
+# loop through clusters
+
+for (cl in clusters) {
+clstr <- cl 
 
 files <- list.files(clstr, pattern = "^results_.*\\.RData$", full.names = TRUE)
 data_list <- lapply(files, function(file) {
@@ -23,8 +27,13 @@ names(data_list) <- basename(files)
 names(data_list) <- sub("\\.RData$", "", names(data_list))
 
 # now tally the results and save that csv 
-for (j in names((data_list))) {
+for (j in names(data_list)) {
   merged_results_df <- tally_iterations(data_list, j)
   write.csv(merged_results_df, 
-            file = paste0(clstr,"/",j,"_iteration_tally.csv"))
+            file = paste0(clstr, "/", j, "_iteration_tally.csv"))
 }
+
+}
+
+
+

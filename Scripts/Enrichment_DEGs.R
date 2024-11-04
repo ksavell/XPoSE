@@ -8,8 +8,7 @@ library(reshape2)
 
 # Load data ---------------------------------------------------------------
 
-load("glut.RData")
-load("gaba.RData")
+load("all_10312024.RData")
 
 # Load functions ----------------------------------------------------------
 
@@ -23,7 +22,7 @@ props <- as.numeric(c(0.035, 0.07, 0.105, 0.175, 0.245)) # 1x, 2x, 3x, 5x, 7x
 
 iterations <- 100
 
-seur_obj <- gaba
+seur_obj <- all
 
 seur_obj$experience <- ifelse(seur_obj$group == "Homecage", "HC", "NC")
 
