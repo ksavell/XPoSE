@@ -77,6 +77,9 @@ for (cluster in clusters) {
 print(average_sums_df)
 print(sd_sums_df)
 
+# save as csv
+write.csv(average_sums_df, "iteration_plot_sum_average.csv")
+write.csv(sd_sums_df, "iteration_plot_stdev.csv")
 
 # Add in the no downsample group ------------------------------------------
 
@@ -113,6 +116,9 @@ for (cl in clusters) {
 
 # View the combined scores_df
 print(scores_df)
+
+# save as csv
+write.csv(scores_df, "full_enrichment_deg_count.csv")
 
 # add in columns that make it compatible with plotting
 scores_df$Variable <- as.character(0.305)

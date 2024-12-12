@@ -29,8 +29,15 @@ names(data_list) <- sub("\\.RData$", "", names(data_list))
 # now tally the results and save that csv 
 for (j in names(data_list)) {
   merged_results_df <- tally_iterations(data_list, j)
-  write.csv(merged_results_df, 
-            file = paste0(clstr, "/", j, "_iteration_tally.csv"))
+  
+  # Check the result
+  print(paste("Processing:", j))
+  print(head(merged_results_df))
+  
+  file_path <- paste0(clstr, "/", j, "_iteration_tally.csv")
+  print(paste("Saving to:", file_path))
+  
+  write.csv(merged_results_df, file = file_path, row.names = TRUE)
 }
 
 }
