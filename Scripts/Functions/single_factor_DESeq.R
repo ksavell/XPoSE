@@ -228,7 +228,8 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     
     # now to add option to save the DESeq object
     if (keep_dds == TRUE){
-        saveRDS(clust_tbl, file = paste("DESeq2_", cluster, ".rds", sep = ""))
+        #saveRDS(clust_tbl, file = paste("DESeq2_", cluster, ".rds", sep = ""))
+      #assign(dds, dds, envir = .GlobalEnv)
     }
     
     #populates results
@@ -246,5 +247,6 @@ results = results(clust_tbl,
         as_tibble()
     
     #returns
-    return(results)
+    #return(results)
+ return(list(deseq_results = results, clust_tbl = clust_tbl))
 }
