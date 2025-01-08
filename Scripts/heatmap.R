@@ -1,6 +1,8 @@
 library(Seurat)
 library(pheatmap)
 
+load("all_10312024.RData")
+
 # Define your marker genes
 marker_genes <- c("Slc17a7", "Gad1", "Sst", "Rbx3")  # Replace with your actual genes
 
