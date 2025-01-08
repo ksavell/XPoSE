@@ -3,7 +3,7 @@
 library(dplyr)
 library(tidyr)
 library(UpSetR)
-
+library(Seurat)
 
 source("Scripts/Functions/single_factor_DESeq.R") 
 load("all_10312024.RData")
@@ -231,14 +231,23 @@ for (cluster in clusters) {
     deseq_score <- read.csv(deseq_score_file, row.names = 1, check.names = FALSE)
     deseq_updnscore <- read.csv(deseq_updnscore_file, row.names = 1, check.names = FALSE)
     
-    # Identify consistent (all 1's) and nonconsistent (at least 1 1, not all 0's) genes
+    # Ensure Excluded_none column exists
+    if (!"Excluded_none" %in% colnames(fm_score) || !"Excluded_none" %in% colnames(deseq_score)) {
+      stop("Excluded_none column not found in score files!")
+    }
+    
+    # Identify consistent (all 1's)
     fm_consistent <- rownames(fm_score)[apply(fm_score, 1, function(row) all(row == 1))]
-    fm_nonconsistent <- rownames(fm_score)[apply(fm_score, 1, function(row) any(row == 1) & !all(row == 1))]
-    
     deseq_consistent <- rownames(deseq_score)[apply(deseq_score, 1, function(row) all(row == 1))]
-    deseq_nonconsistent <- rownames(deseq_score)[apply(deseq_score, 1, function(row) any(row == 1) & !all(row == 1))]
     
-    # Filter updnscore files by consistent and nonconsistent genes
+    # Identify non-consistent genes:
+    # 1. Must have at least one `1`
+    # 2. Must **not** be in the consistent list
+    # 3. Must **not have Excluded_none == 0**
+    fm_nonconsistent <- rownames(fm_score)[apply(fm_score, 1, function(row) any(row == 1) & !all(row == 1) & row["Excluded_none"] != 0)]
+    deseq_nonconsistent <- rownames(deseq_score)[apply(deseq_score, 1, function(row) any(row == 1) & !all(row == 1) & row["Excluded_none"] != 0)]
+    
+    # Filter updnscore files by consistent and non-consistent genes
     fm_updn_consistent <- fm_updnscore[rownames(fm_updnscore) %in% fm_consistent, , drop = FALSE]
     fm_updn_nonconsistent <- fm_updnscore[rownames(fm_updnscore) %in% fm_nonconsistent, , drop = FALSE]
     
@@ -256,13 +265,14 @@ for (cluster in clusters) {
     write.csv(deseq_updn_consistent, deseq_consistent_file, row.names = TRUE)
     write.csv(deseq_updn_nonconsistent, deseq_nonconsistent_file, row.names = TRUE)
     
-    cat("Processed consistent and nonconsistent updn scores for cluster:", cluster, "\n")
+    cat("Processed consistent and non-consistent updn scores for cluster:", cluster, "\n")
     
   }, error = function(e) {
     cat("Error processing cluster:", cluster, "\n")
     cat("Error message:", e$message, "\n")
   })
 }
+
 
 
 # now calculate comparison table ------------------------------------------
@@ -334,7 +344,6 @@ define_overlap <- function(fm_data, deseq_data) {
 for (cluster in clusters) {
   tryCatch({
     # Define cluster directory
-    #cluster_dir <- file.path(getwd(), cluster)
     cat("Processing cluster:", cluster, "\n")
     
     # Load consistent and non-consistent data
@@ -343,20 +352,34 @@ for (cluster in clusters) {
     deseq_consistent_file <- paste0(cluster, "/DESeq2_Results_updnConsistent_Experience_NC_HC_", cluster, ".csv")
     deseq_nonconsistent_file <- paste0(cluster, "/DESeq2_Results_updnNonConsistent_Experience_NC_HC_", cluster, ".csv")
     
+    # Read data
     fm_consistent <- read.csv(fm_consistent_file, row.names = 1, check.names = FALSE)
     fm_nonconsistent <- read.csv(fm_nonconsistent_file, row.names = 1, check.names = FALSE)
     deseq_consistent <- read.csv(deseq_consistent_file, row.names = 1, check.names = FALSE)
     deseq_nonconsistent <- read.csv(deseq_nonconsistent_file, row.names = 1, check.names = FALSE)
     
-    # Calculate overlaps
+    # Ensure we're only using 'Excluded_none'
+    fm_consistent <- fm_consistent[, "Excluded_none", drop = FALSE]
+    fm_nonconsistent <- fm_nonconsistent[, "Excluded_none", drop = FALSE]
+    deseq_consistent <- deseq_consistent[, "Excluded_none", drop = FALSE]
+    deseq_nonconsistent <- deseq_nonconsistent[, "Excluded_none", drop = FALSE]
+    
+    # Debugging: Print data previews
+    cat("FM Consistent Preview:\n")
+    print(head(fm_consistent))
+    
+    cat("DESeq Consistent Preview:\n")
+    print(head(deseq_consistent))
+    
+    # Calculate overlaps using only 'Excluded_none'
     consistent_overlap <- define_overlap(fm_consistent, deseq_consistent)
     nonconsistent_overlap <- define_overlap(fm_nonconsistent, deseq_nonconsistent)
     
-    # Count overlap categories
+    # Convert overlap results to factor to ensure all categories exist
     consistent_counts <- table(factor(consistent_overlap, levels = overlap_categories))
     nonconsistent_counts <- table(factor(nonconsistent_overlap, levels = overlap_categories))
     
-    # Create dataframes for counts, filling missing categories with 0
+    # Convert counts to dataframes
     consistent_df <- data.frame(Cluster = cluster, t(as.data.frame(consistent_counts)))
     nonconsistent_df <- data.frame(Cluster = cluster, t(as.data.frame(nonconsistent_counts)))
     
@@ -369,6 +392,7 @@ for (cluster in clusters) {
     cat("Error message:", e$message, "\n")
   })
 }
+
 
 clean_up_results <- function(results_list, overlap_categories) {
   # Initialize cleaned results with zero counts
