@@ -64,13 +64,13 @@ for (target_percentage in target_percentages) {
 for (target_percentage in target_percentages) {
   
   # Load the downsampled indices and seeds for the target percentage
-  load(paste0(target_percentage, "/downsampled_indices_and_seeds_", target_percentage, ".RData"))
+  load(paste0("downsampled_indices_and_seeds_", target_percentage, ".RData"))
   
   # Loop through clusters
   for (cl in clusters) {
     
     # Create a directory for the cluster and percentage
-    cluster_percentage_dir <- paste0(cl, "/", target_percentage, "/")
+    cluster_percentage_dir <- paste0(cl, "/")
     if (!dir.exists(cluster_percentage_dir)) {
       dir.create(cluster_percentage_dir, recursive = TRUE)
     }
@@ -79,24 +79,158 @@ for (target_percentage in target_percentages) {
     results <- list()
     
     # Loop through iterations and run DESeq2 for each
-    for (it in 1:iterations) {
-      
+    for (j in 1:iterations) {
+     
       # Extract chosen cells for the current iteration
-      chosen_cells <- all_indices[[it]]
+      chosen_cells <- all_indices[[j]]
       
-      # Subset the Seurat object
-      seurat_subset <- subset(seur_obj, cells = chosen_cells)
+      result <- tryCatch({
+        seurat_subset <- subset(seur_obj, cells = chosen_cells)
+        deseq2_results <- single_factor_DESeq(object = seurat_subset,
+                                              comp_vect = c("experience", "NC", "HC"),
+                                              cluster = cl,
+                                              min_cell = 1)
+        deseq2_results$deseq_results  # Extract result tibble
+      }, error = function(e) {
+        message(paste("Error in cluster", cl, "at iteration", j, "for", target_percentage, "%: ", e$message))
+        NULL  # Return NULL for failed iterations
+      })
       
-      # Run DESeq2
-      deseq2_results <- single_factor_DESeq(object = seurat_subset,
-                                            comp_vect = c("experience", "NC", "HC"),
-                                            cluster = cl,
-                                            min_cell = 1)
-      # pull out only result tibble from the deseq2_result list
-      results[[it]] <- deseq2_results$results
+      # # Subset the Seurat object
+      # seurat_subset <- subset(seur_obj, cells = chosen_cells)
+      # 
+      # # Run DESeq2
+      # deseq2_results <- single_factor_DESeq(object = seurat_subset,
+      #                                       comp_vect = c("experience", "NC", "HC"),
+      #                                       cluster = cl,
+      #                                       min_cell = 1)
+     
+       # pull out only result tibble from the deseq2_result list
+      results[[j]] <- deseq2_results$deseq_results
     }
     
     # Save the DESeq2 results for the current cluster and percentage
-    save(results, file = paste0(cluster_percentage_dir, "PercentActiveInNC_experience_NC_HC_results_", target_percentage, "_percent.RData"))
+    save(results, file = paste0(cl, "/PercentActiveInNC_experience_NC_HC_results_", target_percentage, "_percent.RData"))
   }
 }
+
+# Tally clusters per percent and gene
+for (cl in clusters) {
+  clstr <- cl
+  
+  # List all result files matching the pattern
+  files <- list.files(clstr, pattern = "^PercentActiveInNC_experience_NC_HC_results_\\d+_percent\\.RData$", full.names = TRUE)
+  #files <- list.files(clstr, pattern = "^results_.*\\.RData$", full.names = TRUE)
+  
+  # Load the results from each file
+  results <- lapply(files, function(file) {
+    env <- new.env()
+    load(file, envir = env)
+    as.list(env)
+  })
+  
+  # Give the list of results meaningful names
+  names(results) <- basename(files)
+  
+  # Remove the file extension from the names
+  names(results) <- sub("\\.RData$", "", names(results))
+  
+  # Now tally the results and save that CSV
+  all_tallies <- list()  # Collect all tallies for further processing
+  for (j in names(results)) {
+    merged_results_df <- tally_iterations(results, j)
+    
+    # Check the result
+    print(paste("Processing:", j))
+    print(head(merged_results_df))
+    
+    # Save the results to a CSV file
+    file_path <- paste0(clstr, "/", j, "_iteration_tally.csv")
+    print(paste("Saving to:", file_path))
+    
+    write.csv(merged_results_df, file = file_path, row.names = TRUE)
+    
+  }
+}
+
+# Calculate averages and stdevs
+all_data_lists <- list()
+
+for (cl in clusters) {
+  
+  # Folder path is the same as cluster name in this case
+  folder_id <- cl
+  
+  # Get a list of all CSV files in the folder
+  csv_files <- list.files(path = cl, pattern = "results_.*_iteration_tally\\.csv", full.names = TRUE)
+  
+  # Initialize a list to store data frames for this specific folder
+  data_list <- list()
+  
+  # Loop through each CSV file in the folder
+  for (file in csv_files) {
+    # Extract the unique number from the filename
+    unique_number <- sub(".*results_(.*?)_iteration_tally\\.csv", "\\1", basename(file))
+    
+    # Create a unique name by combining the folder name and unique number
+    data_name <- paste0(folder_id, "_", unique_number)
+    
+    # Read the CSV file into a data frame and store it in data_list
+    data_list[[data_name]] <- read.csv(file)
+  }
+  
+  # Store the data_list in all_data_lists with the cluster ID as the key
+  all_data_lists[[folder_id]] <- data_list
+}
+
+# Check the structure to confirm
+print(names(all_data_lists))
+
+
+# Define clusters and numbers
+clusters <- names(all_data_lists)
+numbers <- c("0", "5", "10", "25", "50", "75", "100")
+
+# Initialize data frames to store the results: one for averages, one for SD, and one for nods
+average_sums_df <- data.frame(matrix(nrow = length(clusters), ncol = length(numbers)))
+sd_sums_df <- data.frame(matrix(nrow = length(clusters), ncol = length(numbers)))
+
+rownames(average_sums_df) <- clusters
+colnames(average_sums_df) <- numbers
+rownames(sd_sums_df) <- clusters
+colnames(sd_sums_df) <- numbers
+
+# Populate the data frames with mean, SD values, and nods data
+for (cl in clusters) {
+  for (num in numbers) {
+    # Construct the name of the DataFrame in all_data_lists
+    df_name <- paste0(cl, "_", num,'_percent')
+    
+    
+    # Check if the DataFrame exists and compute the average and SD if it does
+    if (df_name %in% names(all_data_lists[[cl]])) {
+      
+      df <- all_data_lists[[cl]][[df_name]]
+      numeric_df <- df[, sapply(df, function(col) is.numeric(col) || is.integer(col))]
+      
+      # Calculate column sums, then compute mean and SD
+      col_sums <- colSums(numeric_df, na.rm = TRUE)
+      average_sums_df[cl, num] <- mean(col_sums)
+      sd_sums_df[cl, num] <- sd(col_sums)  # Calculate SD instead of SEM
+    } 
+    else {
+      # Assign NA if the DataFrame is missing
+      average_sums_df[cl, num] <- NA
+      sd_sums_df[cl, num] <- NA
+    }
+  }
+}
+
+# Check the resulting data frames
+print(average_sums_df)
+print(sd_sums_df)
+
+# save as csv
+write.csv(average_sums_df, "iteration_plot_sum_average.csv")
+write.csv(sd_sums_df, "iteration_plot_stdev.csv")
+

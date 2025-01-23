@@ -2,14 +2,14 @@
 
 #' Title
 #'
-#' @param results_list list of deseq2 results from each iteration
+#' @param results list of deseq2 results from each iteration
 #' @param cluster name of the cluster
 #'
 #' @return
 #' @export
 #'
 #' @examples
-tally_iterations <- function(results_list, j) {
+tally_iterations <- function(results, j) {
 
 # Initialize a list to store DESeq2 results with scores for each iteration
 scored_results <- list()
@@ -17,7 +17,7 @@ scored_results <- list()
 # Process each iteration's DESeq2 results
 for (i in 1:100) {
   # Get the DESeq2 results for this iteration
-  deseq2_df <- as.data.frame(results_list[[j]][["results"]][[i]])
+  deseq2_df <- as.data.frame(results[[j]][["results"]][[i]])
   
   # Add the gene names as a column for merging purposes
   rownames(deseq2_df) <- deseq2_df$gene
