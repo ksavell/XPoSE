@@ -42,7 +42,7 @@ for (target_number in target_numbers) {
     chosen_cells <- group_downsample_counts(
       seur_obj = seur_obj,
       group_to_subset = "Active",
-      group_to_blend = "Non-active",
+      group_to_blend = "Homecage",
       number = target_number,
       seed = seed,
       cluster = cl
@@ -68,7 +68,7 @@ for (target_number in target_numbers) {
         seurat_subset <- subset(seur_obj, cells = chosen_cells)
         deseq2_results <- single_factor_DESeq(
           object = seurat_subset,
-          comp_vect = c("group", "Active", "Non-active"),
+          comp_vect = c("group", "Active", "Homecage"),
           cluster = cl,
           min_cell = 0
         )
@@ -82,7 +82,7 @@ for (target_number in target_numbers) {
     }
     
     # Save the DESeq2 results for the current cluster and number
-    save(results, file = file.path(cl, paste0("/Number_group_Active_Nonactive_results_", target_number, "_count.RData")))
+    save(results, file = file.path(cl, paste0("/Number_group_Active_Homecage_results_", target_number, "_count.RData")))
   }
 }
 
@@ -95,7 +95,7 @@ for (cl in clusters) {
   clstr <- cl
   
   # List all result files matching the pattern
-  files <- list.files(clstr, pattern = "^Number_group_Active_Nonactive_results_\\d+_count\\.RData$", full.names = TRUE)
+  files <- list.files(clstr, pattern = "^Number_group_Active_Homecage_results_\\d+_count\\.RData$", full.names = TRUE)
   #files <- list.files(clstr, pattern = "^results_.*\\.RData$", full.names = TRUE)
  
   
