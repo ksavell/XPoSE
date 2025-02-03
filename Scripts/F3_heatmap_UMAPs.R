@@ -4,7 +4,7 @@ library(ggplot2)
 
 load("/Users/holmesar/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/Robjects/hc_combined_09112024.RData")
 
-markers <- FindAllMarkers(all)
+markers <- FindAllMarkers(combine_f)
 
 
 marker_genes <- c("Slc7a7","Gad1", # general markers
@@ -53,15 +53,15 @@ gene_cluster_heatmap <- pheatmap(scaled_expr_matrix, scale = "row", cluster_rows
           
 #legend_colors <- c("#d3d3d3", "#6F77B0", "#06188C")
 
-# Create the DimPlot for the Slc17a7
-FeaturePlot(combined_f, features = c("Slc17a7"), min.cutoff = 'q1') +
+# Create the DimPlot for the Slc17a
+FeaturePlot(combined_f, features = c("Slc17a7"), min.cutoff = 'q1', pt.size = 0.5) +
     theme_void() +   # Removes the background grid
     theme(axis.title = element_blank(),  # Removes axis titles
           legend.position = "right",      # Positions the legend to the right
           #legend.title = element_blank(), # Optional: Remove legend title
           plot.title = element_blank())
 
-Slc17a7_umap <- FeaturePlot(combined_f, features = c("Slc17a7"), min.cutoff = 'q1') +
+Slc17a7_umap <- FeaturePlot(combined_f, features = c("Slc17a7"), min.cutoff = 'q1',pt.size = 0.5) +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
         legend.position = "none",      # Positions the legend to the right
@@ -72,14 +72,14 @@ ggsave("/Users/holmesar/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Proj
 
 
 # Create the DimPlot for the Gad1
-FeaturePlot(combined_f, features = c("Gad1"), min.cutoff = 'q1') +
+FeaturePlot(combined_f, features = c("Gad1"), min.cutoff = 'q1',pt.size = 0.5) +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
         legend.position = "right",      # Positions the legend to the right
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-Gad1_umap <- FeaturePlot(combined_f, features = c("Gad1"),min.cutoff = 'q1') +
+Gad1_umap <- FeaturePlot(combined_f, features = c("Gad1"),min.cutoff = 'q1',pt.size = 0.5) +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
         legend.position = "none",      # Positions the legend to the right

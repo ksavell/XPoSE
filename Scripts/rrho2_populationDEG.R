@@ -1,5 +1,7 @@
 
-
+library(colorRamp2)
+library(circlize)
+library(ComplexHeatmap)
 library(RRHO2)
 
 #Load in csv files of population deg comparisons per cluster
@@ -20,7 +22,7 @@ A_NA <- A_NA[, c("gene", "log2FoldChange", "padj")]
 NA_HC <- NA_HC[, c("gene", "log2FoldChange", "padj")] 
 
 # Merge columns from both dataframes into a single dataframe, filling missing values with zeros
-merged_df <- merge(A_NA, NA_HC, by = "gene", suffixes = c("_A_NA", "_NA_HC"))
+merged_df <- merge(A_NA, A_HC, by = "gene", suffixes = c("_A_NA", "_A_HC"))
   
 merged_df <- merged_df[complete.cases(merged_df), ]
   
@@ -37,14 +39,14 @@ merged_df[[paste0("DDE_", "A_NA")]] <- ifelse(
 )
 
 # DDE for df2
-merged_df[[paste0("DDE_", "NA_HC")]] <- NA
-merged_df[[paste0("DDE_", "NA_HC")]] <- ifelse(
-  merged_df[["log2FoldChange_NA_HC"]] > 0, 
-  -log10(merged_df[["padj_NA_HC"]]), 
+merged_df[[paste0("DDE_", "A_HC")]] <- NA
+merged_df[[paste0("DDE_", "A_HC")]] <- ifelse(
+  merged_df[["log2FoldChange_A_HC"]] > 0, 
+  -log10(merged_df[["padj_A_HC"]]), 
   ifelse(
-    merged_df[["log2FoldChange_NA_HC"]] == 0 | is.na(merged_df[["log2FoldChange_NA_HC"]]),
+    merged_df[["log2FoldChange_A_HC"]] == 0 | is.na(merged_df[["log2FoldChange_A_HC"]]),
     0,
-    log10(merged_df[["padj_NA_HC"]])
+    log10(merged_df[["padj_A_HC"]])
   )
 )
 
@@ -55,37 +57,36 @@ return(merged_df)
 gene_names <- merged_df[["gene"]]
 
 gene_list1 <- merged_df[, c("gene", "DDE_A_NA")]
-gene_list2 <- merged_df[, c("gene", "DDE_NA_HC")]
+gene_list2 <- merged_df[, c("gene", "DDE_A_HC")]
 
 # Now initialize the RRHO2 object
-RRHO_obj <- RRHO2_initialize(gene_list1, gene_list2, labels = c("A_NA", "NA_HC"), log10.ind = TRUE, stepsize = 100)
-
-# RRHO_obj <- RRHO2_initialize(
-#   gene_list1,
-#   gene_list2,
-#   stepsize = defaultStepSize(list1, list2),
-#   labels = NULL,
-#   log10.ind = FALSE,
-#   multipleTesting = "none",
-#   boundary = 0.1,
-#   method = "hyper"
-# )
-
+RRHO_obj <- RRHO2_initialize(gene_list1, gene_list2, labels = c("A_NA", "A_HC"), log10.ind = TRUE, stepsize = 100)
 
 
 rrho_matrix <- as.matrix(RRHO_obj[["hypermat"]])
 
 
 custom_colors <- colorRamp2(
-  c(0, 1.3, 1.305, 10, 50),  # Corresponding -log10(pval) values (e.g., 0.05, 0.01, etc.)
-  c("gray90", "gray90", "paleturquoise", "paleturquoise3","paleturquoise4")  # Colors mapped to these values
+  c(0, 1.3, 1.305, 500, 1000, 2300),  # Corresponding -log10(pval) values (e.g., 0.05, 0.01, etc.)
+  c("gray90", "gray90", "paleturquoise", "dodgerblue1","royalblue1", "royalblue4")  # Colors mapped to these values
 )
 
 rrho_matrix[is.na(rrho_matrix)] <- 0
 
+
+RRHO2_heatmap(RRHO_obj)
+
 Heatmap(rrho_matrix, col = custom_colors, name = "-log10(pval)", cluster_rows = FALSE, cluster_columns = FALSE)
 
+heatmap <- Heatmap(rrho_matrix, col = custom_colors, name = "-log10(pval)", cluster_rows = FALSE, cluster_columns = FALSE)
 
-pdf("bin10_ANA_NAHC_rrho.pdf", height = 20, width = 20)
+pdf("heatmap_NAA_AHC.pdf", height = 20, width = 20)
+
+
+pdf("heatmap_NAA_AHC.pdf", height = 20, width = 20)
+draw(heatmap, heatmap_legend_side = "right")  # Ensure it's drawn
+dev.off()
+
+
 RRHO2_heatmap(RRHO_obj, colorGradient = )
 dev.off()
