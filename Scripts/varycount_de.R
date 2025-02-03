@@ -211,7 +211,7 @@ for (cl in clusters) {
 }
 
 # save as csv
-write.csv(average_sums_df, "iteration_plot_sum_average.csv")
-write.csv(sd_sums_df, "iteration_plot_stdev.csv")
+write.csv(average_sums_df, "Count_group_Active_Homecage_iteration_plot_sum_average.csv")
+write.csv(sd_sums_df, "Count_group_Active_Homecage_iteration_plot_stdev.csv")
 
 
