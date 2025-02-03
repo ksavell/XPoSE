@@ -1,10 +1,9 @@
-# Load necessary libraries
-library(ComplexHeatmap)
+# Load necessary packages
 library(dplyr)
-library(ggplot2)
-library(Cairo)
+library(ggvenn)
+library(venn)
 
-# Define the working directory (update if needed)
+# Define working directory
 base_dir <- "~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/F5/population_degs"
 
 # Get list of all files in the directory
@@ -15,25 +14,16 @@ sig_gene_lists <- list()
 
 # Process each file
 for (file in files) {
-  # Extract cluster name from the filename
-  cluster <- gsub("_group_Active_Homecage.csv", "", basename(file))
-  
-  # Read the file
+  cluster <- gsub("_group_Active_Homecage.csv", "", basename(file))  # Extract cluster name
   data <- read.csv(file, header = TRUE, stringsAsFactors = FALSE)
   
-  # Check if required columns exist
   if (!all(c("gene", "padj") %in% colnames(data))) {
     cat("Skipping", file, "- missing required columns.\n")
     next
   }
   
-  # Remove rows with missing values in gene or padj
-  data <- na.omit(data[, c("gene", "padj")])
+  sig_genes <- unique(as.character(na.omit(data$gene[data$padj < 0.05])))
   
-  # Filter for significant genes (padj < 0.05)
-  sig_genes <- unique(as.character(data$gene[data$padj < 0.05]))
-  
-  # Store only if there are significant genes
   if (length(sig_genes) > 0) {
     sig_gene_lists[[cluster]] <- sig_genes
   } else {
@@ -41,58 +31,63 @@ for (file in files) {
   }
 }
 
-# Ensure we have at least two clusters with significant genes
+# Ensure at least two clusters have significant genes
 if (length(sig_gene_lists) < 2) {
   cat("Not enough clusters with significant genes to create an UpSet plot.\n")
-} else 
-  {
+} else {
   # Create a presence/absence matrix for all genes across clusters
-  all_genes <- unique(unlist(sig_gene_lists))  # Get all unique genes
+  all_genes <- unique(unlist(sig_gene_lists))
   gene_matrix <- data.frame(Gene = all_genes, stringsAsFactors = FALSE)
   
-  # Fill in presence/absence for each cluster
   for (cluster in names(sig_gene_lists)) {
     gene_matrix[[cluster]] <- ifelse(gene_matrix$Gene %in% sig_gene_lists[[cluster]], 1, 0)
   }
   
-  # Remove the gene column to get a binary matrix
-  gene_matrix_binary <- gene_matrix %>% select(-Gene)
-  
-  # Debugging: Check if the matrix is correctly populated
-  print(dim(gene_matrix_binary))  # Check dimensions
-  print(head(gene_matrix_binary))  # Print first few rows
-  
-  # Ensure gene_matrix has at least one non-zero entry before plotting
-  if (all(gene_matrix_binary == 0)) {
-    stop("Error: All values in the gene_matrix are zero! No overlaps to plot.")
-  }
-  
-  # Create an UpSet plot
-  # CairoPDF("UpSet_Active_Homecage.pdf", width = 20, height = 10)
-  # upset(
-  #   gene_matrix_binary, 
-  #   sets = names(sig_gene_lists), 
-  #   keep.order = TRUE,
-  #   sets.bar.color = "steelblue", 
-  #   order.by = "freq", 
-  #   mainbar.y.label = "Number of Shared Significant Genes",
-  #   sets.x.label = "Number of Genes per Cluster"
-  # )
-  # dev.off()
-  
-  p <- upset(
-    gene_matrix_binary, 
-    sets = names(cluster), 
-    keep.order = TRUE,
-    sets.bar.color = "steelblue", 
-    order.by = "freq", 
-    mainbar.y.label = "Number of Shared Significant Genes",
-    sets.x.label = "Number of Genes per Cluster"
-  )
-  
-  ggsave("UpSet_Active_Homecage.pdf", plot = p, width = 20, height = 10)
-  
-  write.csv(gene_matrix, file = "group_Active_Homecage_overlaps.csv")
+  # Save the matrix as a CSV
+  write.csv(gene_matrix, file = file.path(base_dir, "group_Active_Homecage_overlaps.csv"), row.names = FALSE)
 }
+
+# --- Convert Binary Matrix to List of Genes for `venn()` ---
+# Define the subsets of columns for "glut" and "gaba"
+glut_cols <- c("ITL23","ITL5","ITL6","CTL6", "PTL5")  #  glutamatergic clusters
+gaba_cols <- c("Pvalb","Sst")  #  GABAergic clusters
+
+# Convert for Glut Venn
+glut_sets <- lapply(glut_cols, function(col) gene_matrix$Gene[gene_matrix[[col]] == 1])
+names(glut_sets) <- glut_cols
+
+# Convert for GABA Venn
+gaba_sets <- lapply(gaba_cols, function(col) gene_matrix$Gene[gene_matrix[[col]] == 1])
+names(gaba_sets) <- gaba_cols
+
+# Create new dataframe with 'Gene' column and collapsed 'glut' and 'gaba' categories
+glut_gaba_sets <- gene_matrix %>%
+  mutate(
+    glut = ifelse(rowSums(select(., all_of(glut_cols))) > 0, 1, 0),
+    gaba = ifelse(rowSums(select(., all_of(gaba_cols))) > 0, 1, 0)
+  ) %>%
+  select(Gene, glut, gaba)  # Keep only relevant columns
+
+write.csv(glut_gaba_sets, "glut_gaba_geneoverlaps.csv")
+glut_gaba_sets <- glut_gaba_sets %>%
+  select(glut,gaba)
+
+# --- Save Venn Diagrams as PDFs ---
+pdf(file = file.path(base_dir, "glut_venn.pdf"))
+venn(glut_sets, ilabels = "counts", zcolor = c('ITL23' = '#41B75F', 
+                                               'ITL5' = '#5DBFC1', 
+                                               'ITL6' = '#3A8F87', 
+                                               'CTL6' = '#2C8CB9', 
+                                               'PTL5' = '#0A5B8C'))
+dev.off()
+
+pdf(file = file.path(base_dir, "gaba_venn.pdf"))
+venn(gaba_sets, ilabels = "counts", zcolor = c('Pvalb' = '#E66027', 'Sst' = '#F8991D'))
+dev.off()
+
+pdf(file = file.path(base_dir, "glut_vs_gaba_venn.pdf"))
+venn(glut_gaba_sets, ilabels = "counts",
+     zcolor = c('#1E9BB5','#D35400'))
+dev.off()
 
 
