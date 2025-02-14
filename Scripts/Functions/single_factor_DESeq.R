@@ -219,12 +219,12 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     form_fact <- as.formula(paste("~", comp_vect[1], sep = " "))
     
     #turns matrix into DESeq object
-    clust_tbl <- DESeqDataSetFromMatrix(counts, #Data Table
+    dds <- DESeqDataSetFromMatrix(counts, #Data Table
                                         colData = temp,  #metaData
                                         design = form_fact)
     
     # runs DESseq2
-    clust_tbl <- DESeq(clust_tbl)
+    dds <- DESeq(dds)
     
     # now to add option to save the DESeq object
     if (keep_dds == TRUE){
@@ -234,7 +234,7 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     
     #populates results
   
-results = results(clust_tbl, 
+results = results(dds, 
                   contrast = comp_vect,
                   alpha = 0.05,
                   cooksCutoff = FALSE,
@@ -248,5 +248,5 @@ results = results(clust_tbl,
     
     #returns
     #return(results)
- return(list(deseq_results = results, clust_tbl = clust_tbl))
+ return(list(dds = dds, results = results))
 }

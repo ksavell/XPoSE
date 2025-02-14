@@ -4,7 +4,7 @@ library(ggvenn)
 library(venn)
 
 # Define working directory
-base_dir <- "~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/F5/population_degs"
+base_dir <- "~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/F5/population_degs/Group_Active_HC_2371subset/"
 
 # Get list of all files in the directory
 files <- list.files(path = base_dir, pattern = "_group_Active_Homecage.csv$", full.names = TRUE)

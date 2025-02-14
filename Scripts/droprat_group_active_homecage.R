@@ -11,6 +11,21 @@ load("all_10312024.RData")
 
 # Run DESeq and FM for dropped iterations and no drop ---------------------
 
+set.seed(22)
+
+# Define target size for downsampling
+target_size <- 2371  
+
+# Function to downsample a group
+downsample_group <- function(seurat_obj, group, target_size) {
+  cells <- WhichCells(seurat_obj, ident = group)
+  if (length(cells) > target_size) {
+    return(sample(cells, target_size))  # Downsample if more than target
+  } else {
+    return(cells)  # Keep as is if already equal or smaller
+  }
+}
+
 # List of all unique rat IDs
 all_rats <- unique(all$ratID)
 clusters <- unique(all$cluster_name)
@@ -38,12 +53,19 @@ for (cl in clusters) {
       dir.create(rat_dir)
     }
     
-    # Subset data based on exclusion
+    # Step 1: Exclude the rat first
     subset_data <- if (excluded_rat == "none") {
-      all  # Use full dataset for "none"
+      all  # Use full dataset if no rat is excluded
     } else {
       subset(all, ratID != excluded_rat)
     }
+    
+    # Step 2: Perform downsampling after exclusion
+    groups <- levels(subset_data)
+    selected_cells <- unlist(lapply(groups, function(g) downsample_group(subset_data, g, target_size)))
+    
+    # Step 3: Subset the downsampled Seurat object
+    subset_data <- subset(subset_data, cells = selected_cells)
     
     tryCatch({
       # DESeq2 Analysis (Active vs. Homecage)
@@ -57,8 +79,8 @@ for (cl in clusters) {
       )
       
       # Extract results and dds
-      deseq_results <- results$deseq_results
-      dds <- results$clust_tbl
+      deseq_results <- results$results
+      dds <- results$dds
       
       # Ensure valid row names for deseq_results
       if (is.null(rownames(deseq_results))) {
@@ -99,6 +121,7 @@ for (cl in clusters) {
     })
   }
 }
+
 
 
 # Calculate gene overlap --------------------------------------------------

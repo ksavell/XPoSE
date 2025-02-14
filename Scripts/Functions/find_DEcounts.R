@@ -1,37 +1,46 @@
-find_DEcounts <- function(dds, coexp, cluster, feature_list, factor_metadata, factor_levels){
+find_DEcounts <- function(directory, cluster, de_path = "_group_Active_Homecage", feature_list, control_suffix = "HC") {
   
-  source("Scripts/Functions/sort_df.R")
+  # Construct file paths
   
-  # Extract all normalized counts for each sample
-  count <- counts(dds, normalized=TRUE)
+  dds_file <- file.path(directory, paste0(cluster, de_path, ".RDS"))
+  coexp_file <- file.path(directory, paste0(cluster, de_path, ".csv"))
   
-  # Define the cluster and genes to pull (sig. upregulated)
+  # Load DESeq2 dataset
+  if (!file.exists(dds_file) | !file.exists(coexp_file)) {
+    stop("Missing input files for cluster: ", cluster)
+  }
+  dds <- readRDS(dds_file)
+  coexp <- read.csv(coexp_file, row.names = 1)
+  
+  # Extract normalized counts
+  count <- counts(dds, normalized = TRUE)
+  
+  # Define relevant variables
   FCvar <- "log2FoldChange"
   PVvar <- "padj"
   
   # Filter by feature list
   filtered_count <- as.data.frame(count[rownames(count) %in% feature_list, ])
   
-  # Calculate averages based on the provided factor levels
-  averages <- sapply(factor_levels, function(level) {
-    sample_cols <- factor_metadata$sample[factor_metadata$factor == level]
-    rowMeans(filtered_count[, sample_cols, drop = FALSE], na.rm = TRUE)
-  })
+  # Identify control samples
+  control_samples <- colnames(count)[grepl(control_suffix, colnames(count))]
   
-  # Add the averages as new columns
-  filtered_count <- cbind(filtered_count, averages)
+  # Calculate log2 fold change relative to control group
+  control_avg <- rowMeans(filtered_count[, control_samples, drop = FALSE], na.rm = TRUE)
   
-  # Calculate fold changes for each sample relative to the factor-based average
-  for (i in seq_along(colnames(filtered_count[, 1:ncol(count)]))) {
-    new_column_name <- paste0("FC_", colnames(filtered_count)[i])
-    filtered_count[new_column_name] <- log2(filtered_count[, i] / filtered_count[, "average"])
+  for (sample in colnames(filtered_count)) {
+    new_column_name <- paste0("log2FC_", sample)
+    filtered_count[[new_column_name]] <- log2(filtered_count[[sample]] / control_avg)
   }
   
-  # Copy over the adjusted p-value from the coexp table
+  # Copy adjusted p-values from coexp table
   idx <- match(rownames(filtered_count), rownames(coexp))
   filtered_count$adjpval <- coexp[[PVvar]][idx]
   filtered_count$adjpvalT <- -log10(filtered_count$adjpval)
   
-  # Save the filtered count as a CSV
-  write.csv(filtered_count, file = paste0("ExampleFeatures_", cluster, ".csv"))
+  # Save as CSV
+  output_file <- file.path(directory, paste0("Log2FC_Values_", cluster, de_path, ".csv"))
+  write.csv(filtered_count, file = output_file, row.names = TRUE)
+  
+  message("Saved file: ", output_file)
 }
