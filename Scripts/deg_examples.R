@@ -1,65 +1,33 @@
 # example gene heatmaps
 
-source("~/XPoSE/Scripts/Functions/find_DEcounts.R")
+source("Scripts/Functions/find_DEcounts.R")
+library(DESeq2)
+library(tidyverse)
 
-all_glut <- c("Actn1",
-              "Egr3",
-              "Fosb",
-              "Homer1",
-              "Inhba",
-              "Nptx2",
-              "Ppm1h",
-              "Slc6a17",
-              "Slc9a5",
-              "Tet3")
-
-glut_gaba <- c("Vgf","Prprn")
-
-specific <- c("Olfm3","Ecel1", # Sst
-              "Dnah2","Crh", # Pvalb
-              "Efcab3","Nptx1", # CTL6
-              "Pim1","Sik1", # ITL23
-              "Prkcdbp", # ITL5
-              "Gfra1","Lbh", # ITL6
-              "Pdyn","Ctrl","Dusp1","Oacyl" # PTL5
-              )
-              
-others <- c("Bdnf","Homer1","Scg2","Arc","Fosb")
-
-together <- c("Actn1",
-              "Egr3",
-              "Fosb",
-              "Homer1",
-              "Inhba",
-              "Nptx2",
-              "Ppm1h",
-              "Slc6a17",
-              "Slc9a5",
-              "Tet3",
-              "Olfm3","Ecel1", # Sst
-              "Dnah2","Crh", # Pvalb
-              "Efcab3","Nptx1", # CTL6
-              "Pim1","Sik1", # ITL23
-              "Prkcdbp", # ITL5
-              "Gfra1","Lbh", # ITL6
-              "Pdyn","Ctrl","Dusp1","Oacyl", # PTL5
-              "Bdnf","Homer1","Scg2","Arc","Fosb",
-              "Vgf","Ptprn")
+gene_list <- c("Vgf","Ptprn", "Scg2", # common across most
+              "Arc","Bdnf","Egr3","Fosb","Homer1","Nptx2", # all glut
+              "Egr2", "Penk", "Mapk4", # all IT gluts
+              "Crh" #Pvalb specific
+              ) 
 
 clusters <- c("ITL23","ITL5","ITL6","CTL6","PTL5","Pvalb","Sst")
+
 # test
 for (cl in clusters) {
 find_DEcounts(directory = "~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/F5/population_degs/Group_Active_HC_2371subset", 
               cluster = cl, 
               de_path = "_group_Active_Homecage", 
-              feature_list = together, 
+              feature_list = gene_list, 
               control_suffix = "HC")
 }
 
 
 # summarize ---------------------------------------------------------------
 
-summarize_DEcounts <- function(directory, clusters) {
+summarize_DEcounts <- function(directory, clusters, gene_list) {
+  
+  # Convert gene_list to a character vector
+  gene_list <- unlist(strsplit(gene_list, ","))
   
   # Initialize empty lists to store results
   log2FC_HC_list <- list()
@@ -86,6 +54,17 @@ summarize_DEcounts <- function(directory, clusters) {
     
     adjpval <- data[, "adjpval", drop = FALSE]
     
+    # Check for missing gene names
+    missing_genes <- setdiff(gene_list, rownames(data))
+    if (length(missing_genes) > 0) {
+      warning("The following genes are not found in the data for cluster ", cluster, ": ", paste(missing_genes, collapse = ", "))
+    }
+    
+    # Reorder data frames based on gene_list
+    log2FC_HC <- log2FC_HC[gene_list, , drop = FALSE]
+    log2FC_Active <- log2FC_Active[gene_list, , drop = FALSE]
+    adjpval <- adjpval[gene_list, , drop = FALSE]
+    
     # Store results
     log2FC_HC_list[[cluster]] <- log2FC_HC
     log2FC_Active_list[[cluster]] <- log2FC_Active
@@ -105,5 +84,8 @@ summarize_DEcounts <- function(directory, clusters) {
   message("Summary files saved in ", directory)
 }
 
+
+
 summarize_DEcounts("~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_January2025/DataForFigures/F5/population_degs/Group_Active_HC_2371subset",
-                  clusters = clusters)
+                  clusters = clusters,
+                  gene_list = gene_list)
