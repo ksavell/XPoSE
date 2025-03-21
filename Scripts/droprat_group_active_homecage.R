@@ -2,7 +2,6 @@
 
 library(dplyr)
 library(tidyr)
-library(UpSetR)
 library(Seurat)
 
 source("Scripts/Functions/single_factor_DESeq.R") 
@@ -13,10 +12,7 @@ load("all_10312024.RData")
 
 set.seed(22)
 
-# Define target size for downsampling
-target_size <- 2371  
-
-# Function to downsample a group
+# Function to downsample a group dynamically
 downsample_group <- function(seurat_obj, group, target_size) {
   cells <- WhichCells(seurat_obj, ident = group)
   if (length(cells) > target_size) {
@@ -60,11 +56,22 @@ for (cl in clusters) {
       subset(all, ratID != excluded_rat)
     }
     
-    # Step 2: Perform downsampling after exclusion
-    groups <- levels(subset_data)
-    selected_cells <- unlist(lapply(groups, function(g) downsample_group(subset_data, g, target_size)))
+    # Step 2: Set correct identity class
+    Idents(subset_data) <- "group"  # Ensure "Active" and "Homecage" are the current identities
     
-    # Step 3: Subset the downsampled Seurat object
+    # Step 3: Dynamically determine the downsampling target size
+    group_sizes <- table(Idents(subset_data))  # Count nuclei per group
+    if (!all(c("Active", "Homecage") %in% names(group_sizes))) {
+      cat("Skipping cluster:", cl, "for excluded rat:", excluded_rat, "- one or both groups missing.\n")
+      next
+    }
+    
+    target_size <- min(group_sizes["Active"], group_sizes["Homecage"])  # Choose the smaller group size
+    
+    # Step 4: Perform downsampling after exclusion
+    selected_cells <- unlist(lapply(c("Active", "Homecage"), function(g) downsample_group(subset_data, g, target_size)))
+    
+    # Step 5: Subset the downsampled Seurat object
     subset_data <- subset(subset_data, cells = selected_cells)
     
     tryCatch({
@@ -104,7 +111,7 @@ for (cl in clusters) {
       
       # FindMarkers Analysis (for Seurat object)
       cluster_subset <- subset(subset_data, cluster_name == cl)  # Subset by cluster
-      Idents(cluster_subset) <- "group"
+      Idents(cluster_subset) <- "group"  # Set identity to group again
       fm_results <- FindMarkers(cluster_subset, ident.1 = "Active", ident.2 = "Homecage")  # Compare Active vs. Homecage
       fm_results$score <- ifelse(fm_results$p_val_adj < 0.05, 1, 0)
       fm_results$score_updn <- ifelse(fm_results$p_val_adj < 0.05 & fm_results$avg_log2FC > 0, 1,  # Upregulated
@@ -123,152 +130,128 @@ for (cl in clusters) {
 }
 
 
-
 # Calculate gene overlap --------------------------------------------------
 
-excluded_dirs <- c("Excluded_none", "Excluded_HC-1", "Excluded_HC-2", "Excluded_HC-3", "Excluded_HC-4", 
-                   "Excluded_Active-1", "Excluded_Active-2", "Excluded_Active-3", "Excluded_Active-4")
-
-# Define the clusters and directories
-clusters <- list.dirs(path = getwd(), recursive = FALSE, full.names = FALSE)
-clusters <- clusters[grepl("^Cluster_", clusters)] # Keep only cluster directories
-
-for (cluster in clusters) {
-  tryCatch({
-    # Set the cluster directory
-    cluster_dir <- file.path(getwd(), cluster)
-    excluded_dirs <- list.dirs(cluster_dir, recursive = FALSE, full.names = TRUE)
+# Function to process each cluster and merge DESeq and FindMarkers results
+# Function to process each cluster and merge DESeq and FindMarkers results
+process_cluster <- function(cluster_dir) {
+  # Extract the cluster name from the directory
+  cluster_name <- basename(cluster_dir)
+  
+  # Get a list of Excluded directories within the current cluster directory
+  excluded_dirs <- list.dirs(cluster_dir, full.names = TRUE, recursive = FALSE)
+  
+  # Initialize empty data frames to store results for DESeq and FindMarkers
+  deseq_results <- data.frame()
+  findmarkers_results <- data.frame()
+  
+  # Loop through each excluded directory
+  for (excluded_dir in excluded_dirs) {
+    # Get the list of DESeq and FindMarkers files within the Excluded directory
+    deseq_file <- list.files(excluded_dir, pattern = "DESeq_Results_Group_Active_Homecage_Excluded_.*\\.csv$", full.names = TRUE)
+    findmarkers_file <- list.files(excluded_dir, pattern = "FindMarkers_Results_Group_Active_Homecage_Excluded_.*\\.csv$", full.names = TRUE)
     
-    # Initialize lists to store data for each file type
-    fm_binary_list <- list()
-    fm_updn_list <- list()
-    deseq_binary_list <- list()
-    deseq_updn_list <- list()
+    # Extract the sample name from the directory
+    sample_name <- basename(excluded_dir)
     
-    # Process each excluded directory
-    for (excluded_dir in excluded_dirs) {
-      exclusion_name <- basename(excluded_dir)  # Get the name of exclusion (e.g., Excluded_HC-1)
+    # Process DESeq file
+    if (length(deseq_file) == 1) {
+      deseq_data <- read.csv(deseq_file, stringsAsFactors = FALSE)
       
-      # FindMarkers processing
-      fm_file <- file.path(excluded_dir, paste0("FindMarkers_Results_Group_Active_Homecage_", exclusion_name, ".csv"))
-      if (file.exists(fm_file)) {
-        fm_data <- read.csv(fm_file, row.names = 1)  # Read row names as gene
-        
-        # Ensure required columns exist
-        if (all(c("score", "score_updn") %in% colnames(fm_data))) {
-          fm_data$gene <- rownames(fm_data)
-          fm_binary_list[[exclusion_name]] <- fm_data[, c("gene", "score")]
-          fm_binary_list[[exclusion_name]] <- setNames(fm_binary_list[[exclusion_name]], c("gene", exclusion_name))
-          
-          fm_updn_list[[exclusion_name]] <- fm_data[, c("gene", "score_updn")]
-          fm_updn_list[[exclusion_name]] <- setNames(fm_updn_list[[exclusion_name]], c("gene", exclusion_name))
-        } else {
-          cat("FindMarkers file missing required columns:", fm_file, "\n")
-          next
-        }
-      } else {
-        cat("FindMarkers file not found in directory:", excluded_dir, "\n")
-      }
+      # Extract the gene and score_updn columns
+      deseq_data <- deseq_data %>% select(gene, score_updn)
       
-      # DESeq2 processing
-      deseq_file <- file.path(excluded_dir, paste0("DESeq_Results_Group_Active_Homecage_", exclusion_name, ".csv"))
-      if (file.exists(deseq_file)) {
-        deseq_data <- read.csv(deseq_file)  # Genes are already a column
-        
-        # Ensure required columns exist
-        if (all(c("gene", "score", "score_updn") %in% colnames(deseq_data))) {
-          deseq_binary_list[[exclusion_name]] <- deseq_data[, c("gene", "score")]
-          deseq_binary_list[[exclusion_name]] <- setNames(deseq_binary_list[[exclusion_name]], c("gene", exclusion_name))
-          
-          deseq_updn_list[[exclusion_name]] <- deseq_data[, c("gene", "score_updn")]
-          deseq_updn_list[[exclusion_name]] <- setNames(deseq_updn_list[[exclusion_name]], c("gene", exclusion_name))
-        } else {
-          cat("DESeq2 file missing required columns:", deseq_file, "\n")
-          next
-        }
+      # Rename the column dynamically (fixing the `:=` error)
+      colnames(deseq_data)[colnames(deseq_data) == "score_updn"] <- sample_name
+      
+      # Merge with the main results data frame
+      if (nrow(deseq_results) == 0) {
+        deseq_results <- deseq_data
       } else {
-        cat("DESeq2 file not found in directory:", excluded_dir, "\n")
+        deseq_results <- merge(deseq_results, deseq_data, by = "gene", all = TRUE)
       }
     }
     
-    # Function to merge dataframes by gene
-    combine_tables <- function(data_list) {
-      combined <- Reduce(function(x, y) merge(x, y, by = "gene", all = TRUE), data_list)
-      combined[is.na(combined)] <- 0  # Replace NAs with 0
-      return(combined)
-    }
-    
-    # Combine tables for each method/score type
-    if (length(fm_binary_list) > 0) {
-      fm_binary_data <- combine_tables(fm_binary_list)
-      fm_updn_data <- combine_tables(fm_updn_list)
+    # Process FindMarkers file
+    if (length(findmarkers_file) == 1) {
+      findmarkers_data <- read.csv(findmarkers_file, row.names = 1, stringsAsFactors = FALSE)
       
-      # Save combined tables
-      write.csv(fm_binary_data, file.path(cluster_dir, paste0("FindMarkers_Results_binaryTally_Group_Active_Homecage_", cluster, ".csv")), row.names = FALSE)
-      write.csv(fm_updn_data, file.path(cluster_dir, paste0("FindMarkers_Results_updnTally_Group_Active_Homecage_", cluster, ".csv")), row.names = FALSE)
-    }
-    
-    if (length(deseq_binary_list) > 0) {
-      deseq_binary_data <- combine_tables(deseq_binary_list)
-      deseq_updn_data <- combine_tables(deseq_updn_list)
+      # Ensure row names are preserved
+      findmarkers_data <- findmarkers_data %>% mutate(gene = rownames(findmarkers_data))
       
-      # Save combined tables
-      write.csv(deseq_binary_data, file.path(cluster_dir, paste0("DESeq2_Results_binaryTally_Group_Active_Homecage_", cluster, ".csv")), row.names = FALSE)
-      write.csv(deseq_updn_data, file.path(cluster_dir, paste0("DESeq2_Results_updnTally_Group_Active_Homecage_", cluster, ".csv")), row.names = FALSE)
+      # Extract only the score_updn column
+      findmarkers_data <- findmarkers_data %>% select(gene, score_updn)
+      
+      # Rename the column dynamically (fixing the `:=` error)
+      colnames(findmarkers_data)[colnames(findmarkers_data) == "score_updn"] <- sample_name
+      
+      # Merge with the main results data frame
+      if (nrow(findmarkers_results) == 0) {
+        findmarkers_results <- findmarkers_data
+      } else {
+        findmarkers_results <- merge(findmarkers_results, findmarkers_data, by = "gene", all = TRUE)
+      }
     }
-    
-    cat("Processing completed for cluster:", cluster, "\n")
-    
-  }, error = function(e) {
-    cat("Error processing cluster:", cluster, "\n")
-    cat("Error message:", e$message, "\n")
-  })
+  }
+  
+  # Save the results to the cluster directory with cluster name in filenames
+  if (nrow(deseq_results) > 0) {
+    write.csv(deseq_results, file.path(cluster_dir, paste0("DESeq_combined_results_Cluster_", cluster_name, ".csv")), row.names = FALSE)
+  }
+  if (nrow(findmarkers_results) > 0) {
+    write.csv(findmarkers_results, file.path(cluster_dir, paste0("FindMarkers_combined_results_Cluster_", cluster_name, ".csv")), row.names = FALSE)
+  }
 }
 
 
-# Find Consistent and nonconsistent genes ---------------------------------
+# Define the main directory containing "Cluster_[cl]" directories
+base_dir <- "~/Library/CloudStorage/Box-Box/RM_Projects/mRFP-snSeq/Project1_XPoSEseq/XPoSEseq_manuscript/NeuroResource_March2025/DataForFigures/S4/Droprat"
 
-for (cluster in clusters) {
+# Get the list of "Cluster_[cl]" directories
+cluster_dirs <- list.dirs(base_dir, full.names = TRUE, recursive = FALSE)
+
+# Loop through each "Cluster_[cl]" directory and process
+for (cluster_dir in cluster_dirs) {
+  process_cluster(cluster_dir)
+}
+
+# Find Consistent and Non-consistent Genes ---------------------------------
+for (cluster_dir in cluster_dirs) {
+  cluster_name <- basename(cluster_dir)
+  
   tryCatch({
-    # Define the cluster directory
-    cluster_dir <- file.path(getwd(), cluster)
-    if (!dir.exists(cluster_dir)) {
-      dir.create(cluster_dir)
-    }
+    # Define filenames with cluster name included
+    fm_updnscore_file <- file.path(cluster_dir, paste0("FindMarkers_combined_results_Cluster_", cluster_name, ".csv"))
+    deseq_updnscore_file <- file.path(cluster_dir, paste0("DESeq_combined_results_Cluster_", cluster_name, ".csv"))
     
-    # Load score files
-    fm_score_file <- file.path(cluster_dir, paste0("FindMarkers_Results_binaryTally_Group_Active_Homecage_", cluster, ".csv"))
-    fm_updnscore_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnTally_Group_Active_Homecage_", cluster, ".csv"))
-    deseq_score_file <- file.path(cluster_dir, paste0("DESeq2_Results_binaryTally_Group_Active_Homecage_", cluster, ".csv"))
-    deseq_updnscore_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnTally_Group_Active_Homecage_", cluster, ".csv"))
-    
-    # Check if required files exist
-    if (!all(file.exists(c(fm_score_file, fm_updnscore_file, deseq_score_file, deseq_updnscore_file)))) {
-      cat("Score files missing for cluster:", cluster, "\n")
-      next
-    }
-    
-    # Read in score and updnscore files
-    fm_score <- read.csv(fm_score_file, row.names = 1, check.names = FALSE)
+    # Read in score files
     fm_updnscore <- read.csv(fm_updnscore_file, row.names = 1, check.names = FALSE)
-    deseq_score <- read.csv(deseq_score_file, row.names = 1, check.names = FALSE)
     deseq_updnscore <- read.csv(deseq_updnscore_file, row.names = 1, check.names = FALSE)
     
-    # Ensure Excluded_none column exists
-    if (!"Excluded_none" %in% colnames(fm_score) || !"Excluded_none" %in% colnames(deseq_score)) {
-      stop("Excluded_none column not found in score files!")
+    # Identify consistent genes (all 1 or 2)
+    fm_consistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) all(row == 1 | row == 2))]
+    deseq_consistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) all(row == 1 | row == 2))]
+    
+    # Identify non-consistent genes
+    if ("Excluded_none" %in% colnames(fm_updnscore)) {
+      fm_nonconsistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) 
+        any(row == 1 | row == 2) & !all(row == 1 | row == 2) & row["Excluded_none"] != 0)]
+    } else {
+      fm_nonconsistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) 
+        any(row == 1 | row == 2) & !all(row == 1 | row == 2))]
     }
     
-    # Identify consistent (all 1's)
-    fm_consistent <- rownames(fm_score)[apply(fm_score, 1, function(row) all(row == 1))]
-    deseq_consistent <- rownames(deseq_score)[apply(deseq_score, 1, function(row) all(row == 1))]
+    if ("Excluded_none" %in% colnames(deseq_updnscore)) {
+      deseq_nonconsistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) 
+        any(row == 1 | row == 2) & !all(row == 1 | row == 2) & row["Excluded_none"] != 0)]
+    } else {
+      deseq_nonconsistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) 
+        any(row == 1 | row == 2) & !all(row == 1 | row == 2))]
+    }
     
-    # Identify non-consistent genes:
-    # 1. Must have at least one `1`
-    # 2. Must **not** be in the consistent list
-    # 3. Must **not have Excluded_none == 0**
-    fm_nonconsistent <- rownames(fm_score)[apply(fm_score, 1, function(row) any(row == 1) & !all(row == 1) & row["Excluded_none"] != 0)]
-    deseq_nonconsistent <- rownames(deseq_score)[apply(deseq_score, 1, function(row) any(row == 1) & !all(row == 1) & row["Excluded_none"] != 0)]
+    # Debugging: Check if non-consistent gene lists are empty
+    cat("Cluster:", cluster_name, " - FM Non-Consistent Genes:", length(fm_nonconsistent), "\n")
+    cat("Cluster:", cluster_name, " - DESeq Non-Consistent Genes:", length(deseq_nonconsistent), "\n")
     
     # Filter updnscore files by consistent and non-consistent genes
     fm_updn_consistent <- fm_updnscore[rownames(fm_updnscore) %in% fm_consistent, , drop = FALSE]
@@ -277,132 +260,84 @@ for (cluster in clusters) {
     deseq_updn_consistent <- deseq_updnscore[rownames(deseq_updnscore) %in% deseq_consistent, , drop = FALSE]
     deseq_updn_nonconsistent <- deseq_updnscore[rownames(deseq_updnscore) %in% deseq_nonconsistent, , drop = FALSE]
     
-    # Save filtered updnscore files
-    fm_consistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_", cluster, ".csv"))
-    fm_nonconsistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_", cluster, ".csv"))
-    write.csv(fm_updn_consistent, fm_consistent_file, row.names = TRUE)
-    write.csv(fm_updn_nonconsistent, fm_nonconsistent_file, row.names = TRUE)
+    # Ensure non-consistent files are saved even if empty
+    fm_nonconsistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
+    deseq_nonconsistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
     
-    deseq_consistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_", cluster, ".csv"))
-    deseq_nonconsistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_", cluster, ".csv"))
-    write.csv(deseq_updn_consistent, deseq_consistent_file, row.names = TRUE)
-    write.csv(deseq_updn_nonconsistent, deseq_nonconsistent_file, row.names = TRUE)
+    write.csv(fm_updn_consistent, file.path(cluster_dir, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv")), row.names = TRUE)
+    write.csv(deseq_updn_consistent, file.path(cluster_dir, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv")), row.names = TRUE)
     
-    cat("Processed consistent and non-consistent updn scores for cluster:", cluster, "\n")
+    # **Ensuring non-consistent files save even if empty**
+    if (nrow(fm_updn_nonconsistent) > 0) {
+      write.csv(fm_updn_nonconsistent, fm_nonconsistent_file, row.names = TRUE)
+    } else {
+      cat("Cluster:", cluster_name, " - No Non-Consistent FindMarkers Genes. Saving empty file.\n")
+      write.csv(data.frame(Gene = character(), Score = integer()), fm_nonconsistent_file, row.names = FALSE)
+    }
+    
+    if (nrow(deseq_updn_nonconsistent) > 0) {
+      write.csv(deseq_updn_nonconsistent, deseq_nonconsistent_file, row.names = TRUE)
+    } else {
+      cat("Cluster:", cluster_name, " - No Non-Consistent DESeq Genes. Saving empty file.\n")
+      write.csv(data.frame(Gene = character(), Score = integer()), deseq_nonconsistent_file, row.names = FALSE)
+    }
+    
+    cat("Processed consistent and non-consistent updn scores for cluster:", cluster_name, "\n")
     
   }, error = function(e) {
-    cat("Error processing cluster:", cluster, "\n")
+    cat("Error processing cluster:", cluster_name, "\n")
     cat("Error message:", e$message, "\n")
   })
 }
 
 
-# Tally and save ----------------------------------------------------------
+# Save Summary Results ----------------------------------------------------
 
-# Define the working directory (main directory containing cluster folders)
-base_dir <- "Droprat"
-
-# Get the list of cluster directories
-clusters <- list.dirs(path = base_dir, recursive = FALSE, full.names = FALSE)
-clusters <- clusters[grepl("^Cluster_", clusters)]  # Keep only cluster directories
-
-# Initialize results data frame
-summary_results <- data.frame(
-  Cluster = clusters,
-  consistent_DESeq = numeric(length(clusters)),
-  consistent_FM = numeric(length(clusters)),
-  nonconsistent_DESeq = numeric(length(clusters)),
-  nonconsistent_FM = numeric(length(clusters)),
+# Initialize summary table
+consistency_summary <- data.frame(
+  Cluster = character(),
+  consistent_DESeq = integer(),
+  nonconsistent_DESeq = integer(),
+  consistent_FM = integer(),
+  nonconsistent_FM = integer(),
   stringsAsFactors = FALSE
 )
 
-proportion_results <- data.frame(
-  Cluster = clusters,
-  consistent_DESeq = numeric(length(clusters)),
-  consistent_FM = numeric(length(clusters)),
-  nonconsistent_DESeq = numeric(length(clusters)),
-  nonconsistent_FM = numeric(length(clusters)),
-  stringsAsFactors = FALSE
-)
-
-# Loop through each cluster
-for (i in seq_along(clusters)) {
-  cluster <- clusters[i]
-  cat("Processing cluster:", cluster, "\n")
+# Loop again to count consistent and non-consistent genes
+for (cluster_dir in cluster_dirs) {
+  cluster_name <- basename(cluster_dir)
   
-  # Define file paths
-  fm_consistent_file <- file.path(base_dir, cluster, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_", cluster, ".csv"))
-  fm_nonconsistent_file <- file.path(base_dir, cluster, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_", cluster, ".csv"))
-  deseq_consistent_file <- file.path(base_dir, cluster, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_", cluster, ".csv"))
-  deseq_nonconsistent_file <- file.path(base_dir, cluster, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_", cluster, ".csv"))
+  # File paths (must match saved filenames)
+  deseq_consistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
+  deseq_nonconsistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
+  fm_consistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
+  fm_nonconsistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
   
-  # Read and count rows for each file (if it exists)
-  consistent_FM_count <- if (file.exists(fm_consistent_file)) {
-    nrow(read.csv(fm_consistent_file, header = TRUE, stringsAsFactors = FALSE))
-  } else {
-    cat("File not found:", fm_consistent_file, "\n")
-    NA
+  # Read counts if files exist, else assume 0
+  count_if_exists <- function(filepath) {
+    if (file.exists(filepath)) {
+      nrow(read.csv(filepath))
+    } else {
+      0
+    }
   }
   
-  nonconsistent_FM_count <- if (file.exists(fm_nonconsistent_file)) {
-    nrow(read.csv(fm_nonconsistent_file, header = TRUE, stringsAsFactors = FALSE))
-  } else {
-    cat("File not found:", fm_nonconsistent_file, "\n")
-    NA
-  }
+  summary_row <- data.frame(
+    Cluster = cluster_name,
+    consistent_DESeq = count_if_exists(deseq_consistent_file),
+    nonconsistent_DESeq = count_if_exists(deseq_nonconsistent_file),
+    consistent_FM = count_if_exists(fm_consistent_file),
+    nonconsistent_FM = count_if_exists(fm_nonconsistent_file),
+    stringsAsFactors = FALSE
+  )
   
-  consistent_DESeq_count <- if (file.exists(deseq_consistent_file)) {
-    nrow(read.csv(deseq_consistent_file, header = TRUE, stringsAsFactors = FALSE))
-  } else {
-    cat("File not found:", deseq_consistent_file, "\n")
-    NA
-  }
-  
-  nonconsistent_DESeq_count <- if (file.exists(deseq_nonconsistent_file)) {
-    nrow(read.csv(deseq_nonconsistent_file, header = TRUE, stringsAsFactors = FALSE))
-  } else {
-    cat("File not found:", deseq_nonconsistent_file, "\n")
-    NA
-  }
-  
-  # Save counts to summary_results
-  summary_results$consistent_FM[i] <- consistent_FM_count
-  summary_results$nonconsistent_FM[i] <- nonconsistent_FM_count
-  summary_results$consistent_DESeq[i] <- consistent_DESeq_count
-  summary_results$nonconsistent_DESeq[i] <- nonconsistent_DESeq_count
-  
-  # Calculate proportions
-  total_DESeq <- consistent_DESeq_count + nonconsistent_DESeq_count
-  total_FM <- consistent_FM_count + nonconsistent_FM_count
-  
-  proportion_results$proportion_consistent_DESeq[i] <- if (!is.na(total_DESeq) && total_DESeq > 0) {
-    consistent_DESeq_count / total_DESeq
-  } else {
-    NA
-  }
-  
-  proportion_results$proportion_nonconsistent_DESeq[i] <- if (!is.na(total_DESeq) && total_DESeq > 0) {
-    nonconsistent_DESeq_count / total_DESeq
-  } else {
-    NA
-  }
-  
-  proportion_results$proportion_consistent_FM[i] <- if (!is.na(total_FM) && total_FM > 0) {
-    consistent_FM_count / total_FM
-  } else {
-    NA
-  }
-  
-  proportion_results$proportion_nonconsistent_FM[i] <- if (!is.na(total_FM) && total_FM > 0) {
-    nonconsistent_FM_count / total_FM
-  } else {
-    NA
-  }
+  consistency_summary <- rbind(consistency_summary, summary_row)
 }
 
-# Save the summary results and proportions to separate CSV files
-summary_file <- file.path(base_dir, "MethodComp_Group_Active_Homecage_Summary.csv")
-proportion_file <- file.path(base_dir, "MethodComp_Group_Active_Homecage_Proportions.csv")
+# Save the summary table
+summary_output_file <- file.path(base_dir, "Cluster_Consistency_Summary.csv")
+write.csv(consistency_summary, summary_output_file, row.names = FALSE)
 
-write.csv(summary_results, file = summary_file, row.names = FALSE)
-write.csv(proportion_results, file = proportion_file, row.names = FALSE)
+cat("Cluster-level consistency summary saved to:", summary_output_file, "\n")
+
+
