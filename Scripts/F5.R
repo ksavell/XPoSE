@@ -25,7 +25,7 @@ de_and_summary <- function(seur_obj, pair) {
   for (cl in clusters) {
     # Run DESeq2 analysis
     deseq2_results <- tryCatch({
-      single_factor_DESeq(object = all, comp_vect = pair, cluster = cl, min_cell = 1)
+      single_factor_DESeq(object = all, comp_vect = pair, cluster = cl, min_cell = 0)
     }, error = function(e) {
       message(paste("DESeq2 failed for cluster:", cl, "with pair:", paste(pair, collapse = "_")))
       NULL
@@ -120,6 +120,8 @@ set.seed(22)
 # number of cells
 target_size <- 2371
 
+Idents(all) <- "group"
+
 # Function to downsample a group
 downsample_group <- function(seurat_obj, group, target_size) {
   cells <- WhichCells(seurat_obj, ident = group)
@@ -150,3 +152,8 @@ de_and_summary(all,
 
 de_and_summary(all,
                pair = pairs_list[[4]])
+
+
+#save downsampled all for Figure S4
+
+save(all, file = "all_downsampledforde_03212025.RData")
