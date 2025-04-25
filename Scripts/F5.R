@@ -60,12 +60,14 @@ deg_overlap_and_venn(base_dir = "group_Active_Non-active", pattern = "Active_Non
 source("Scripts/Functions/summarize_de_counts.R")
 source("Scripts/Functions/find_DEcounts.R")
 
+clusters <- c("ITL23","ITL5","ITL6","CTL6","PTL5","Pvalb","Sst")
+
 gene_list <- c("Vgf","Ptprn", "Scg2", # common across most
                "Egr3","Fosb","Homer1","Nptx2", # all glut
-               "Egr2", "Penk", "Mapk4", # all IT gluts
+                "Penk", "Mapk4","Egr2", # all IT gluts
                "Arc","Bdnf", # notable arg's
                "Crh", #Pvalb specific
-               "Cpne7","Ecel1" #Sst specific
+               "Ecel1" #Sst specific
 )
 
 for (cl in clusters) {

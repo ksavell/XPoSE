@@ -57,7 +57,7 @@ for (cl in clusters) {
         cluster = cl,
         min_cell = 0,
         min_rat = 2,
-        keep_dds = FALSE
+        keep_dds = TRUE
       )
       
       # Extract results and dds
@@ -107,7 +107,6 @@ for (cl in clusters) {
 
 # Calculate gene overlap --------------------------------------------------
 
-# Function to process each cluster and merge DESeq and FindMarkers results
 # Function to process each cluster and merge DESeq and FindMarkers results
 process_cluster <- function(cluster_dir) {
   # Extract the cluster name from the directory
@@ -195,124 +194,139 @@ for (cluster_dir in cluster_dirs) {
   cluster_name <- basename(cluster_dir)
   
   tryCatch({
-    # Define filenames with cluster name included
+    # Define filenames
     fm_updnscore_file <- file.path(cluster_dir, paste0("FindMarkers_combined_results_Cluster_", cluster_name, ".csv"))
     deseq_updnscore_file <- file.path(cluster_dir, paste0("DESeq_combined_results_Cluster_", cluster_name, ".csv"))
     
-    # Read in score files
+    # Read in score tables
     fm_updnscore <- read.csv(fm_updnscore_file, row.names = 1, check.names = FALSE)
     deseq_updnscore <- read.csv(deseq_updnscore_file, row.names = 1, check.names = FALSE)
     
-    # Identify consistent genes (all 1 or 2)
-    fm_consistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) all(row == 1 | row == 2))]
-    deseq_consistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) all(row == 1 | row == 2))]
+    # Consistent (all 1 or all 2)
+    fm_consistent_up <- rownames(fm_updnscore)[apply(fm_updnscore, 1, \(x) all(x == 1))]
+    fm_consistent_down <- rownames(fm_updnscore)[apply(fm_updnscore, 1, \(x) all(x == 2))]
     
-    # Identify non-consistent genes
-    if ("Excluded_none" %in% colnames(fm_updnscore)) {
-      fm_nonconsistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) 
-        any(row == 1 | row == 2) & !all(row == 1 | row == 2) & row["Excluded_none"] != 0)]
-    } else {
-      fm_nonconsistent <- rownames(fm_updnscore)[apply(fm_updnscore, 1, function(row) 
-        any(row == 1 | row == 2) & !all(row == 1 | row == 2))]
+    deseq_consistent_up <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, \(x) all(x == 1))]
+    deseq_consistent_down <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, \(x) all(x == 2))]
+    
+    # Non-consistent (includes mixed or missing agreement)
+    nonconsist_logic <- function(x, val) {
+      any(x == val) & !all(x == val) & (!"Excluded_none" %in% names(x) || x["Excluded_none"] != 0)
     }
     
-    if ("Excluded_none" %in% colnames(deseq_updnscore)) {
-      deseq_nonconsistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) 
-        any(row == 1 | row == 2) & !all(row == 1 | row == 2) & row["Excluded_none"] != 0)]
-    } else {
-      deseq_nonconsistent <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, function(row) 
-        any(row == 1 | row == 2) & !all(row == 1 | row == 2))]
+    fm_nonconsistent_up <- rownames(fm_updnscore)[apply(fm_updnscore, 1, nonconsist_logic, val = 1)]
+    fm_nonconsistent_down <- rownames(fm_updnscore)[apply(fm_updnscore, 1, nonconsist_logic, val = 2)]
+    
+    deseq_nonconsistent_up <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, nonconsist_logic, val = 1)]
+    deseq_nonconsistent_down <- rownames(deseq_updnscore)[apply(deseq_updnscore, 1, nonconsist_logic, val = 2)]
+    
+    # Save filtered tables
+    save_filtered <- function(df, genes, filename) {
+      out <- df[rownames(df) %in% genes, , drop = FALSE]
+      if (nrow(out) > 0) {
+        write.csv(out, filename, row.names = TRUE)
+      } else {
+        cat("Saving empty file:", basename(filename), "\n")
+        write.csv(data.frame(Gene = character(), Score = integer()), filename, row.names = FALSE)
+      }
     }
     
-    # Debugging: Check if non-consistent gene lists are empty
-    cat("Cluster:", cluster_name, " - FM Non-Consistent Genes:", length(fm_nonconsistent), "\n")
-    cat("Cluster:", cluster_name, " - DESeq Non-Consistent Genes:", length(deseq_nonconsistent), "\n")
+    # Define filenames and save (FM)
+    save_filtered(fm_updnscore, fm_consistent_up,
+                  file.path(cluster_dir, paste0("FindMarkers_ConsistentUp_Cluster_", cluster_name, ".csv")))
     
-    # Filter updnscore files by consistent and non-consistent genes
-    fm_updn_consistent <- fm_updnscore[rownames(fm_updnscore) %in% fm_consistent, , drop = FALSE]
-    fm_updn_nonconsistent <- fm_updnscore[rownames(fm_updnscore) %in% fm_nonconsistent, , drop = FALSE]
+    save_filtered(fm_updnscore, fm_consistent_down,
+                  file.path(cluster_dir, paste0("FindMarkers_ConsistentDown_Cluster_", cluster_name, ".csv")))
     
-    deseq_updn_consistent <- deseq_updnscore[rownames(deseq_updnscore) %in% deseq_consistent, , drop = FALSE]
-    deseq_updn_nonconsistent <- deseq_updnscore[rownames(deseq_updnscore) %in% deseq_nonconsistent, , drop = FALSE]
+    save_filtered(fm_updnscore, fm_nonconsistent_up,
+                  file.path(cluster_dir, paste0("FindMarkers_NonConsistentUp_Cluster_", cluster_name, ".csv")))
     
-    # Ensure non-consistent files are saved even if empty
-    fm_nonconsistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
-    deseq_nonconsistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
+    save_filtered(fm_updnscore, fm_nonconsistent_down,
+                  file.path(cluster_dir, paste0("FindMarkers_NonConsistentDown_Cluster_", cluster_name, ".csv")))
     
-    write.csv(fm_updn_consistent, file.path(cluster_dir, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv")), row.names = TRUE)
-    write.csv(deseq_updn_consistent, file.path(cluster_dir, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv")), row.names = TRUE)
+    # Define filenames and save (DESeq)
+    save_filtered(deseq_updnscore, deseq_consistent_up,
+                  file.path(cluster_dir, paste0("DESeq_ConsistentUp_Cluster_", cluster_name, ".csv")))
     
-    # **Ensuring non-consistent files save even if empty**
-    if (nrow(fm_updn_nonconsistent) > 0) {
-      write.csv(fm_updn_nonconsistent, fm_nonconsistent_file, row.names = TRUE)
-    } else {
-      cat("Cluster:", cluster_name, " - No Non-Consistent FindMarkers Genes. Saving empty file.\n")
-      write.csv(data.frame(Gene = character(), Score = integer()), fm_nonconsistent_file, row.names = FALSE)
-    }
+    save_filtered(deseq_updnscore, deseq_consistent_down,
+                  file.path(cluster_dir, paste0("DESeq_ConsistentDown_Cluster_", cluster_name, ".csv")))
     
-    if (nrow(deseq_updn_nonconsistent) > 0) {
-      write.csv(deseq_updn_nonconsistent, deseq_nonconsistent_file, row.names = TRUE)
-    } else {
-      cat("Cluster:", cluster_name, " - No Non-Consistent DESeq Genes. Saving empty file.\n")
-      write.csv(data.frame(Gene = character(), Score = integer()), deseq_nonconsistent_file, row.names = FALSE)
-    }
+    save_filtered(deseq_updnscore, deseq_nonconsistent_up,
+                  file.path(cluster_dir, paste0("DESeq_NonConsistentUp_Cluster_", cluster_name, ".csv")))
     
-    cat("Processed consistent and non-consistent updn scores for cluster:", cluster_name, "\n")
+    save_filtered(deseq_updnscore, deseq_nonconsistent_down,
+                  file.path(cluster_dir, paste0("DESeq_NonConsistentDown_Cluster_", cluster_name, ".csv")))
+    
+    cat("✅ Processed up/down consistent and non-consistent genes for cluster:", cluster_name, "\n")
     
   }, error = function(e) {
-    cat("Error processing cluster:", cluster_name, "\n")
-    cat("Error message:", e$message, "\n")
+    cat("❌ Error processing cluster:", cluster_name, "\n")
+    cat("Message:", e$message, "\n")
   })
 }
 
 
 # Save Summary Results ----------------------------------------------------
 
-# Initialize summary table
+count_if_exists_rows <- function(filepath, filter_val, consistent = TRUE) {
+  if (!file.exists(filepath)) return(0)
+  
+  df <- read.csv(filepath, row.names = 1, check.names = FALSE)
+  
+  if (consistent) {
+    # All values must be the same
+    sum(apply(df, 1, function(x) all(x == filter_val)))
+  } else {
+    # Any value matches filter_val
+    sum(apply(df, 1, function(x) any(x == filter_val)))
+  }
+}
+
+
+# Initialize detailed summary table
 consistency_summary <- data.frame(
   Cluster = character(),
-  consistent_DESeq = integer(),
-  nonconsistent_DESeq = integer(),
-  consistent_FM = integer(),
-  nonconsistent_FM = integer(),
+  consistent_DESeq_up = integer(),
+  consistent_DESeq_down = integer(),
+  nonconsistent_DESeq_up = integer(),
+  nonconsistent_DESeq_down = integer(),
+  consistent_FM_up = integer(),
+  consistent_FM_down = integer(),
+  nonconsistent_FM_up = integer(),
+  nonconsistent_FM_down = integer(),
   stringsAsFactors = FALSE
 )
 
-# Loop again to count consistent and non-consistent genes
+# Loop to populate the new summary
 for (cluster_dir in cluster_dirs) {
   cluster_name <- basename(cluster_dir)
   
-  # File paths (must match saved filenames)
+  # File paths
   deseq_consistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
   deseq_nonconsistent_file <- file.path(cluster_dir, paste0("DESeq2_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
   fm_consistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
   fm_nonconsistent_file <- file.path(cluster_dir, paste0("FindMarkers_Results_updnNonConsistent_Group_Active_Homecage_Cluster_", cluster_name, ".csv"))
   
-  # Read counts if files exist, else assume 0
-  count_if_exists <- function(filepath) {
-    if (file.exists(filepath)) {
-      nrow(read.csv(filepath))
-    } else {
-      0
-    }
-  }
-  
   summary_row <- data.frame(
     Cluster = cluster_name,
-    consistent_DESeq = count_if_exists(deseq_consistent_file),
-    nonconsistent_DESeq = count_if_exists(deseq_nonconsistent_file),
-    consistent_FM = count_if_exists(fm_consistent_file),
-    nonconsistent_FM = count_if_exists(fm_nonconsistent_file),
+    consistent_DESeq_up = count_if_exists_rows(deseq_consistent_file, 1, consistent = TRUE),
+    consistent_DESeq_down = count_if_exists_rows(deseq_consistent_file, 2, consistent = TRUE),
+    nonconsistent_DESeq_up = count_if_exists_rows(deseq_nonconsistent_file, 1, consistent = FALSE),
+    nonconsistent_DESeq_down = count_if_exists_rows(deseq_nonconsistent_file, 2, consistent = FALSE),
+    consistent_FM_up = count_if_exists_rows(fm_consistent_file, 1, consistent = TRUE),
+    consistent_FM_down = count_if_exists_rows(fm_consistent_file, 2, consistent = TRUE),
+    nonconsistent_FM_up = count_if_exists_rows(fm_nonconsistent_file, 1, consistent = FALSE),
+    nonconsistent_FM_down = count_if_exists_rows(fm_nonconsistent_file, 2, consistent = FALSE),
     stringsAsFactors = FALSE
   )
+  
   
   consistency_summary <- rbind(consistency_summary, summary_row)
 }
 
-# Save the summary table
-summary_output_file <- file.path(base_dir, "Cluster_Consistency_Summary.csv")
+# Save updated summary
+summary_output_file <- file.path(base_dir, "Cluster_Consistency_Summary_Directional.csv")
 write.csv(consistency_summary, summary_output_file, row.names = FALSE)
-
-cat("Cluster-level consistency summary saved to:", summary_output_file, "\n")
+cat("Updated cluster-level summary with up/down direction saved to:", summary_output_file, "\n")
 
 

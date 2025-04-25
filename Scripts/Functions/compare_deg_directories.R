@@ -105,5 +105,49 @@ compare_deg_directories <- function(dir1, dir2, prefixes = NULL, output_dir = NU
     message("\nSkipped prefixes: ", paste(skipped, collapse = ", "))
   }
   
+  # Generate DEG direction-specific summary with dynamic column names
+  if (!is.null(output_dir) && length(all_results) > 0) {
+    clean_name <- function(x) gsub("[^A-Za-z0-9]", "_", x)
+    
+    up_dir1_col <- paste0("Up_", clean_name(dir1_name))
+    up_both_col <- "Up_Both"
+    up_dir2_col <- paste0("Up_", clean_name(dir2_name))
+    dn_dir1_col <- paste0("Down_", clean_name(dir1_name))
+    dn_both_col <- "Down_Both"
+    dn_dir2_col <- paste0("Down_", clean_name(dir2_name))
+    
+    summary_list <- lapply(names(all_results), function(prefix) {
+      res <- all_results[[prefix]]
+      if (is.null(res$data)) return(NULL)
+      
+      df <- res$data
+      
+      # Define categories
+      up_dir1 <- df %>% filter(padj_dir1 < 0.05, log2FoldChange_dir1 > 0, (padj_dir2 >= 0.05 | log2FoldChange_dir2 <= 0))
+      up_both <- df %>% filter(padj_dir1 < 0.05, log2FoldChange_dir1 > 0,
+                               padj_dir2 < 0.05, log2FoldChange_dir2 > 0)
+      up_dir2 <- df %>% filter(padj_dir2 < 0.05, log2FoldChange_dir2 > 0, (padj_dir1 >= 0.05 | log2FoldChange_dir1 <= 0))
+      
+      dn_dir1 <- df %>% filter(padj_dir1 < 0.05, log2FoldChange_dir1 < 0, (padj_dir2 >= 0.05 | log2FoldChange_dir2 >= 0))
+      dn_both <- df %>% filter(padj_dir1 < 0.05, log2FoldChange_dir1 < 0,
+                               padj_dir2 < 0.05, log2FoldChange_dir2 < 0)
+      dn_dir2 <- df %>% filter(padj_dir2 < 0.05, log2FoldChange_dir2 < 0, (padj_dir1 >= 0.05 | log2FoldChange_dir1 >= 0))
+      
+      tibble(
+        Prefix = prefix,
+        !!up_dir1_col := nrow(up_dir1),
+        !!up_both_col := nrow(up_both),
+        !!up_dir2_col := nrow(up_dir2),
+        !!dn_dir1_col := nrow(dn_dir1),
+        !!dn_both_col := nrow(dn_both),
+        !!dn_dir2_col := nrow(dn_dir2)
+      )
+    })
+    
+    summary_df <- bind_rows(summary_list)
+    write.csv(summary_df, file.path(output_dir, "summary_comparison.csv"), row.names = FALSE)
+  }
+  
+  
   return(list(results = all_results, skipped = skipped))
 }

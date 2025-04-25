@@ -68,8 +68,8 @@ save_dimplot(nc,
 source("Scripts/Functions/calc_prop.R")
 
 obj_celltype <- calc_prop(seur_obj = all, 
-                          fact1 = 'ratID',
-                          fact2 = 'group')
+                          fact1 = 'group',
+                          fact2 = 'cluster_name')
 
 write.csv(obj_celltype, file = "all_counts_by_rat_group.csv")
 
@@ -283,3 +283,56 @@ ggplot(group_means, aes(x = cluster_name, y = mean_fold_change, fill = group)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for better visibility
   scale_fill_brewer(palette = "Set1") +  # Color palette for bars
   scale_color_brewer(palette = "Set1")  # Color palette for points
+
+
+
+# pie charts --------------------------------------------------------------
+
+cluster_order <- c('ITL23', 'ITL5', 'ITL6',
+  'CTL6', 'CTL6b', 'PTL5',  'NPL56',
+  'Pvalb', 'Sst', 'PvalbChand', 'SstChodl',
+   'Vip', 'Lamp5', 'Meis2')
+
+cluster_colors <- c(
+  'CTL6' = '#2C8CB9',
+  'PTL5' = '#0A5B8C',
+  'ITL23' = '#41B75F',
+  'ITL5' = '#5DBFC1',  
+  'ITL6' = '#3A8F87',
+  'NPL56' = '#3C9E64',
+  'CTL6b' = '#6F499D',
+  'Pvalb' = '#E66027',
+  'Sst' = '#F8991D',
+  'Meis2' = '#C52126',
+  'Vip' = '#A669AB',
+  'Lamp5' = '#DB808C',
+  'SstChodl' = '#B0B235',
+  'PvalbChand' = '#AD6C49'
+)
+
+obj_celltype$cluster_name <- factor(obj_celltype$cluster_name, levels = cluster_order)
+
+obj_celltype <- obj_celltype %>%
+  group_by(group) %>%
+  arrange(cluster_name) %>%  # this will now respect your custom order
+  mutate(
+    percent_scaled = percent / sum(percent),
+    pos = cumsum(percent_scaled) - 0.5 * percent_scaled,
+    label = ifelse(percent_scaled > 0.03, as.character(cluster_name), "")
+  )
+
+pdf("piecharts.pdf",
+    height = 10,
+    width = 10)
+ggplot(obj_celltype, aes(x = "", y = percent_scaled, fill = cluster_name)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  facet_wrap(~ group) +
+  scale_fill_manual(values = cluster_colors) +
+  labs(fill = "Cluster") +
+  theme_void() +
+  theme(
+    strip.text = element_text(size = 10, face = "bold"),
+    legend.position = "right"
+  )
+dev.off()
