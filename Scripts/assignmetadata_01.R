@@ -14,25 +14,22 @@ library(Seurat)
 
 # Load data ---------------------------------------------------------------
 
-# set working directory where the raw data files are found
-setwd("~/MakeObject")
-
 # Read gene count tables
-counts_c1 <- read.csv("~/MakeObject/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
+counts_c1 <- read.csv("~/input/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
                       skip = 7, row.names = 1)
-counts_c2 <- read.csv("~/MakeObject/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
+counts_c2 <- read.csv("~/input/Combined_cart2-good-only_RSEC_MolsPerCell.csv", 
                       skip = 7, row.names = 1)
 
 # Read sample tag calls
-tags_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_Calls.csv", 
+tags_c1 <- read.csv("~/input/cart1-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
-tags_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_Calls.csv", 
+tags_c2 <- read.csv("~/input/cart2-good-only_Sample_Tag_Calls.csv", 
                     skip = 7, row.names = 1)
 
 #Read Sample tag reads
-streads_c1 <- read.csv("~/MakeObject/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c1 <- read.csv("~/input/cart1-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
-streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
+streads_c2 <- read.csv("~/input/cart2-good-only_Sample_Tag_ReadsPerCell.csv", 
                        skip = 7, row.names = 1)
 
 # Reorder all input files -------------------------------------------------
@@ -40,13 +37,13 @@ streads_c2 <- read.csv("~/MakeObject/cart2-good-only_Sample_Tag_ReadsPerCell.csv
 # current objects in environment to order
 objects <- ls()
 
-source("~/XPoSE/Scripts/Functions/sort_df.R")
-
 #order them
 invisible(lapply(objects, function(name) {
-  df <- get(name)  # Get the data frame from the environment
-  modified_df <- sort_df(df)  # Apply the function to the data frame
-  assign(name, modified_df, envir = .GlobalEnv)  # Update the data frame in the environment
+  obj <- get(name, envir = .GlobalEnv)
+  if (is.data.frame(obj)) {
+    sorted_obj <- obj[order(rownames(obj)), ]
+    assign(name, sorted_obj, envir = .GlobalEnv)
+  }
 }))
 
 # Create intermediate object and bind sample tag reads and calls ----------
@@ -96,10 +93,14 @@ for (l in 1:length(seur_list)) {
 
 combined <- merge(seur_list[[1]],seur_list[[2]])
 
-# removed multiplet, undetermined, and ST calls not in experiment
-combined <- subset(combined, !(Sample_tag=="Multiplet" | 
-                                 Sample_tag=="Undetermined" |
-                                 Sample_tag=="SampleTag10_mm" |
-                                 Sample_tag=="SampleTag12_mm"))
+# include ST calls that in experiment
+combined <- subset(combined, (Sample_tag=="SampleTag02_mm" | 
+                                 Sample_tag=="SampleTag03_mm" |
+                                 Sample_tag=="SampleTag04_mm" |
+                                 Sample_tag=="SampleTag05_mm" |
+                                Sample_tag=="SampleTag06_mm" |
+                                Sample_tag=="SampleTag07_mm" |
+                                Sample_tag=="SampleTag08_mm" |
+                                Sample_tag=="SampleTag09_mm"))
 
 save(combined, file = "combined08032023.RData")
