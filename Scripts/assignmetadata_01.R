@@ -104,3 +104,34 @@ combined <- subset(combined, (Sample_tag=="SampleTag02_mm" |
                                 Sample_tag=="SampleTag09_mm"))
 
 save(combined, file = "combined08032023.RData")
+
+
+# Prep for MapMyCells -----------------------------------------------------
+
+library(Seurat)
+library(reticulate)
+py_require(c("anndata"))
+
+load("combined08032023.RData")
+
+# Python modules
+anndata <- import("anndata")
+scipy <- import("scipy.sparse")
+pd <- import("pandas")
+
+obj <- combined
+
+# pull counts and format
+counts <- t(as.matrix(obj[["RNA"]]@counts))  # Make genes = columns
+sparse_counts_py <- scipy$csr_matrix(counts)
+
+genes   <- colnames(counts)
+samples <- rownames(counts)
+
+var_df <- pd$DataFrame(dict(genes = genes), index = genes)
+obs_df <- pd$DataFrame(dict(samples = samples), index = samples)
+
+# convert and save as .h5ad
+countAD <- anndata$AnnData(X = sparse_counts_py, var = var_df, obs = obs_df)
+
+countAD$write("combinedcounts.h5ad")
