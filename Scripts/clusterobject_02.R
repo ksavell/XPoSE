@@ -5,6 +5,7 @@
 # This script creates
 #       * hc only object
 #       * hc/nc combined object
+#       * pre-clustered object with mapmycell annotation
 
 # Loading -----------------------------------------------------------------
 ## Load packages -----------------------------------------------------------
@@ -16,6 +17,10 @@ library(tidyverse)
 # load in initial 'combined' object that is output of create_object01.R
 
 load("combined08032023.RData")
+
+source("Scripts/Functions/cluster_first.R")
+source("Scripts/Functions/clstr_vln.R")
+source("Scripts/Functions/subset_reclust.R")
 
 # Assign MapMyCells metadata ----------------------------------------------
 
@@ -37,10 +42,8 @@ metadata$numeric_part <- as.numeric(sub(" .*", "", metadata$class))
 # Assign 'other' if the numeric part is 30 or greater, else 'neuron'
 metadata$celltype <- ifelse(metadata$numeric_part >= 30, 'other', 'neuron')
 
-# Update the Seurat object's metadata
+# Update the Seurat object's metadata and drop numeric
 combined@meta.data <- metadata
-
-# Optionally, drop the helper column 'numeric_part'
 combined@meta.data$numeric_part <- NULL
 
 save(combined, file = "combined_withmmmannotation_09112024.RData")
@@ -53,14 +56,9 @@ combined <- subset(combined, subset = celltype == 'neuron')
 
 combined <- subset(combined, subset = group == 'Homecage')
 
-source("Scripts/Functions/cluster_first.R")
-
 combined <- cluster_first(combined)
 
 # First check QC metrics to see if any cluster is defined by low QC measures
-
-source("Scripts/Functions/clstr_vln.R")
-
 clstr_vln(combined, qc = T)
 
 # Plot excitatory, inhibitory, and glia contamination markers
@@ -70,8 +68,6 @@ clstr_vln(combined, all = T)
 # 21 is clustering by lower QC measures
 
 keep <- as.character(c(0:20,22:25,27))
-
-source("Scripts/Functions/subset_reclust.R")
 
 combined_f <- subset_reclust(combined, clust_tokeep = keep, neigh_dim = 1:30, 
                        umap_dim = 1:30, res = 0.5)
@@ -91,19 +87,13 @@ save(hc, file = "hc_09112024.RData")
 
 
 # Combined clustering -----------------------------------------------------
-load("~/rstudio_projects/XPoSE/combined_withmmmannotation_09112024.RData")
+load("combined_withmmmannotation_09112024.RData")
 
 combined <- subset(combined, subset = celltype == 'neuron')
 
-
-source("Scripts/Functions/cluster_first.R")
-
 combined <- cluster_first(combined)
 
-# First check QC metrics to see if any cluster is defined by low QC measures
-
-source("Scripts/Functions/clstr_vln.R")
-
+# check QC metrics to see if any cluster is defined by low QC measures
 clstr_vln(combined, qc = T)
 
 # Plot excitatory, inhibitory, and glia contamination markers
@@ -113,8 +103,6 @@ clstr_vln(combined, all = T)
 # 28 is clustering by lower QC measures
 
 keep <- as.character(c(0:26,29:31))
-
-source("Scripts/Functions/subset_reclust.R")
 
 combined_f <- subset_reclust(combined, clust_tokeep = keep, neigh_dim = 1:30, 
                              umap_dim = 1:30, res = 0.5)
