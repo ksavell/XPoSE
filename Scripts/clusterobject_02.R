@@ -8,19 +8,17 @@
 #       * pre-clustered object with mapmycell annotation
 
 # Loading -----------------------------------------------------------------
-## Load packages -----------------------------------------------------------
 # loads all required packages
 library(Seurat)
 library(tidyverse)
 
-## Data loading ------------------------------------------------------------
-# load in initial 'combined' object that is output of create_object01.R
-
-load("combined08032023.RData")
-
 source("Scripts/Functions/cluster_first.R")
 source("Scripts/Functions/clstr_vln.R")
 source("Scripts/Functions/subset_reclust.R")
+
+# load in initial 'combined' object that is output of createobject_01.R
+
+load("combined08032023.RData")
 
 # Assign MapMyCells metadata ----------------------------------------------
 

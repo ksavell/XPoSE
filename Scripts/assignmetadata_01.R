@@ -9,10 +9,8 @@
 # sample tag reads Sample_Tag_ReadsPerCell.csv
 # sample tag calls Sample_Tag_Calls.csv
 
-# Load packages -----------------------------------------------------------
+# Loading -----------------------------------------------------------
 library(Seurat)
-
-# Load data ---------------------------------------------------------------
 
 # Read gene count tables
 counts_c1 <- read.csv("~/input/Combined_cart1-good-only_RSEC_MolsPerCell.csv", 
