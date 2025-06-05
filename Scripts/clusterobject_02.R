@@ -141,3 +141,18 @@ all <- RenameIdents(all, all_ids)
 all$cluster_name <- paste(all@active.ident)
 save(all, file = "all_10312024.RData")
 
+# Generate marker tables for each object ----------------------------------
+
+hc_markers <- FindAllMarkers(hc)
+hc_top10 <- hc_markers %>%
+  group_by(cluster) %>%
+  slice_min(order_by = p_val_adj, n = 10, with_ties = FALSE) %>%
+  arrange(cluster, p_val_adj)
+write.csv(hc_top10, "hc_top10_markers.csv", row.names = FALSE)
+
+all_markers <- FindAllMarkers(all)
+all_top10 <- all_markers %>%
+  group_by(cluster) %>%
+  slice_min(order_by = p_val_adj, n = 10, with_ties = FALSE) %>%
+  arrange(cluster, p_val_adj)
+write.csv(all_markers, "all_top10_markers.csv")
