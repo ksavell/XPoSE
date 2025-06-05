@@ -148,6 +148,7 @@ hc_top10 <- hc_markers %>%
   group_by(cluster) %>%
   slice_min(order_by = p_val_adj, n = 10, with_ties = FALSE) %>%
   arrange(cluster, p_val_adj)
+hc_top10$gene <- paste0("'", hc_top10$gene)
 write.csv(hc_top10, "hc_top10_markers.csv", row.names = FALSE)
 
 all_markers <- FindAllMarkers(all)
@@ -155,4 +156,5 @@ all_top10 <- all_markers %>%
   group_by(cluster) %>%
   slice_min(order_by = p_val_adj, n = 10, with_ties = FALSE) %>%
   arrange(cluster, p_val_adj)
+all_top10$gene <- paste0("'", all_top10$gene) # prevents date conversion in excel
 write.csv(all_markers, "all_top10_markers.csv")
