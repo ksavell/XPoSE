@@ -43,7 +43,7 @@ results <- compare_deg_directories(
   dir1_name = "ActivevHomecage",
   dir2_name = "ActivevNonactive",
   prefixes = clusters,  # Manually specify prefixes
-  output_dir = "~/Projects/XPoSE/correspondence_AvHC_AvNA"
+  output_dir = "F5B_correspondence_AvHC_AvNA"
 )
 
 
