@@ -99,3 +99,51 @@ clust_prop_cart <- calc_prop(seur_obj = all,
                              fact3 = 'group')
 
 write.csv(clust_prop_cart, file = "F4I_all_clust_prop_group.csv")
+
+all_p_values <- c(0.696196,
+                  0.728801,
+                  0.518292,
+                  0.397060,
+                  0.275019,
+                  0.505165,
+                  0.740391,
+                  0.616846,
+                  0.274822,
+                  0.690104,
+                  0.352961,
+                  0.984257,
+                  0.423412,
+                  0.416241, # this ends NC:NA v HC
+                  0.965903,
+                  0.604107,
+                  0.407974,
+                  0.00144,
+                  0.003981,
+                  0.439324,
+                  0.002325,
+                  0.00481,
+                  0.001521,
+                  0.058972,
+                  0.000006,
+                  0.001795,
+                  0.000418,
+                  0.219776, # this ends NC:A vs HC
+                  0.395221,
+                  0.428542,
+                  0.065448,
+                  0.025388,
+                  0.050596,
+                  0.209591,
+                  0.015136,
+                  0.010185,
+                  0.011206,
+                  0.069069,
+                  0.073653,
+                  0.003313,
+                  0.004614,
+                  0.238339) # this ends NC:A vs NC:NA
+
+
+adjusted_p_values <- p.adjust(all_p_values, method = "BH")
+
+write.csv(adjusted_p_values, "fig4i_adjpval_BH.csv")
