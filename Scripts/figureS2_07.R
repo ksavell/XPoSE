@@ -59,3 +59,48 @@ VlnPlot(
         title.position = "none") +
   coord_flip()
 dev.off()
+
+
+# added 07/08/2026
+
+## Stacked bar plot + Prism-ready tables of Sample_tag contribution per cluster
+
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(scales)
+})
+
+load("input/HC_annotated_07012026.RData")
+
+date_tag <- format(Sys.Date(), "_%m%d%Y")
+n_tags   <- length(unique(as.character(all$Sample_tag)))
+expected <- 1 / n_tags
+
+## counts + proportions per cluster
+counts <- all@meta.data %>%
+  dplyr::select(cluster_name, Sample_tag) %>%
+  dplyr::mutate(dplyr::across(everything(), as.character)) %>%
+  dplyr::count(cluster_name, Sample_tag, name = "n") %>%
+  tidyr::complete(cluster_name, Sample_tag, fill = list(n = 0)) %>%
+  dplyr::group_by(cluster_name) %>%
+  dplyr::mutate(cluster_total = sum(n),
+                prop = n / cluster_total,
+                percent = prop * 100) %>%
+  dplyr::ungroup()
+
+## ---- Prism-ready wide tables (clusters x tags) ----
+write_prism_wide <- function(value_col, fname) {
+  wide <- counts %>%
+    dplyr::select(cluster_name, Sample_tag, dplyr::all_of(value_col)) %>%
+    tidyr::pivot_wider(names_from = Sample_tag,
+                       values_from = dplyr::all_of(value_col)) %>%
+    dplyr::arrange(cluster_name)
+  write.csv(wide, file.path(paste0(fname, date_tag, ".csv")),
+            row.names = FALSE)
+}
+
+write_prism_wide("percent", "prism_stackedbar_percent")
+# write_prism_wide("prop",    "prism_stackedbar_proportion")
+# write_prism_wide("n",       "prism_stackedbar_counts")
