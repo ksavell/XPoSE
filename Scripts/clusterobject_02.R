@@ -21,7 +21,7 @@ date_stamp <- format(Sys.Date(), "_%m%d%Y")
 
 # load in initial 'combined' object that is output of createobject_01.R
 
-load("all_filtered_06222026.RData")
+load("QC/all_filtered_06222026.RData")
 
 mmc_files <- list(
   c1 = "input/C1_06222026_10xWholeMouseBrain(CCN20230722)_HierarchicalMapping_UTC_1782177798832.csv",
@@ -33,20 +33,20 @@ combined_all <- join_mapmycells(combined_all, mmc_files)
 save(combined_all, file = paste0("all_filtered_mmc",date_stamp,".RData"))
 
 # Calculate subclass_confident from bootstrapping probability --------------
-  prob_threshold <- 0.5
-combined_all$subclass_confident <- ifelse(
-  is.na(combined_all$subclass_bootstrapping_probability) |
-    combined_all$subclass_bootstrapping_probability < prob_threshold,
-  "low_confidence", "confident"
-)
+#   prob_threshold <- 0.5
+# combined_all$subclass_confident <- ifelse(
+#   is.na(combined_all$subclass_bootstrapping_probability) |
+#     combined_all$subclass_bootstrapping_probability < prob_threshold,
+#   "low_confidence", "confident"
+# )
 
 combined_all <- subset(combined_all, celltype == "neuron")
 combined_all <- subset(combined_all, nFeature_RNA > 1000)
 # classes to keep
 class_keep <- c("01 IT-ET Glut", "02 NP-CT-L6b Glut", "06 CTX-CGE GABA", "07 CTX-MGE GABA","08 CNU-MGE GABA")
 combined_all <- subset(combined_all, subset = class_name %in% class_keep)
-combined_all <- subset(combined_all, subclass_confident == "confident")
-
+# combined_all <- subset(combined_all, subclass_confident == "confident")
+combined_all$subclass_confident <- "confident"
 
 # Explore homecage clusters ----------------------------------------------
 
@@ -54,11 +54,11 @@ combined_hc <- subset(combined_all, subset = experience == 'HC')
 
 combined_hc <- cluster_first(combined_hc)
 
-pdf(paste0("first_clustering", date_stamp, ".pdf"), height = 10, width = 10)
+pdf(paste0("hc_first_clustering", date_stamp, ".pdf"), height = 10, width = 10)
 DimPlot(combined_hc, label = TRUE)
 dev.off()
 
-pdf(paste0("qc_check_first_clustering", date_stamp, ".pdf"), height = 50, width = 50)
+pdf(paste0("hc_qc_check_first_clustering", date_stamp, ".pdf"), height = 50, width = 50)
 VlnPlot(combined_hc, c("nFeature_RNA", "nCount_RNA",
                       "Slc17a7", "Gad1",
                       "Snap25", "Mbp", "Gja1", "Col5a3", "Gpc5",
@@ -73,23 +73,23 @@ VlnPlot(combined_hc, c("nFeature_RNA", "nCount_RNA",
 dev.off()
 
 write.csv(table(combined_hc$subclass_name, combined_hc$RNA_snn_res.2),
-          file = paste0("first_clustering_subclass_by_cluster", date_stamp, ".csv"))
+          file = paste0("hc_first_clustering_subclass_by_cluster", date_stamp, ".csv"))
 
 write.csv(table(combined_hc$class_name, combined_hc$RNA_snn_res.2),
-          file = paste0("first_clustering_class_by_cluster", date_stamp, ".csv"))
+          file = paste0("hc_first_clustering_class_by_cluster", date_stamp, ".csv"))
 
 
 # Second clustering -------------------------------------------------------
-keep_1 <- as.character(c(0:21))  # reclustering with higher res
+keep_1 <- as.character(c(0:20,22:23))  # 21 is Mbp+
 
 all <- subset_reclust(combined_hc, clust_tokeep = keep_1,
                       neigh_dim = 1:50, umap_dim = 1:40, res = 5)
 
-pdf(paste0("second_clustering", date_stamp, ".pdf"), height = 10, width = 10)
+pdf(paste0("hc_second_clustering", date_stamp, ".pdf"), height = 10, width = 10)
 DimPlot(all, label = TRUE)
 dev.off()
 
-pdf(paste0("qc_check_second_clustering", date_stamp, ".pdf"), height = 50, width = 50)
+pdf(paste0("hc_qc_check_second_clustering", date_stamp, ".pdf"), height = 50, width = 50)
 VlnPlot(all, c("nFeature_RNA", "nCount_RNA",
                "Slc17a7", "Gad1",
                "Mbp", "Gja1", "Col5a3", "Gpc5",
@@ -103,40 +103,12 @@ VlnPlot(all, c("nFeature_RNA", "nCount_RNA",
 dev.off()
 
 write.csv(table(all$subclass, all$RNA_snn_res.5),
-          file = paste0("second_clustering_subclass_by_cluster", date_stamp, ".csv"))
+          file = paste0("hc_second_clustering_subclass_by_cluster", date_stamp, ".csv"))
 
 write.csv(table(all$class, all$RNA_snn_res.5),
-          file = paste0("second_clustering_class_by_cluster", date_stamp, ".csv"))
+          file = paste0("hc_second_clustering_class_by_cluster", date_stamp, ".csv"))
 
 # Third clustering -------------------------------------------------------
-keep_1 <- as.character(c(0:35,37:38))  # 36 is cell type mix
-
-all <- subset_reclust(all, clust_tokeep = keep_1,
-                      neigh_dim = 1:50, umap_dim = 1:40, res = 5)
-
-pdf(paste0("third_clustering", date_stamp, ".pdf"), height = 10, width = 10)
-DimPlot(all, label = TRUE)
-dev.off()
-
-pdf(paste0("qc_check_third_clustering", date_stamp, ".pdf"), height = 50, width = 50)
-VlnPlot(all, c("nFeature_RNA", "nCount_RNA",
-               "Slc17a7", "Gad1",
-               "Mbp", "Gja1", "Col5a3", "Gpc5",
-               "Rfx3", "Rorb",
-               "Syt6", "Ctgf",
-               "Tshz2", "Kcnc2",
-               "Sst", "Chodl",
-               "Drd1", "Drd2", "Drd3",
-               "Vip", "Lamp5",
-               "Egfr", "Unc5b"), pt.size = 0)
-dev.off()
-
-write.csv(table(all$subclass, all$RNA_snn_res.5),
-          file = paste0("third_clustering_subclass_by_cluster", date_stamp, ".csv"))
-
-write.csv(table(all$class, all$RNA_snn_res.5),
-          file = paste0("third_clustering_class_by_cluster", date_stamp, ".csv"))
-
 # Subclass composition: confident cells only, weighted by bootstrap probability
 # Used for hierarchical clustering, dot plot, and auto-annotation ----------
 confident_meta <- all@meta.data[all@meta.data$subclass_confident == "confident", ]
@@ -187,13 +159,13 @@ p_dot <- ggplot(dot_df[dot_df$pct > 0, ],
   scale_color_viridis_c(option = "magma", name = "Avg bootstrap\nprobability",
                         limits = c(0.4, 1)) +
   labs(title = "Subclass Composition by Cluster",
-       subtitle = "Confident cells only (bootstrap prob ≥ 0.5); weighted by probability",
+       subtitle = "Weighted by probability",
        x = "Cluster (RNA_snn_res.5)", y = "MapMyCells Subclass") +
   theme_classic(base_size = 11) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.text.y = element_text(size = 8))
 
-pdf(paste0("hc_third_clustering_subclass_dotplot", date_stamp, ".pdf"),
+pdf(paste0("hc_second_clustering_subclass_dotplot", date_stamp, ".pdf"),
     width = 22, height = 14)
 print(p_dot)
 dev.off()
@@ -231,6 +203,9 @@ write.csv(ids_df,
 
 # >> REVIEW auto-annotation CSV and edit ids before proceeding
 # >> Override any assignments by name, e.g.: ids["12"] <- "Pvalb"
+ids["23"] <- "006 L4/5 IT CTX Glut"
+ids["27"] <- "022 L5 ET CTX Glut"
+
 
 all <- RenameIdents(all, ids)
 all$cluster_name_allen <- paste(all@active.ident)
@@ -283,30 +258,35 @@ message("Auto-annotated dot plot saved to annotated_cluster_subclass_dotplot", d
 
 
 # Collapsed clustering for main figures -----------------------------------
-subclass_keep <- c("006 L4/5 IT CTX Glut", "030 L6 CT CTX Glut", "052 Pvalb Gaba", 
-                "022 L5 ET CTX Glut", "056 Sst Chodl Gaba", "053 Sst Gaba", 
-                "007 L2/3 IT CTX Glut", "022 L5 ET CTX Glut", "010 IT AON-TT-DP Glut", 
-                "049 Lamp5 Gaba", "051 Pvalb chandelier Gaba", "032 L5 NP CTX Glut",       
-                "004 L6 IT CTX Glut", "029 L6b CTX Glut", "046 Vip Gaba", "047 Sncg Gaba")
-all <- subset(all, subset = cluster_name_allen %in% subclass_keep)
+# subclass_keep <- c("006 L4/5 IT CTX Glut", "030 L6 CT CTX Glut", "052 Pvalb Gaba", 
+#                 "022 L5 ET CTX Glut", "056 Sst Chodl Gaba", "053 Sst Gaba", 
+#                 "007 L2/3 IT CTX Glut", "022 L5 ET CTX Glut", "010 IT AON-TT-DP Glut", 
+#                 "049 Lamp5 Gaba", "051 Pvalb chandelier Gaba", "032 L5 NP CTX Glut",       
+#                 "004 L6 IT CTX Glut", "029 L6b CTX Glut", "046 Vip Gaba", "047 Sncg Gaba")
+# all <- subset(all, subset = cluster_name_allen %in% subclass_keep)
 
 all <- RenameIdents(all,
-                    "007 L2/3 IT CTX Glut"        = "ITL23",
-                    "030 L6 CT CTX Glut"           = "CTL6",
-                    "010 IT AON-TT-DP Glut"        = "ITvm",
-                    "056 Sst Chodl Gaba"           = "Sst",
-                    "052 Pvalb Gaba"               = "Pvalb",
-                    "006 L4/5 IT CTX Glut"         = "ITL56",
                     "004 L6 IT CTX Glut"           = "ITL56",
-                    "022 L5 ET CTX Glut"           = "ETL5",
-                    "053 Sst Gaba"                 = "Sst",
-                    "029 L6b CTX Glut"             = "CTL6",
-                    "032 L5 NP CTX Glut"           = "NPL5",
                     # "005 L5 IT CTX Glut"           = "ITL56",
-                    "046 Vip Gaba"                 = "HT3A",
-                    "049 Lamp5 Gaba"               = "HT3A",
-                    "047 Sncg Gaba"                = "HT3A",
-                    "051 Pvalb chandelier Gaba"    = "Pvalb")
+                    "006 L4/5 IT CTX Glut"         = "ITL56",
+                    "007 L2/3 IT CTX Glut"        = "ITL23",
+                    "010 IT AON-TT-DP Glut"        = "ITvm",
+                    
+                    "022 L5 ET CTX Glut"           = "ETL5",
+                    "029 L6b CTX Glut"             = "CTL6",
+                    "030 L6 CT CTX Glut"           = "CTL6",
+                    "032 L5 NP CTX Glut"           = "NPL5",
+                    
+                    "046 Vip Gaba"                 = "CGE",
+                    "047 Sncg Gaba"                = "CGE",
+                    "049 Lamp5 Gaba"               = "CGE",
+                    
+                    "051 Pvalb chandelier Gaba"    = "Pvalb",
+                    "052 Pvalb Gaba"               = "Pvalb",
+                    "053 Sst Gaba"                 = "Sst",
+                    "056 Sst Chodl Gaba"           = "Sst"
+                    )
+                   
 
 all$cluster_name <- paste(all@active.ident)
 
@@ -383,7 +363,7 @@ write.csv(table(combined_all$class_name, combined_all$RNA_snn_res.2),
 
 
 # Second clustering -------------------------------------------------------
-keep_1 <- as.character(c(0:25,28:29))  # 26 is non-vmPFC gaba; 27 is Mbp+
+keep_1 <- as.character(c(0:23,26:27))  # 24 is mural, 25 is Mpb+
 
 all <- subset_reclust(combined_all, clust_tokeep = keep_1,
                       neigh_dim = 1:50, umap_dim = 1:40, res = 5)
@@ -467,7 +447,7 @@ p_dot <- ggplot(dot_df[dot_df$pct > 0, ],
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.text.y = element_text(size = 8))
 
-pdf(paste0("combined_third_clustering_subclass_dotplot", date_stamp, ".pdf"),
+pdf(paste0("combined_second_clustering_subclass_dotplot", date_stamp, ".pdf"),
     width = 22, height = 14)
 print(p_dot)
 dev.off()
@@ -553,22 +533,26 @@ dev.off()
 # Collapsed clustering for main figures -----------------------------------
 
 all <- RenameIdents(all,
-                   "007 L2/3 IT CTX Glut"        = "ITL23",
-                   "030 L6 CT CTX Glut"           = "CTL6",
-                   "010 IT AON-TT-DP Glut"        = "ITvm",
-                   "056 Sst Chodl Gaba"           = "Sst",
-                   "052 Pvalb Gaba"               = "Pvalb",
-                   "006 L4/5 IT CTX Glut"         = "ITL56",
-                   "004 L6 IT CTX Glut"           = "ITL56",
-                   "022 L5 ET CTX Glut"           = "ETL5",
-                   "053 Sst Gaba"                 = "Sst",
-                   "029 L6b CTX Glut"             = "CTL6",
-                   "032 L5 NP CTX Glut"           = "NPL5",
-                   # "005 L5 IT CTX Glut"           = "ITL56",
-                   "046 Vip Gaba"                 = "HT3A",
-                   "049 Lamp5 Gaba"               = "HT3A",
-                   "047 Sncg Gaba"                = "HT3A",
-                   "051 Pvalb chandelier Gaba"    = "Pvalb")
+                    "004 L6 IT CTX Glut"           = "ITL56",
+                    # "005 L5 IT CTX Glut"           = "ITL56",
+                    "006 L4/5 IT CTX Glut"         = "ITL56",
+                    "007 L2/3 IT CTX Glut"        = "ITL23",
+                    "010 IT AON-TT-DP Glut"        = "ITvm",
+                    
+                    "022 L5 ET CTX Glut"           = "ETL5",
+                    "029 L6b CTX Glut"             = "CTL6",
+                    "030 L6 CT CTX Glut"           = "CTL6",
+                    "032 L5 NP CTX Glut"           = "NPL5",
+                    
+                    "046 Vip Gaba"                 = "CGE",
+                    "047 Sncg Gaba"                = "CGE",
+                    "049 Lamp5 Gaba"               = "CGE",
+                    
+                    "051 Pvalb chandelier Gaba"    = "Pvalb",
+                    "052 Pvalb Gaba"               = "Pvalb",
+                    "053 Sst Gaba"                 = "Sst",
+                    "056 Sst Chodl Gaba"           = "Sst"
+)
 
 all$cluster_name <- paste(all@active.ident)
 
@@ -616,7 +600,8 @@ dev.off()
 
 # Generate marker tables for each object ----------------------------------
 
-hc_markers <- FindAllMarkers(hc)
+load(paste0("HC_annotated", date_stamp,".RData")) # join layers error
+hc_markers <- FindAllMarkers(all)
 hc_top10 <- hc_markers %>%
   group_by(cluster) %>%
   slice_min(order_by = p_val_adj, n = 10, with_ties = FALSE) %>%
@@ -624,6 +609,7 @@ hc_top10 <- hc_markers %>%
 hc_top10$gene <- paste0("'", hc_top10$gene)
 write.csv(hc_top10, "hc_top10_markers.csv", row.names = FALSE)
 
+load("combined_annotated", date_stamp, ".RData")
 all_markers <- FindAllMarkers(all)
 all_top10 <- all_markers %>%
   group_by(cluster) %>%
