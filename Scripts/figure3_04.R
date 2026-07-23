@@ -9,11 +9,8 @@ library(tidyverse)
 source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/save_dimplot.R')
 source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/calc_prop.R')
 
-# load in clustered hc object that is output of createobject_01.R
-
-all <- load("objects/dmvmPFC_annotated07162026")
-
 # define colors
+
 hex_list <- list(
   "cluster_name" = c('CTL6' = '#2D8CB8',
                      'CTL6b' = '#7044AA',
@@ -30,21 +27,15 @@ hex_list <- list(
                      'Sncg' = '#D3408D',
                      'Vip' = '#B864CC',
                      'Lamp5' = '#DA808C'),
-  "orig.ident" = c('vmPFC1' = '#5A9BC7', 
-                   'vmPFC2' = '#89D1D9',
-                   'vmPFC3' = '#5A9BC7', 
-                   'vmPFC4' = '#89D1D9',
-                   'dmPFC1' = '#E08A2D',
-                   'dmPFC2' = '#EDCC85',
-                   'dmPFC3' = '#E08A2D',
-                   'dmPFC4' = '#EDCC85'),
+  "orig.ident" = c('C1' = '#5A9BC7', 
+                   'C2' = '#E08A2D'),
   "sex" = c('male' = "#2C5F2D", 
             'female' = "#97BC62")
 )
 
 # F3A ---------------------------------------------------------------------
 
-save_dimplot(all, 
+save_dimplot(obj, 
              groupby = 'cluster_name',
              file_n = 'all',
              hex_list = hex_list)
@@ -55,7 +46,7 @@ save_dimplot(all,
 # feature plot save
 legend_colors <- c('#D1D1D1', '#2D00FF')
 # Create the DimPlot for the Slc17a7
-FeaturePlot(all, features = c("Slc17a7"), 
+FeaturePlot(obj, features = c("Slc17a7"), 
             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -63,7 +54,7 @@ FeaturePlot(all, features = c("Slc17a7"),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-Slc17a7_umap <- FeaturePlot(all, features = c("Slc17a7"), 
+Slc17a7_umap <- FeaturePlot(obj, features = c("Slc17a7"), 
                             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -71,11 +62,11 @@ Slc17a7_umap <- FeaturePlot(all, features = c("Slc17a7"),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-ggsave("Slc17a7.svg", Slc17a7_umap, width = 10, height = 10)
+ggsave("/Users/leej77/Documents/R Work/XPoSE/XPoSE/Slc17a7.svg", Slc17a7_umap, width = 10, height = 10)
 
 
 # Create the DimPlot for the Gad1
-FeaturePlot(all, features = c("Gad1"), 
+FeaturePlot(obj, features = c("Gad1"), 
             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -83,7 +74,7 @@ FeaturePlot(all, features = c("Gad1"),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-Gad1_umap <- FeaturePlot(all, features = c("Gad1"), 
+Gad1_umap <- FeaturePlot(obj, features = c("Gad1"), 
                          cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -91,12 +82,11 @@ Gad1_umap <- FeaturePlot(all, features = c("Gad1"),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-ggsave("Gad1.svg", Gad1_umap, width = 10, height = 10)
+ggsave("/Users/leej77/Documents/R Work/XPoSE/XPoSE/Gad1.svg", Gad1_umap, width = 10, height = 10)
 
 # F3C ---------------------------------------------------------------------
 
 # marker heatmap
-
 marker_genes <- c("Rfx3", "Cux2", # "ITL23"
                   "Rorb", "Slc7a11", # "ITL5"
                   "Col6a1", "Col6a2", # "ITL6"
@@ -112,13 +102,13 @@ marker_genes <- c("Rfx3", "Cux2", # "ITL23"
                   "Vip", "Prox1", # "Vip"
                   "Lamp5", "Egfr", # "Lamp5"
                   "Htr3a", "Frem1" # "Sncg"
-                  )
+)
 
 cluster_order <- c("ITL23", "ITL5", "ITL6", "ITvm", "CTL6", "CTL6b", "ETL5", "NPL5", "Pvalb", "Sst", "PvalbChand", "SstChodl", "Vip", "Lamp5", "Sncg")
 
 # Compute average expression per cluster
 marker_genes <- marker_genes
-avg_expr <- AverageExpression(all, features = marker_genes, group.by = "cluster_name")$RNA
+avg_expr <- AverageExpression(obj, features = marker_genes, group.by = "cluster_name")$RNA
 
 expr_matrix <- as.matrix(avg_expr)
 
@@ -133,7 +123,7 @@ write.csv(scaled_expr_matrix,"scaled_expr_matrix.csv", row.names = TRUE)
 
 # F3D ---------------------------------------------------------------------
 
-save_dimplot(all, 
+save_dimplot(obj, 
              groupby = "orig.ident",
              splitby = "ratID",
              file_n = "all",
@@ -143,10 +133,9 @@ save_dimplot(all,
 
 # props 
 
-clust_prop_cart <- calc_prop(seur_obj = all, 
+clust_prop_cart <- calc_prop(seur_obj = obj, 
                              fact1 = 'ratID',
                              fact2 = 'cluster_name',
                              fact3 = 'orig.ident') 
 
 write.csv(clust_prop_cart, file = "f3e_clust_prop_cart.csv")
-

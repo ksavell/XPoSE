@@ -19,11 +19,9 @@ source("Scripts/Functions/calc_prop.R")
 
 # load in unclustered object that is output of createobject_01.R
 
-load("combined_withmmmannotation_09112024.RData")
-
 # F2F ---------------------------------------------------------------------
 
-rat_orig_table <- table(combined$ratID, combined$orig.ident)
+rat_orig_table <- table(obj$ratID, obj$orig.ident)
 rat_orig_df <- as.data.frame(rat_orig_table)
 
 # save
@@ -32,7 +30,7 @@ write.csv(rat_orig_df, "f2f_ratID_vs_origident_table.csv", row.names = FALSE)
 # F2G ---------------------------------------------------------------------
 
 ## means
-df <- make_stdf(combined)
+df <- make_stdf(obj)
 
 # Splitting the dataframe by both 'st' and 'cart'
 IDslist <- split(df, list(df$st, df$cart))
@@ -76,11 +74,11 @@ for (sample_base in names(samples)) {
   correct_reads_var <- paste0(sample_base, "_reads")  # Correct reads column
   
   # Subset cells
-  cells <- WhichCells(combined, expression = Sample_tag == assigned_tag)
+  cells <- WhichCells(obj, expression = Sample_tag == assigned_tag)
   
   # Fetch correct and incorrect tag reads
-  correct <- FetchData(combined, vars = correct_reads_var)[cells, 1]
-  incorrect <- rowMeans(FetchData(combined, vars = samples[[sample_base]])[cells, ])
+  correct <- FetchData(obj, vars = correct_reads_var)[cells, 1]
+  incorrect <- rowMeans(FetchData(obj, vars = samples[[sample_base]])[cells, ])
   
   # Run Wilcoxon test
   test <- wilcox.test(correct, incorrect, paired = TRUE, alternative = "greater")
@@ -103,7 +101,7 @@ write.csv(wilcox_summary, "f2g_stats.csv", row.names = FALSE)
 
 # F2H ---------------------------------------------------------------------
 
-obj_celltype <- calc_prop(seur_obj = combined, 
+obj_celltype <- calc_prop(seur_obj = obj, 
                           fact1 = 'ratID',
                           fact2 = 'celltype',
                           fact3 = 'orig.ident')
