@@ -1,40 +1,48 @@
 # Figure 4
-
 library(Seurat)
 library(tidyverse)
 
-load("~/Projects/XPoSE/all_10312024.RData")
+all <- load('all_annotated_111325.RData')
 
-source("Scripts/Functions/calc_prop.R")
-source("Scripts/Functions/save_dimplot.R")
+source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/save_dimplot.R')
+source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/calc_prop.R')
 
-all$experience <- ifelse(all$group == "Homecage", "HC",
-                         "NC")
+# all$experience <- ifelse(all$group == "Homecage", "HC",
+#                          "NC")
 
 # Custom groupby-hex combinations
 hex_list <- list(
-  'cluster_name' = c('CTL6' = '#2C8CB9',
-                     'PTL5' = '#0A5B8C',
-                     'ITL23' = '#41B75F',
-                     'ITL5' = '#5DBFC1',  
-                     'ITL6' = '#3A8F87',
-                     'NPL56' = '#3C9E64',
-                     'CTL6b' = '#6F499D',
-                     'Pvalb' = '#E66027',
-                     'Sst' = '#F8991D',
-                     'Meis2' = '#C52126',
-                     'Vip' = '#A669AB',
-                     'Lamp5' = '#DB808C',
-                     'SstChodl' = '#B0B235',
-                     'PvalbChand' = '#AD6C49'),
-  'orig.ident' = c('C1' = '#22677A', 
-                   'C2' = '#D4A841'),
+  "cluster_name" = c('CTL6' = '#2D8CB8',
+                     'CTL6b' = '#7044AA',
+                     'ETL5' = '#0D5A8B',
+                     'ITL23' = '#2EBF5E',
+                     'ITL5' = '#50B2AD',  
+                     'ITL6' = '#58D2CF',
+                     'ITvm' = '#B1DE7D',
+                     'NPL5' = '#3E9E64',
+                     'Pvalb' = '#B9342C',
+                     'PvalbChand' = '#FF2D4E',
+                     'Sst' = '#FF9900',
+                     'SstChodl' = '#B1B10C',
+                     'Sncg' = '#D3408D',
+                     'Vip' = '#B864CC',
+                     'Lamp5' = '#DA808C'),
+  "orig.ident" = c('vmPFC1' = '#5A9BC7', 
+                   'vmPFC2' = '#89D1D9',
+                   'vmPFC3' = '#5A9BC7', 
+                   'vmPFC4' = '#89D1D9',
+                   'dmPFC1' = '#E08A2D',
+                   'dmPFC2' = '#EDCC85',
+                   'dmPFC3' = '#E08A2D',
+                   'dmPFC4' = '#EDCC85'),
   'sex' = c('male' = "#2C5F2D", 
             'female' = "#97BC62"),
-  'experience' =  c('HC' = '#c0c0c0',
-                    'NC' = '#ae1e5b'),
-  'group' = c('Non-active' = '#e37a9e',
-              'Active' = '#801743')
+  'experience' =  c('NT' = '#C0C0C0',
+                    'RT' = '#AE1E5B',
+                    'NC' = '#74b4af',
+                    'N' = '#000000'),
+  'group' = c('non-active' = '#e37a9e',
+              'active' = '#801743')
 )
 
 # F4D ---------------------------------------------------------------------
@@ -60,26 +68,40 @@ save_dimplot(all,
 # F4F ---------------------------------------------------------------------
 
 save_dimplot(all, 
-             groupby = 'experience',
+             groupby = "cluster_name",
+             splitby = 'experience',
              file_n = 'F4F_all',
              hex_list = hex_list)
 
 
 # F4G ---------------------------------------------------------------------
 
-nc <- subset(all, subset = experience == 'NC')
+seeking <- subset(all, subset = experience == 'RT')
 
-save_dimplot(nc, 
+save_dimplot(seeking, 
              groupby = 'group',
-             file_n = 'F4G_nc',
+             file_n = 'F4G_seeking',
+             hex_list = hex_list)
+
+NC <- subset(all, subset = experience == 'NC')
+
+save_dimplot(NC, 
+             groupby = 'group',
+             file_n = 'F4G_NC',
              hex_list = hex_list)
 
 # F4H ---------------------------------------------------------------------
 
-save_dimplot(nc, 
+save_dimplot(seeking, 
              groupby = 'group',
              splitby = 'ratID',
-             file_n = 'F4H_nc',
+             file_n = 'F4H_seeking',
+             hex_list = hex_list)
+
+save_dimplot(NC, 
+             groupby = 'group',
+             splitby = 'ratID',
+             file_n = 'F4H_NC',
              hex_list = hex_list)
 
 
@@ -87,7 +109,7 @@ save_dimplot(nc,
 
 # for pie chart
 obj_celltype <- calc_prop(seur_obj = all, 
-                          fact1 = 'group',
+                          fact1 = 'experience',
                           fact2 = 'cluster_name')
 
 write.csv(obj_celltype, file = "F4I_all_clust_by_group.csv")
@@ -100,50 +122,4 @@ clust_prop_cart <- calc_prop(seur_obj = all,
 
 write.csv(clust_prop_cart, file = "F4I_all_clust_prop_group.csv")
 
-all_p_values <- c(0.696196,
-                  0.728801,
-                  0.518292,
-                  0.397060,
-                  0.275019,
-                  0.505165,
-                  0.740391,
-                  0.616846,
-                  0.274822,
-                  0.690104,
-                  0.352961,
-                  0.984257,
-                  0.423412,
-                  0.416241, # this ends NC:NA v HC
-                  0.965903,
-                  0.604107,
-                  0.407974,
-                  0.00144,
-                  0.003981,
-                  0.439324,
-                  0.002325,
-                  0.00481,
-                  0.001521,
-                  0.058972,
-                  0.000006,
-                  0.001795,
-                  0.000418,
-                  0.219776, # this ends NC:A vs HC
-                  0.395221,
-                  0.428542,
-                  0.065448,
-                  0.025388,
-                  0.050596,
-                  0.209591,
-                  0.015136,
-                  0.010185,
-                  0.011206,
-                  0.069069,
-                  0.073653,
-                  0.003313,
-                  0.004614,
-                  0.238339) # this ends NC:A vs NC:NA
 
-
-adjusted_p_values <- p.adjust(all_p_values, method = "BH")
-
-write.csv(adjusted_p_values, "fig4i_adjpval_BH.csv")
