@@ -1,47 +1,45 @@
 # Figure 4
-
 library(Seurat)
 library(tidyverse)
 
-load("~/Projects/XPoSE/all_10312024.RData")
 
-source("Scripts/Functions/calc_prop.R")
-source("Scripts/Functions/save_dimplot.R")
-
-all$experience <- ifelse(all$group == "Homecage", "HC",
-                         "NC")
+source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/save_dimplot.R')
+source('/Users/leej77/Documents/R Work/XPoSE/XPoSE/Scripts/Functions/calc_prop.R')
 
 # Custom groupby-hex combinations
 hex_list <- list(
-  'cluster_name' = c('CTL6' = '#2C8CB9',
-                     'PTL5' = '#0A5B8C',
-                     'ITL23' = '#41B75F',
-                     'ITL5' = '#5DBFC1',  
-                     'ITL6' = '#3A8F87',
-                     'NPL56' = '#3C9E64',
-                     'CTL6b' = '#6F499D',
-                     'Pvalb' = '#E66027',
-                     'Sst' = '#F8991D',
-                     'Meis2' = '#C52126',
-                     'Vip' = '#A669AB',
-                     'Lamp5' = '#DB808C',
-                     'SstChodl' = '#B0B235',
-                     'PvalbChand' = '#AD6C49'),
-  'orig.ident' = c('C1' = '#22677A', 
-                   'C2' = '#D4A841'),
+  "cluster_name" = c('CTL6' = '#2D8CB8',
+                     'CTL6b' = '#7044AA',
+                     'ETL5' = '#0D5A8B',
+                     'ITL23' = '#2EBF5E',
+                     'ITL5' = '#50B2AD',  
+                     'ITL6' = '#58D2CF',
+                     'ITvm' = '#B1DE7D',
+                     'NPL5' = '#3E9E64',
+                     'Pvalb' = '#B9342C',
+                     'PvalbChand' = '#FF2D4E',
+                     'Sst' = '#FF9900',
+                     'SstChodl' = '#B1B10C',
+                     'Sncg' = '#D3408D',
+                     'Vip' = '#B864CC',
+                     'Lamp5' = '#DA808C'),
+  "orig.ident" = c('C1' = '#5A9BC7',
+                   'C2' = '#E08A2D'),
   'sex' = c('male' = "#2C5F2D", 
             'female' = "#97BC62"),
-  'experience' =  c('HC' = '#c0c0c0',
-                    'NC' = '#ae1e5b'),
-  'group' = c('Non-active' = '#e37a9e',
-              'Active' = '#801743')
+  'experience' =  c('HC' = '#C0C0C0',
+                    'RT' = '#AE1E5B',
+                    'NC' = '#0A8C81',
+                    'N' = 'black'),
+  'group' = c('non-active' = '#75C3BC',
+              'active' = '#00675F')
 )
 
 # F4D ---------------------------------------------------------------------
 
 # post QC NC counts
 
-obj_celltype <- calc_prop(seur_obj = all, 
+obj_celltype <- calc_prop(seur_obj = obj, 
                           fact1 = 'ratID',
                           fact2 = 'group')
 
@@ -51,7 +49,7 @@ write.csv(obj_celltype, file = "f4d_group_by_rat.csv")
 
 # Dimplots for HC/NC combined object
 
-save_dimplot(all, 
+save_dimplot(obj, 
              groupby = 'cluster_name',
              file_n = 'F4E_all',
              hex_list = hex_list)
@@ -59,91 +57,76 @@ save_dimplot(all,
 
 # F4F ---------------------------------------------------------------------
 
-save_dimplot(all, 
-             groupby = 'experience',
+save_dimplot(obj, 
+             groupby = "experience",
              file_n = 'F4F_all',
              hex_list = hex_list)
 
 
 # F4G ---------------------------------------------------------------------
 
-nc <- subset(all, subset = experience == 'NC')
+NC <- subset(obj, subset = experience == 'NC')
 
-save_dimplot(nc, 
+save_dimplot(NC, 
              groupby = 'group',
-             file_n = 'F4G_nc',
+             file_n = 'F4G_NC',
              hex_list = hex_list)
 
 # F4H ---------------------------------------------------------------------
 
-save_dimplot(nc, 
+save_dimplot(NC, 
              groupby = 'group',
              splitby = 'ratID',
-             file_n = 'F4H_nc',
+             file_n = 'F4H_NC',
              hex_list = hex_list)
 
 
 # F4I ---------------------------------------------------------------------
 
 # for pie chart
-obj_celltype <- calc_prop(seur_obj = all, 
-                          fact1 = 'group',
+obj_celltype <- calc_prop(seur_obj = obj, 
+                          fact1 = 'experience',
                           fact2 = 'cluster_name')
 
 write.csv(obj_celltype, file = "F4I_all_clust_by_group.csv")
 
 # for bar plot
-clust_prop_cart <- calc_prop(seur_obj = all, 
+clust_prop_cart <- calc_prop(seur_obj = obj, 
                              fact1 = 'ratID',
                              fact2 = 'cluster_name',
                              fact3 = 'group')
 
 write.csv(clust_prop_cart, file = "F4I_all_clust_prop_group.csv")
 
-all_p_values <- c(0.696196,
-                  0.728801,
-                  0.518292,
-                  0.397060,
-                  0.275019,
-                  0.505165,
-                  0.740391,
-                  0.616846,
-                  0.274822,
-                  0.690104,
-                  0.352961,
-                  0.984257,
-                  0.423412,
-                  0.416241, # this ends NC:NA v HC
-                  0.965903,
-                  0.604107,
-                  0.407974,
-                  0.00144,
-                  0.003981,
-                  0.439324,
-                  0.002325,
-                  0.00481,
-                  0.001521,
-                  0.058972,
-                  0.000006,
-                  0.001795,
-                  0.000418,
-                  0.219776, # this ends NC:A vs HC
-                  0.395221,
-                  0.428542,
-                  0.065448,
-                  0.025388,
-                  0.050596,
-                  0.209591,
-                  0.015136,
-                  0.010185,
-                  0.011206,
-                  0.069069,
-                  0.073653,
-                  0.003313,
-                  0.004614,
-                  0.238339) # this ends NC:A vs NC:NA
+all_p_values <- c(0.138772,
+                  0.095136,
+                  0.882892,
+                  0.619633,
+                  0.989023,
+                  0.048194,
+                  0.000008,
+                  0.457147, # this ends NC:NA v HC
+                  0.001121,
+                  0.165038,
+                  0.000180,
+                  0.040186,
+                  0.000001,
+                  0.002378,
+                  0.000599,
+                  0.000159, # this ends NC:A vs HC
+                  0.000107,
+                  0.094900,
+                  0.003804,
+                  0.028463,
+                  0.000214,
+                  0.001804,
+                  0.002276,
+                  0.010723) # this ends NC:A vs NC:NA
 
 
 adjusted_p_values <- p.adjust(all_p_values, method = "BH")
 
 write.csv(adjusted_p_values, "fig4i_adjpval_BH.csv")
+
+write.csv(clustgroup_prop_04282026, "cluster_proportions_05052026.csv")
+
