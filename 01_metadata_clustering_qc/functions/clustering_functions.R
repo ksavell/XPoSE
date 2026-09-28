@@ -15,9 +15,8 @@ neuron_classes_keep <- c(
 
 # Final cell-type order used throughout the manuscript.
 cluster_order <- c(
-  "CTL6", "CTL6b", "ETL5", "ITL23", "ITL5", "ITL6", "ITvm",
-  "Lamp5", "NPL5", "Pvalb", "PvalbChand", "Sncg", "Sst",
-  "SstChodl", "Vip"
+  "ITL23", "ITL5", "ITL6", "ITvm", "CTL6", "CTL6b", "ETL5", 
+  "NPL5", "Pvalb", "Sst", "PvalbChand", "SstChodl", "Vip", "Lamp5", "Sncg"
 )
 
 # Allen subclass -> manuscript cell-type label.
