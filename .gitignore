@@ -1,0 +1,19 @@
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+
+# R / RStudio temp files
+.RDataTmp*
+.RData
+.Rhistory
+.Ruserdata
+
+# RStudio project files (choose one policy)
+*.Rproj
+.Rproj.user/
+
+# Inputs and outputs (local only)
+input/
+output/
+.positai
