@@ -1,0 +1,9 @@
+capture,region,counts_file,xpose_tag_calls_file,xpose_tag_reads_file
+dmPFC1,dmPFC,input/PL/_1_Combined_Cart1-PL-mm10_RSEC_MolsPerCell.csv,input/PL/_1_Cart1-PL-mm10_Sample_Tag_Calls.csv,input/PL/_1_Cart1-PL-mm10_Sample_Tag_ReadsPerCell.csv
+dmPFC2,dmPFC,input/PL/Combined_Cart2-PL-mm10_RSEC_MolsPerCell.csv,input/PL/Cart2-PL-mm10_Sample_Tag_Calls.csv,input/PL/Cart2-PL-mm10_Sample_Tag_ReadsPerCell.csv
+dmPFC3,dmPFC,input/PL/Combined_Cart5-PL-mm10_RSEC_MolsPerCell.csv,input/PL/Cart5-PL-mm10_Sample_Tag_Calls.csv,input/PL/Cart5-PL-mm10_Sample_Tag_ReadsPerCell.csv
+dmPFC4,dmPFC,input/PL/Combined_Cart6-PL-mm10_RSEC_MolsPerCell.csv,input/PL/Cart6-PL-mm10_Sample_Tag_Calls.csv,input/PL/Cart6-PL-mm10_Sample_Tag_ReadsPerCell.csv
+vmPFC1,vmPFC,input/IL/Combined_Cart3-IL-mm10_RSEC_MolsPerCell.csv,input/IL/Cart3-IL-mm10_Sample_Tag_Calls.csv,input/IL/Cart3-IL-mm10_Sample_Tag_ReadsPerCell.csv
+vmPFC2,vmPFC,input/IL/Combined_Cart4-IL-mm10_RSEC_MolsPerCell.csv,input/IL/Cart4-IL-mm10_Sample_Tag_Calls.csv,input/IL/Cart4-IL-mm10_Sample_Tag_ReadsPerCell.csv
+vmPFC3,vmPFC,input/IL/Combined_Cart7-IL-mm10_RSEC_MolsPerCell.csv,input/IL/Cart7-IL-mm10_Sample_Tag_Calls.csv,input/IL/Cart7-IL-mm10_Sample_Tag_ReadsPerCell.csv
+vmPFC4,vmPFC,input/IL/Combined_Cart8-IL-mm10_RSEC_MolsPerCell.csv,input/IL/Cart8-IL-mm10_Sample_Tag_Calls.csv,input/IL/Cart8-IL-mm10_Sample_Tag_ReadsPerCell.csv

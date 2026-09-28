@@ -1,0 +1,17 @@
+capture,ratID,experience,sex,xpose_tag,group
+C1,HC-3,HC,M,2,all
+C2,HC-3,HC,M,2,all
+C1,NC-4,NC,M,3,non-active
+C2,NC-4,NC,M,3,active
+C1,HC-2,HC,F,4,all
+C2,HC-2,HC,F,4,all
+C1,NC-2,NC,F,5,active
+C2,NC-2,NC,F,5,non-active
+C1,HC-4,HC,M,6,all
+C2,HC-4,HC,M,6,all
+C1,NC-3,NC,M,7,non-active
+C2,NC-3,NC,M,7,active
+C1,HC-1,HC,F,8,all
+C2,HC-1,HC,F,8,all
+C1,NC-1,NC,F,9,active
+C2,NC-1,NC,F,9,non-active
