@@ -1,3 +1,3 @@
-capture,region,counts_file,xpose_tag_calls_file,xpose_tag_reads_file
-C1,,input/Combined_cart1-good-only_RSEC_MolsPerCell.csv,input/cart1-good-only_Sample_Tag_Calls.csv,input/cart1-good-only_Sample_Tag_ReadsPerCell.csv
-C2,,input/Combined_cart2-good-only_RSEC_MolsPerCell.csv,input/cart2-good-only_Sample_Tag_Calls.csv,input/cart2-good-only_Sample_Tag_ReadsPerCell.csv
+capture,region,counts_file,xpose_tag_calls_file,xpose_tag_reads_file,mapmycells_file
+C1,,input/Combined_cart1-good-only_RSEC_MolsPerCell.csv,input/cart1-good-only_Sample_Tag_Calls.csv,input/cart1-good-only_Sample_Tag_ReadsPerCell.csv,input/mapmycells/poc/C1_mapping.csv
+C2,,input/Combined_cart2-good-only_RSEC_MolsPerCell.csv,input/cart2-good-only_Sample_Tag_Calls.csv,input/cart2-good-only_Sample_Tag_ReadsPerCell.csv,input/mapmycells/poc/C2_mapping.csv
