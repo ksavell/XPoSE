@@ -1,0 +1,12 @@
+analysis_name,case_fact1,case_fact2,ctrl_fact1,ctrl_fact2,fact1,fact2,design,meta_rds,pb_rds
+N_vmPFC_N_dmPFC,N,vmPFC,N,dmPFC,experience,region,~ cond + ratID,output/03_differential_expression/03_main_de/pseudobulk/main_meta_mPFC_split.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_mPFC_split.rds
+NT_all_N_all_vmPFC,NT,all,N,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_vmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_vmPFC.rds
+NT_all_N_all_dmPFC,NT,all,N,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_dmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_dmPFC.rds
+RT_active_RT_nonactive_vmPFC,RT,active,RT,non-active,experience,group,~ cond + ratID,output/03_differential_expression/03_main_de/pseudobulk/main_meta_vmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_vmPFC.rds
+RT_active_RT_nonactive_dmPFC,RT,active,RT,non-active,experience,group,~ cond + ratID,output/03_differential_expression/03_main_de/pseudobulk/main_meta_dmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_dmPFC.rds
+NC_active_NC_nonactive_vmPFC,NC,active,NC,non-active,experience,group,~ cond + ratID,output/03_differential_expression/03_main_de/pseudobulk/main_meta_vmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_vmPFC.rds
+NC_active_NC_nonactive_dmPFC,NC,active,NC,non-active,experience,group,~ cond + ratID,output/03_differential_expression/03_main_de/pseudobulk/main_meta_dmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_dmPFC.rds
+RT_nonactive_N_all_vmPFC,RT,non-active,N,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_vmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_vmPFC.rds
+RT_nonactive_N_all_dmPFC,RT,non-active,N,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_dmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_dmPFC.rds
+RT_nonactive_NT_all_vmPFC,RT,non-active,NT,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_vmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_vmPFC.rds
+RT_nonactive_NT_all_dmPFC,RT,non-active,NT,all,experience,group,~ cond,output/03_differential_expression/03_main_de/pseudobulk/main_meta_dmPFC.rds,output/03_differential_expression/03_main_de/pseudobulk/main_pb_dmPFC.rds
