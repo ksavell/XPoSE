@@ -18,16 +18,16 @@
 #' @param cluster the cluster within your object you want to analyze
 #' @param min_cell minimum count that a cluster of each rat must have for that
 #'                 cluster to be considered in analysis. Has a minimum value of
-#'                 0.
+#'                 10.
 #' @param min_rat A minimum number of rats you would want for your comparison.
-#'                Cannot be lower than 2. Has a minimum value of 2.
+#'                Cannot be lower than 3. Has a minimum value of 3.
 #'
 #' @return a list containing the DESeq object and the results table
 #' @export
 #'
 #' @examples
 single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
-                                min_rat = 2, keep_dds = FALSE){
+                                min_rat = 3, keep_dds = FALSE){
   library(Seurat)
   library(Libra)
   library(dplyr)
@@ -42,13 +42,13 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
          "object: ", deparse(substitute(object)), ".")
   }
   
-  #ensures min_rat is at least 2
-  if (min_rat < 2){
-    min_rat <- 2
+  #ensures min_rat is at least 3
+  if (min_rat < 3){
+    min_rat <- 3
   }
-  #ensures min_cell is at least 0
-  if (min_cell < 0){
-    min_cell <- 0
+  #ensures min_cell is at least 10
+  if (min_cell < 10){
+    min_cell <- 10
   }
   
   if (!(comp_vect[1] %in% colnames(object@meta.data))){
