@@ -128,7 +128,7 @@ for (dataset_i in seq_len(nrow(datasets))) {
     # Detect and remove residual within-XPoSE-tag doublets.
     seur_obj <- run_within_xpose_doublet_detection(
       seur_obj = seur_obj,
-      seed = 42
+      seed = 22
     )
     
     doublet_summaries[[i]] <- summarize_within_xpose_doublets(seur_obj)
