@@ -1,31 +1,4 @@
-#' Single Factor DeSeq
-#'
-#' This takes a single cluster and a single factor within a Seurat object and
-#' creates both a DeSeq and results table for the object for further analysis
-#'
-#' @param object The Seurat object to do analysis on
-#' @param comp_vect a vector holding your factor and levels within the factor.
-#'                  The first element of the vector should be your factor and
-#'                  the subsequent elements should be levels within you want to
-#'                  compare.
-#'
-#'                  For example, if you wanted to analyze differences between
-#'                  Active and Non-active within your object, this vector would
-#'                  look like:
-#'
-#'                  comp_vect <- c("group", "Active", "Non-active")
-#'
-#' @param cluster the cluster within your object you want to analyze
-#' @param min_cell minimum count that a cluster of each rat must have for that
-#'                 cluster to be considered in analysis. Has a minimum value of
-#'                 10.
-#' @param min_rat A minimum number of rats you would want for your comparison.
-#'                Cannot be lower than 3. Has a minimum value of 3.
-#'
-#' @return a list containing the DESeq object and the results table
-#' @export
-#'
-#' @examples
+#' Run single-factor pseudobulk DE across cell populations and summarize DEGs
 single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
                                 min_rat = 3, keep_dds = FALSE){
   library(Seurat)
@@ -257,4 +230,115 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
   
   #returns
   return(list(dds = dds, results = results))
+}
+
+
+de_and_summary <- function(seur_obj,
+                           pair,
+                           clusters = sort(unique(seur_obj$cluster_name)),
+                           min_cell = 10,
+                           min_rat = 3,
+                           output_dir = ".",
+                           save_dds = TRUE) {
+  
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  comparison_tag <- paste(pair, collapse = "_")
+  results_list <- list()
+  result_i <- 1
+  
+  for (cl in clusters) {
+    
+    deseq2_results <- tryCatch(
+      single_factor_DESeq(
+        object = seur_obj,
+        comp_vect = pair,
+        cluster = cl,
+        min_cell = min_cell,
+        min_rat = min_rat
+      ),
+      error = function(e) {
+        message(
+          "Skipping ", cl, " for ", comparison_tag, ": ",
+          conditionMessage(e)
+        )
+        NULL
+      }
+    )
+    
+    if (is.null(deseq2_results)) {
+      next
+    }
+    
+    de_tbl <- deseq2_results$results
+    dds <- deseq2_results$dds
+    
+    if (!all(c("padj", "log2FoldChange") %in% colnames(de_tbl))) {
+      warning("padj/log2FoldChange missing for ", cl, "; skipping.")
+      next
+    }
+    
+    de_tbl$padj <- as.numeric(de_tbl$padj)
+    de_tbl$log2FoldChange <- as.numeric(de_tbl$log2FoldChange)
+    
+    n_up <- sum(
+      !is.na(de_tbl$padj) &
+        de_tbl$padj < 0.05 &
+        de_tbl$log2FoldChange > 0
+    )
+    
+    n_down <- sum(
+      !is.na(de_tbl$padj) &
+        de_tbl$padj < 0.05 &
+        de_tbl$log2FoldChange < 0
+    )
+    
+    # Preserve the original F5A convention: upregulated DEG counts are
+    # positive and downregulated DEG counts are negative.
+    results_list[[result_i]] <- data.frame(
+      Category = comparison_tag,
+      Observation = cl,
+      Value = n_up,
+      stringsAsFactors = FALSE
+    )
+    
+    results_list[[result_i + 1]] <- data.frame(
+      Category = comparison_tag,
+      Observation = cl,
+      Value = -n_down,
+      stringsAsFactors = FALSE
+    )
+    
+    result_i <- result_i + 2
+    
+    file_tag <- paste0(cl, "_", comparison_tag)
+    
+    write.csv(
+      de_tbl,
+      file.path(output_dir, paste0(file_tag, ".csv")),
+      row.names = FALSE
+    )
+    
+    if (save_dds) {
+      saveRDS(
+        dds,
+        file.path(output_dir, paste0(file_tag, "_dds.rds"))
+      )
+    }
+  }
+  
+  if (length(results_list) == 0) {
+    warning("No successful DE comparisons for ", comparison_tag)
+    return(invisible(NULL))
+  }
+  
+  summary_df <- do.call(rbind, results_list)
+  
+  write.csv(
+    summary_df,
+    file.path(output_dir, paste0(comparison_tag, "_summary.csv")),
+    row.names = FALSE
+  )
+  
+  invisible(summary_df)
 }

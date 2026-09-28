@@ -13,8 +13,8 @@ suppressPackageStartupMessages({
 input_file <- "output/01_metadata_clustering_qc/poc_combined_annotated.rds"
 output_root <- "output/03_differential_expression/01_poc_group_de"
 
-source("03_differential_expression/functions/single_factor_DESeq.R")
-source("03_differential_expression/functions/de_and_summary.R")
+source("03_differential_expression/functions/poc_de_functions.R")
+
 
 dir.create(output_root, recursive = TRUE, showWarnings = FALSE)
 
