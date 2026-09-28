@@ -1,6 +1,6 @@
 #' Run single-factor pseudobulk DE across cell populations and summarize DEGs
 single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
-                                min_rat = 3, keep_dds = FALSE){
+                                min_rat = 3, keep_dds = FALSE) {
   library(Seurat)
   library(Libra)
   library(dplyr)
@@ -9,229 +9,309 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
   library(rlang)
   library(rlist)
   
-  #checks that cluster exists
-  if (!(cluster %in% unique(object$cluster_name))){
-    stop("Cluster '", deparse(substitute(cluster)), "' not found within ",
-         "object: ", deparse(substitute(object)), ".")
+  # Check that cluster exists
+  if (!(cluster %in% unique(object$cluster_name))) {
+    stop(
+      "Cluster '", cluster, "' not found within object."
+    )
   }
   
-  #ensures min_rat is at least 3
-  if (min_rat < 3){
-    min_rat <- 3
+  # Require at least 2 biological replicates per group.
+  # Default is 3 rats/group for primary DE analyses, but min_rat = 2 can be
+  # explicitly supplied for leave-one-out sensitivity analyses.
+  if (min_rat < 2) {
+    min_rat <- 2
   }
-  #ensures min_cell is at least 10
-  if (min_cell < 10){
+  
+  # Require at least 10 nuclei per population per rat
+  if (min_cell < 10) {
     min_cell <- 10
   }
   
-  if (!(comp_vect[1] %in% colnames(object@meta.data))){
-    stop("Factor, ", comp_vect[1], ", not found within object '",
-         deparse(substitute(object)), "'.")
-  }
-  if (FALSE %in% (comp_vect[2:3] %in% object[[comp_vect[1]]][, 1])){
-    stop("Vector '", deparse(substitute(comp_vect)),
-         "' contains comparisons not in factor '", comp_vect[1], "'.")
+  # Check comparison factor
+  if (!(comp_vect[1] %in% colnames(object@meta.data))) {
+    stop(
+      "Factor ", comp_vect[1],
+      " not found within object metadata."
+    )
   }
   
-  #subsets objects by the comparisons
+  # Check comparison levels
+  if (FALSE %in% (comp_vect[2:3] %in% object[[comp_vect[1]]][, 1])) {
+    stop(
+      "Comparison contains levels not found in factor ",
+      comp_vect[1], "."
+    )
+  }
+  
+  # Subset to cluster and comparison groups
   Idents(object) <- "cluster_name"
   sub_obj <- subset(object, idents = cluster)
+  
   Idents(sub_obj) <- comp_vect[1]
   sub_obj <- subset(sub_obj, idents = comp_vect[2:3])
   
-  #makes table to display rats that will be included as well as their counts
-  #and characteristics
+  # Build table of nuclei counts per rat and comparison group
   t_tbl <- data.frame(matrix(nrow = 1, ncol = 4))
   
-  #table to pull relevant rats from
-  rat_g_c <- table(sub_obj[[comp_vect[1]]][, 1],
-                   sub_obj$cluster_name, sub_obj$ratID)
-  #names
-  colnames(t_tbl) <- c(comp_vect[1], "ratID", "counts",
-                       "Included")
+  rat_g_c <- table(
+    sub_obj[[comp_vect[1]]][, 1],
+    sub_obj$cluster_name,
+    sub_obj$ratID
+  )
   
-  #the row of the table
+  colnames(t_tbl) <- c(
+    comp_vect[1],
+    "ratID",
+    "counts",
+    "Included"
+  )
+  
   curr_row <- 1
-  #loops through our rats and comparisons to fill table
-  for (rat in unique(sub_obj$ratID)){
-    for (level in comp_vect[2:3]){
-      if (rat_g_c[level, ,rat] != 0){
-        #data we fill row with
-        t_tbl[curr_row, ] <- list(level, rat,
-                                  rat_g_c[level, ,rat],
-                                  rat_g_c[level, ,rat] >
-                                    min_cell)
+  
+  for (rat in unique(sub_obj$ratID)) {
+    for (level in comp_vect[2:3]) {
+      
+      if (rat_g_c[level, , rat] != 0) {
         
-        #updates name and index
-        rownames(t_tbl)[curr_row] <- paste(rat, level, sep = ":")
+        t_tbl[curr_row, ] <- list(
+          level,
+          rat,
+          rat_g_c[level, , rat],
+          rat_g_c[level, , rat] >= min_cell
+        )
         
-        #updates curr_row
+        rownames(t_tbl)[curr_row] <- paste(
+          rat,
+          level,
+          sep = ":"
+        )
+        
         curr_row <- curr_row + 1
       }
     }
   }
   
-  #makes table to display holding the number of rats within our sample that
-  #have characteristics of a comparison over the total number of rats in the
-  #data provided with those same characteristics
+  # Summarize included biological replicates
   incl_tbl <- data.frame(matrix(0, nrow = 1, ncol = 2))
+  
   rownames(incl_tbl) <- comp_vect[1]
   colnames(incl_tbl) <- comp_vect[2:3]
   
   rat_ttls <- c()
-  #draws data from the original table
-  for (i in 1:nrow(t_tbl)){
-    #draws data from original table
-    if (t_tbl[i, "Included"]){
+  
+  for (i in seq_len(nrow(t_tbl))) {
+    
+    if (t_tbl[i, "Included"]) {
       incl_tbl[, t_tbl[i, comp_vect[1]]] <-
         incl_tbl[, t_tbl[i, comp_vect[1]]] + 1
     }
     
-    #finds totals
-    if (!(t_tbl[i, comp_vect[1]] %in% names(rat_ttls))){
+    if (!(t_tbl[i, comp_vect[1]] %in% names(rat_ttls))) {
       rat_ttls[t_tbl[i, comp_vect[1]]] <- 1
-    }else {
+    } else {
       rat_ttls[t_tbl[i, comp_vect[1]]] <-
         rat_ttls[t_tbl[i, comp_vect[1]]] + 1
     }
-    
   }
   
-  #flag is here as we want to print the warning after printing the table
-  #but counts are easier to check prior to the step that adds the / total
+  # Check sample availability
   low_samp_flag <- FALSE
-  #loops through table to find with min_rat
-  for (level in comp_vect[2:3]){
-    if (incl_tbl[,level] < min_rat){
+  
+  for (level in comp_vect[2:3]) {
+    
+    if (incl_tbl[, level] < min_rat) {
       low_samp_flag <- TRUE
     }
-    if (incl_tbl[,level] == 0){
-      stop("Level, ", level, ", within factor ", comp_vect[1],
-           " was fully excluded with chosen min-cell. Please lower it",
-           " in order to run analysis.")
+    
+    if (incl_tbl[, level] == 0) {
+      stop(
+        "Level ", level,
+        " within factor ", comp_vect[1],
+        " was fully excluded with min_cell = ", min_cell, "."
+      )
     }
   }
   
-  #adds the / Total#
-  for (i in 1:length(rat_ttls)){
-    incl_tbl[ names(rat_ttls)[i]] <-
-      paste(incl_tbl[names(rat_ttls)[i]], "/",
-            rat_ttls[i], sep = "")
+  # Add included / total counts for display
+  for (i in seq_along(rat_ttls)) {
+    incl_tbl[names(rat_ttls)[i]] <- paste(
+      incl_tbl[names(rat_ttls)[i]],
+      "/",
+      rat_ttls[i],
+      sep = ""
+    )
   }
   
-  #prints the table of those included
   cat("Sample count: Include/Total\n")
   print(incl_tbl)
-  #displays if flagged immediately
-  if (low_samp_flag){
+  
+  if (low_samp_flag) {
     warning(
-      "One or more entries in above table have less included rats ",
-      "than min_rat of ", min_rat, ".\n", immediate. = TRUE)
+      "One or more groups contain fewer than ",
+      min_rat,
+      " included rats.\n",
+      immediate. = TRUE
+    )
   }
   
-  #formats the table so that information is easier to gleam from it
-  prin_tbl <- as.data.frame(t_tbl %>%
-                              arrange(grepl(comp_vect[2], !!as.symbol(comp_vect[1]))))
-  #adds the rownames back
-  for (i in 1:nrow(prin_tbl)){
-    #adds more if they're both within else errors happen
-    rownames(prin_tbl)[i] <- paste(prin_tbl[i, "ratID"],
-                                   prin_tbl[i, comp_vect[1]],
-                                   sep = ":")
+  # Format individual sample nuclei-count table
+  prin_tbl <- as.data.frame(
+    t_tbl %>%
+      arrange(
+        grepl(
+          comp_vect[2],
+          !!as.symbol(comp_vect[1])
+        )
+      )
+  )
+  
+  for (i in seq_len(nrow(prin_tbl))) {
+    rownames(prin_tbl)[i] <- paste(
+      prin_tbl[i, "ratID"],
+      prin_tbl[i, comp_vect[1]],
+      sep = ":"
+    )
   }
   
-  #prints the table
   cat("\n")
   cat("Individual Sample Nuclei Counts\n")
   print(prin_tbl)
   cat("\n")
   
-  #rats that won't be in sample
-  exclusion <- rownames(t_tbl[which(!t_tbl[,"Included"]),])
+  # Identify samples excluded for insufficient nuclei
+  exclusion <- rownames(
+    t_tbl[which(!t_tbl[, "Included"]), ]
+  )
   
-  #prints different message depending on # rats excluded
-  if (length(exclusion) != 0){
-    if (length(exclusion) > 1){
-      cat(cat(exclusion,
-              sep = ", "),
-          "to be excluded as counts < ", min_cell, "\n\n")
+  if (length(exclusion) != 0) {
+    
+    if (length(exclusion) > 1) {
+      cat(
+        paste(exclusion, collapse = ", "),
+        " excluded because counts < ",
+        min_cell,
+        "\n\n",
+        sep = ""
+      )
+    } else {
+      cat(
+        exclusion,
+        " excluded because counts < ",
+        min_cell,
+        "\n\n",
+        sep = ""
+      )
     }
-    else {
-      cat(exclusion, " to be excluded as counts < ", min_cell, "\n\n")
-    }
+    
   } else {
     cat("No rats excluded\n\n")
   }
   
-  #gets rid of the excluded rats
-  temp <- t_tbl[which(t_tbl[,"Included"]),]
+  # Retain samples meeting nuclei-count requirement
+  temp <- t_tbl[
+    which(t_tbl[, "Included"]),
+    ,
+    drop = FALSE
+  ]
   
-  #Checks to see if too many were excluded by the min_cell
-  for (cmp in comp_vect[2:3]){
-    if (!(cmp %in% temp[, comp_vect[1]])){
-      stop("Exclusion excluded all rats with characteristic, ",
-           cmp, ", for factor: ", comp_vect[1], "\n",
-           "  Please adjust min_cell to exclude less rats")
+  # Check that both comparison groups remain
+  for (cmp in comp_vect[2:3]) {
+    
+    if (!(cmp %in% temp[, comp_vect[1]])) {
+      stop(
+        "Nuclei-count filtering excluded all rats from ",
+        cmp,
+        " for factor ",
+        comp_vect[1],
+        "."
+      )
     }
   }
   
-  # ---- SKIP-AND-LOG GUARD ---------------------------------------------------
-  # DESeq requires >= 2 replicates per group. If filtering leaves any group
-  # with fewer, stop() with a clear, catchable message so the caller can log
-  # this as a *skip* rather than a genuine error.
+  # Require requested number of biological replicates after filtering
   grp_counts <- table(temp[, comp_vect[1]])
-  if (any(grp_counts < min_rat)){
+  
+  if (any(grp_counts < min_rat)) {
+    
     low <- names(grp_counts)[grp_counts < min_rat]
-    stop("SKIP: group(s) ", paste(low, collapse = ", "),
-         " have < ", min_rat, " rats after filtering (had ",
-         paste(paste0(names(grp_counts), "=", as.integer(grp_counts)),
-               collapse = ", "), ").")
+    
+    stop(
+      "SKIP: group(s) ",
+      paste(low, collapse = ", "),
+      " have < ",
+      min_rat,
+      " rats after filtering (",
+      paste(
+        paste0(
+          names(grp_counts),
+          "=",
+          as.integer(grp_counts)
+        ),
+        collapse = ", "
+      ),
+      ")."
+    )
   }
-  # ---------------------------------------------------------------------------
   
-  #takes those rats out
+  # Remove excluded rats
   Idents(sub_obj) <- "ratID"
-  sub_obj <- subset(sub_obj, idents = unique(temp$ratID))
+  sub_obj <- subset(
+    sub_obj,
+    idents = unique(temp$ratID)
+  )
   
-  # Pseudobulk via Libra on the (joined) v5 object. This matches the proven
-  # working recipe: caller does JoinLayers only (no v4 downcast), and
-  # to_pseudobulk runs on the resulting Assay5. drop = FALSE guards against a
-  # single-column collapse to a dimensionless vector on minimal subsets.
+  # Pseudobulk counts by rat
   counts <- to_pseudobulk(
-    sub_obj, #The source of what we're generating a count
+    sub_obj,
     replicate_col = "ratID",
     cell_type_col = "cluster_name",
     label_col = comp_vect[1]
   )[[1]][, rownames(temp), drop = FALSE]
   
-  #makes formula
-  form_fact <- as.formula(paste("~", comp_vect[1], sep = " "))
+  # DESeq2 design
+  form_fact <- as.formula(
+    paste("~", comp_vect[1])
+  )
   
-  #turns matrix into DESeq object
-  dds <- DESeqDataSetFromMatrix(counts, #Data Table
-                                colData = temp,  #metaData
-                                design = form_fact)
+  dds <- DESeqDataSetFromMatrix(
+    countData = counts,
+    colData = temp,
+    design = form_fact
+  )
   
-  # runs DESeq2
   dds <- DESeq(dds)
   
-  #populates results
-  results = results(dds,
-                    contrast = comp_vect,
-                    alpha = 0.05,
-                    cooksCutoff = FALSE,
-                    independentFiltering = FALSE)
+  # Differential expression
+  deseq_results <- results(
+    dds,
+    contrast = comp_vect,
+    alpha = 0.05,
+    cooksCutoff = FALSE,
+    independentFiltering = FALSE
+  )
   
-  #turns into tibble
-  results <- results %>%
+  deseq_results <- deseq_results %>%
     data.frame() %>%
     rownames_to_column(var = "gene") %>%
     as_tibble()
   
-  #returns
-  return(list(dds = dds, results = results))
+  # Return DESeq object only when requested
+  if (keep_dds) {
+    return(
+      list(
+        dds = dds,
+        results = deseq_results
+      )
+    )
+  }
+  
+  return(
+    list(
+      results = deseq_results
+    )
+  )
 }
-
 
 de_and_summary <- function(seur_obj,
                            pair,
