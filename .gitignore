@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Rproj.user/
+.gitignore
 
 # R / RStudio temp files
 .RDataTmp*
