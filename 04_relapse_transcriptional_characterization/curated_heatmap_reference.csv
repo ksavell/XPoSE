@@ -1,0 +1,360 @@
+region,final_category,category_rank,gene,main_compact,supplemental_up_only
+dmPFC,Activity-dependent IEG,1,Bdnf,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Fosb,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Arc,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Fosl2,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Fos,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Egr3,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Nr4a1,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Egr1,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Homer1,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Syt4,FALSE,TRUE
+dmPFC,Activity-dependent IEG,1,Egr2,FALSE,TRUE
+dmPFC,Activity-dependent IEG,1,Egr4,FALSE,TRUE
+dmPFC,Activity-dependent IEG,1,Npas4,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Junb,FALSE,TRUE
+dmPFC,Activity-dependent IEG,1,Nr4a2,TRUE,TRUE
+dmPFC,Activity-dependent IEG,1,Nr4a3,TRUE,TRUE
+dmPFC,Glutamatergic,2,Grin2a,TRUE,TRUE
+dmPFC,Glutamatergic,2,Gria3,TRUE,TRUE
+dmPFC,Glutamatergic,2,Grid2,FALSE,FALSE
+dmPFC,Glutamatergic,2,Gria1,FALSE,FALSE
+dmPFC,Glutamatergic,2,Gria4,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grid1,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grik2,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grm1,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grm3,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grm5,FALSE,FALSE
+dmPFC,Glutamatergic,2,Grm7,FALSE,FALSE
+dmPFC,GABA,3,Gad2,TRUE,TRUE
+dmPFC,GABA,3,Gabra4,TRUE,TRUE
+dmPFC,GABA,3,Gabbr2,TRUE,TRUE
+dmPFC,GABA,3,Gabra1,TRUE,TRUE
+dmPFC,GABA,3,Gabbr1,TRUE,TRUE
+dmPFC,GABA,3,Gabra5,FALSE,FALSE
+dmPFC,GABA,3,Gabrb1,FALSE,FALSE
+dmPFC,GABA,3,Gabrb3,FALSE,FALSE
+dmPFC,GABA,3,Gabrg1,FALSE,FALSE
+dmPFC,GABA,3,Gabrg3,FALSE,FALSE
+dmPFC,Neuromodulatory receptors,4,Chrm2,TRUE,TRUE
+dmPFC,Neuromodulatory receptors,4,Chrm4,TRUE,TRUE
+dmPFC,Neuromodulatory receptors,4,Adrb1,TRUE,TRUE
+dmPFC,Neuromodulatory receptors,4,Adra1a,FALSE,FALSE
+dmPFC,Neuromodulatory receptors,4,Drd2,TRUE,TRUE
+dmPFC,Neuromodulatory receptors,4,Htr2c,TRUE,TRUE
+dmPFC,Neuromodulatory receptors,4,Chrna5,FALSE,FALSE
+dmPFC,Neuromodulatory receptors,4,Chrna7,FALSE,FALSE
+dmPFC,Neuromodulatory receptors,4,Htr2a,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacna1a,TRUE,TRUE
+dmPFC,Calcium channels,5,Cacng2,TRUE,TRUE
+dmPFC,Calcium channels,5,Cacnb4,TRUE,TRUE
+dmPFC,Calcium channels,5,Cacna1c,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacna1g,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacna1h,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacna2d1,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacna2d3,FALSE,FALSE
+dmPFC,Calcium channels,5,Cacnb2,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnc2,TRUE,TRUE
+dmPFC,Potassium channels,6,Kcnf1,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnj4,TRUE,TRUE
+dmPFC,Potassium channels,6,Kcnma1,TRUE,TRUE
+dmPFC,Potassium channels,6,Kcnh2,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnk10,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcna1,TRUE,TRUE
+dmPFC,Potassium channels,6,Kcnh1,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnk3,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnk13,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcng3,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnt1,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnk9,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnq5,TRUE,TRUE
+dmPFC,Potassium channels,6,Kcnb1,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnq3,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcnd2,FALSE,TRUE
+dmPFC,Potassium channels,6,Kcng1,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnh5,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnj3,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnj6,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnn2,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnn3,FALSE,FALSE
+dmPFC,Potassium channels,6,Kcnt2,FALSE,FALSE
+dmPFC,Sodium channels,7,Scn1b,TRUE,TRUE
+dmPFC,Sodium channels,7,Scn3b,TRUE,TRUE
+dmPFC,Sodium channels,7,Scn1a,TRUE,TRUE
+dmPFC,Sodium channels,7,Scn9a,FALSE,FALSE
+dmPFC,Neuropeptides,8,Vgf,TRUE,TRUE
+dmPFC,Neuropeptides,8,Penk,TRUE,TRUE
+dmPFC,Neuropeptides,8,Npy,TRUE,TRUE
+dmPFC,Neuropeptides,8,Adcyap1,TRUE,TRUE
+dmPFC,Neuropeptides,8,Crh,TRUE,TRUE
+dmPFC,Neuropeptides,8,Tac1,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Rims1,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Dlgap4,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Ntrk2,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Prkcb,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Snap25,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Stx1b,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Vamp2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Dlgap2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Rheb,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Prkcg,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Nrxn3,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Nlgn2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Shank1,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Bsn,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Prkce,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Pclo,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Nrxn2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Rims2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Calm1,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Src,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Homer2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Cplx2,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Camk2d,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Dlg4,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Prkca,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Epha4,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Calm2,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Rab3a,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Camk2n1,TRUE,TRUE
+dmPFC,Synaptic plasticity,9,Camk4,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Camk2b,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Fyn,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Rps6ka3,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Shank3,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Camk2a,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Syn1,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Dlgap1,FALSE,TRUE
+dmPFC,Synaptic plasticity,9,Nlgn1,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Ppp3ca,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Rab3c,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Rasgrf2,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Reln,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Rps6ka2,FALSE,FALSE
+dmPFC,Synaptic plasticity,9,Syt1,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Kdm6b,TRUE,TRUE
+dmPFC,Epigenetic regulators,10,Dnmt3a,TRUE,TRUE
+dmPFC,Epigenetic regulators,10,Tet3,TRUE,TRUE
+dmPFC,Epigenetic regulators,10,Kmt2a,TRUE,TRUE
+dmPFC,Epigenetic regulators,10,Chd7,TRUE,TRUE
+dmPFC,Epigenetic regulators,10,Smarca1,FALSE,TRUE
+dmPFC,Epigenetic regulators,10,Brd1,FALSE,TRUE
+dmPFC,Epigenetic regulators,10,Chd3,FALSE,TRUE
+dmPFC,Epigenetic regulators,10,Hdac1,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Hdac10,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Hdac7,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Kdm2b,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Kdm6a,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Sirt5,FALSE,FALSE
+dmPFC,Epigenetic regulators,10,Smarca2,FALSE,FALSE
+dmPFC,Sigma receptor system,11,Pgrmc1,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr3,FALSE,TRUE
+dmPFC,Related GPCRs,12,Cnr1,FALSE,TRUE
+dmPFC,Related GPCRs,12,Sstr1,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr162,FALSE,TRUE
+dmPFC,Related GPCRs,12,Lpar3,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr68,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr176,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr83,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr63,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr158,FALSE,TRUE
+dmPFC,Related GPCRs,12,Gpr139,FALSE,FALSE
+dmPFC,Related GPCRs,12,Tacr1,FALSE,FALSE
+dmPFC,Chloride channels,13,Ano4,FALSE,TRUE
+dmPFC,Chloride channels,13,Clcn4,FALSE,TRUE
+dmPFC,Chloride channels,13,Ano6,FALSE,TRUE
+dmPFC,Chloride channels,13,Ano2,FALSE,FALSE
+dmPFC,Chloride channels,13,Ano3,FALSE,FALSE
+dmPFC,Chloride channels,13,Clcn1,FALSE,FALSE
+dmPFC,Chloride channels,13,Clcn2,FALSE,FALSE
+vmPFC,Activity-dependent IEG,1,Fos,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Homer1,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Fosl2,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Arc,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Bdnf,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Nr4a1,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Egr3,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Fosb,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Egr4,FALSE,TRUE
+vmPFC,Activity-dependent IEG,1,Egr1,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Syt4,FALSE,TRUE
+vmPFC,Activity-dependent IEG,1,Npas4,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Nr4a3,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Nr4a2,TRUE,TRUE
+vmPFC,Activity-dependent IEG,1,Junb,FALSE,TRUE
+vmPFC,Activity-dependent IEG,1,Egr2,FALSE,TRUE
+vmPFC,Glutamatergic,2,Grin2a,TRUE,TRUE
+vmPFC,Glutamatergic,2,Gria3,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm2,TRUE,TRUE
+vmPFC,Glutamatergic,2,Grik5,TRUE,TRUE
+vmPFC,Glutamatergic,2,Gria1,FALSE,FALSE
+vmPFC,Glutamatergic,2,Gria2,FALSE,FALSE
+vmPFC,Glutamatergic,2,Gria4,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grid2,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grik2,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grin3a,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm1,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm3,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm5,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm7,FALSE,FALSE
+vmPFC,Glutamatergic,2,Grm8,FALSE,FALSE
+vmPFC,GABA,3,Gabra4,TRUE,TRUE
+vmPFC,GABA,3,Gabra1,TRUE,TRUE
+vmPFC,GABA,3,Gabrb2,TRUE,TRUE
+vmPFC,GABA,3,Gabbr1,TRUE,TRUE
+vmPFC,GABA,3,Gabrq,FALSE,TRUE
+vmPFC,GABA,3,Gad2,TRUE,TRUE
+vmPFC,GABA,3,Gabra2,FALSE,TRUE
+vmPFC,GABA,3,Gad1,FALSE,TRUE
+vmPFC,GABA,3,Gabbr2,FALSE,TRUE
+vmPFC,GABA,3,Gabra3,FALSE,FALSE
+vmPFC,GABA,3,Gabra5,FALSE,FALSE
+vmPFC,GABA,3,Gabrg1,FALSE,FALSE
+vmPFC,GABA,3,Gabrg3,FALSE,FALSE
+vmPFC,Neuromodulatory receptors,4,Adra1b,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Chrm4,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Adra1a,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Drd1,FALSE,FALSE
+vmPFC,Neuromodulatory receptors,4,Chrm2,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Htr1f,FALSE,FALSE
+vmPFC,Neuromodulatory receptors,4,Adrb1,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Htr2c,TRUE,TRUE
+vmPFC,Neuromodulatory receptors,4,Chrm3,FALSE,TRUE
+vmPFC,Neuromodulatory receptors,4,Chrna5,FALSE,FALSE
+vmPFC,Neuromodulatory receptors,4,Htr2a,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacnb4,TRUE,TRUE
+vmPFC,Calcium channels,5,Cacng2,TRUE,TRUE
+vmPFC,Calcium channels,5,Cacna1a,TRUE,TRUE
+vmPFC,Calcium channels,5,Cacna1g,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacna1i,TRUE,TRUE
+vmPFC,Calcium channels,5,Cacnb3,TRUE,TRUE
+vmPFC,Calcium channels,5,Cacna2d3,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacng3,FALSE,TRUE
+vmPFC,Calcium channels,5,Cacna1c,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacna1d,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacna1e,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacna1h,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacnb2,FALSE,FALSE
+vmPFC,Calcium channels,5,Cacng5,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnf1,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnj4,TRUE,TRUE
+vmPFC,Potassium channels,6,Kcnk3,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnc2,TRUE,TRUE
+vmPFC,Potassium channels,6,Kcnh1,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnma1,TRUE,TRUE
+vmPFC,Potassium channels,6,Kcnq5,TRUE,TRUE
+vmPFC,Potassium channels,6,Kcna1,TRUE,TRUE
+vmPFC,Potassium channels,6,Kcnj9,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnd2,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcns1,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnc4,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnj2,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnk2,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnk9,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnh4,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnk10,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnq3,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnt1,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcnb1,FALSE,TRUE
+vmPFC,Potassium channels,6,Kcna6,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnb2,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnd1,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnh6,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnj6,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnmb2,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnn2,FALSE,FALSE
+vmPFC,Potassium channels,6,Kcnt2,FALSE,FALSE
+vmPFC,Sodium channels,7,Scn1b,TRUE,TRUE
+vmPFC,Sodium channels,7,Scn3b,FALSE,FALSE
+vmPFC,Sodium channels,7,Scn1a,FALSE,FALSE
+vmPFC,Sodium channels,7,Scn5a,FALSE,FALSE
+vmPFC,Sodium channels,7,Scn9a,FALSE,FALSE
+vmPFC,Neuropeptides,8,Vgf,TRUE,TRUE
+vmPFC,Neuropeptides,8,Penk,TRUE,TRUE
+vmPFC,Neuropeptides,8,Adcyap1,TRUE,TRUE
+vmPFC,Neuropeptides,8,Sst,TRUE,TRUE
+vmPFC,Neuropeptides,8,Pdyn,TRUE,TRUE
+vmPFC,Neuropeptides,8,Tac1,TRUE,TRUE
+vmPFC,Neuropeptides,8,Cck,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Ntrk2,TRUE,TRUE
+vmPFC,Synaptic plasticity,9,Vamp2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Camk2n1,TRUE,TRUE
+vmPFC,Synaptic plasticity,9,Snap25,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Camk2b,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Nrxn3,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rab3a,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Stx1b,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Dlgap4,TRUE,TRUE
+vmPFC,Synaptic plasticity,9,Rps6ka3,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Dlgap2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Prkca,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Calm1,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Ephb3,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Prkcb,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Nrxn2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Rims2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Nlgn2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Bsn,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Calm2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Shank1,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Pclo,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Syn1,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Camk2a,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rheb,TRUE,TRUE
+vmPFC,Synaptic plasticity,9,Reln,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rims1,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Ephb1,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Src,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Homer2,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Prkcg,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Cplx2,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Prkce,TRUE,TRUE
+vmPFC,Synaptic plasticity,9,Dlg4,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Shank3,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Prkacb,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Rasgrf1,FALSE,TRUE
+vmPFC,Synaptic plasticity,9,Camk4,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Dlgap1,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Nlgn1,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rab3c,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rasgrf2,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Rps6ka2,FALSE,FALSE
+vmPFC,Synaptic plasticity,9,Syt2,FALSE,FALSE
+vmPFC,Epigenetic regulators,10,Kdm6b,TRUE,TRUE
+vmPFC,Epigenetic regulators,10,Kmt2a,TRUE,TRUE
+vmPFC,Epigenetic regulators,10,Tet3,TRUE,TRUE
+vmPFC,Epigenetic regulators,10,Hdac5,TRUE,TRUE
+vmPFC,Epigenetic regulators,10,Hdac9,FALSE,TRUE
+vmPFC,Epigenetic regulators,10,Dnmt3a,TRUE,TRUE
+vmPFC,Epigenetic regulators,10,Smarca1,FALSE,TRUE
+vmPFC,Epigenetic regulators,10,Kdm7a,FALSE,TRUE
+vmPFC,Epigenetic regulators,10,Chd2,FALSE,TRUE
+vmPFC,Epigenetic regulators,10,Setd2,FALSE,TRUE
+vmPFC,Epigenetic regulators,10,Hdac10,FALSE,FALSE
+vmPFC,Epigenetic regulators,10,Hdac7,FALSE,FALSE
+vmPFC,Epigenetic regulators,10,Kdm2b,FALSE,FALSE
+vmPFC,Epigenetic regulators,10,Kdm6a,FALSE,FALSE
+vmPFC,Epigenetic regulators,10,Smarca2,FALSE,FALSE
+vmPFC,Sigma receptor system,11,Pgrmc1,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr3,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr22,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr162,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr158,FALSE,TRUE
+vmPFC,Related GPCRs,12,Lpar3,FALSE,TRUE
+vmPFC,Related GPCRs,12,Npy2r,FALSE,TRUE
+vmPFC,Related GPCRs,12,Cnr1,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr176,FALSE,TRUE
+vmPFC,Related GPCRs,12,Vipr1,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr88,FALSE,TRUE
+vmPFC,Related GPCRs,12,Gpr150,FALSE,FALSE
+vmPFC,Related GPCRs,12,Gpr161,FALSE,FALSE
+vmPFC,Related GPCRs,12,Tacr1,FALSE,FALSE
+vmPFC,Chloride channels,13,Ano6,FALSE,TRUE
+vmPFC,Chloride channels,13,Clcn4,FALSE,TRUE
+vmPFC,Chloride channels,13,Ano4,FALSE,TRUE
+vmPFC,Chloride channels,13,Ano2,FALSE,FALSE
+vmPFC,Chloride channels,13,Ano3,FALSE,FALSE
+vmPFC,Chloride channels,13,Cftr,FALSE,FALSE
+vmPFC,Chloride channels,13,Clcn2,FALSE,FALSE
+vmPFC,Chloride channels,13,Glra2,FALSE,FALSE
+vmPFC,Chloride channels,13,Glra3,FALSE,FALSE
