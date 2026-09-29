@@ -1,0 +1,419 @@
+# QC for Main dataset
+
+# Loading -----------------------------------------------------------------------------
+
+library(ggplot2)
+library(Seurat)
+library(dplyr)
+
+# Load in clustered Main object that is output of createobject_01.R
+load('dmvmPFC_annotated_07162026.RData')
+
+cluster_colors <- c(
+  'ITL23'      = '#2EBF5E',
+  'ITL5'       = '#50B2AD',
+  'ITL6'       = '#58D2CF',
+  'ITvm'       = '#B1DE7D',
+  'CTL6'       = '#2D8CB8',
+  'CTL6b'      = '#7044AA',
+  'ETL5'       = '#0D5A8B',
+  'NPL5'       = '#3E9E64',
+  'Pvalb'      = '#B9342C',
+  'Sst'        = '#FF9900',
+  'PvalbChand' = '#FF2D4E',
+  'SstChodl'   = '#B1B10C',
+  'Vip'        = '#B864CC',
+  'Lamp5'      = '#DA808C',
+  'Sncg'       = '#D3408D'
+)
+
+cluster_order <- c('ITL23', 
+                 'ITL5', 
+                 'ITL6', 
+                 'ITvm', 
+                 'CTL6', 
+                 'CTL6b', 
+                 'ETL5', 
+                 'NPL5', 
+                 'Pvalb', 
+                 'Sst', 
+                 'PvalbChand', 
+                 'SstChodl', 
+                 'Vip', 
+                 'Lamp5', 
+                 'Sncg'
+) 
+
+cluster_labels <- c(
+  'ITL23'      = 'IT L2/3',
+  'ITL5'       = 'IT L5',
+  'ITL6'       = 'IT L6',
+  'ITvm'       = 'IT vm',
+  'CTL6'       = 'CT L6',
+  'CTL6b'      = 'CT L6b',
+  'ETL5'       = 'ET L5',
+  'NPL5'       = 'NP L5',
+  'Pvalb'      = 'Pvalb',
+  'Sst'        = 'Sst',
+  'PvalbChand' = 'Pvalb Chand',
+  'SstChodl'   = 'Sst Chodl',
+  'Vip'        = 'Vip',
+  'Lamp5'      = 'Lamp5',
+  'Sncg'       = 'Sncg'
+)
+
+all$cluster_name <- factor(
+  as.character(all$cluster_name),
+  levels = rev(cluster_order)
+)
+
+# QC plot by cluster ------------------------------------------------------------------
+
+# Genes expressed
+p <- VlnPlot(
+  all,
+  features = 'nFeature_RNA',
+  group.by = 'cluster_name',
+  cols = cluster_colors,
+  sort = FALSE,
+  pt.size = 0,
+  combine = FALSE)[[1]] +
+  scale_x_discrete(
+    labels = function(x) {sprintf("<span style='color:%s'>%s</span>",
+                                  cluster_colors[x],
+                                  x)}) +
+  scale_y_continuous(
+    breaks = seq(2000, 8000, by = 2000),
+    labels = function(x) x / 1000,
+    expand = expansion(mult = c(0, 0.05))) +
+  labs(
+    x = NULL,
+    y = 'Genes expressed (\u00D710\u00B3)') +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(size = 7,
+                                   family = 'Arial',
+                                   angle = 0),
+        axis.text.y = ggtext::element_markdown(size = 7,
+                                               family = 'Arial'),
+        axis.title.x = element_text(size = 8,
+                                    family = 'Arial'),
+        axis.title.y = element_blank(),
+        plot.title = element_blank(),
+        
+        axis.line = element_line(linewidth = 0.5),
+        axis.ticks = element_line(linewidth = 0.5)) +
+  coord_flip()
+
+# Set violin outlines to 0.25
+violin_layers <- vapply(
+  p$layers,
+  function(layer) inherits(layer$geom, 'GeomViolin'),
+  logical(1)
+)
+
+for (i in which(violin_layers)) {p$layers[[i]]$aes_params$linewidth <- 0.25}
+
+quartz(
+  type = 'pdf',
+  file = 'output/FS3C_genesexpressed.pdf',
+  width = 1.5,
+  height = 2.5,
+  family = 'Arial'
+)
+
+print(p)
+dev.off()
+
+# Transcripts expressed
+p2 <- VlnPlot(
+  all,
+  features = 'nCount_RNA',
+  group.by = 'cluster_name',
+  cols = cluster_colors,
+  sort = FALSE,
+  pt.size = 0,
+  combine = FALSE)[[1]] +
+  scale_x_discrete(labels = function(x) {
+    sprintf(
+      "<span style='color:%s'>%s</span>",
+      cluster_colors[x], x)}) +
+  scale_y_continuous(
+    breaks = seq(0, 60000, by = 15000),
+    labels = function(x) x / 1000,
+    expand = expansion(mult = c(0, 0))) +
+  labs(
+    x = NULL,
+    y = 'Transcripts expressed (\u00D710\u00B3)') +
+  theme(
+    legend.position = 'none',
+    axis.text.x = element_text(size = 7,
+                               family = 'Arial',
+                               angle = 0),
+    axis.text.y = ggtext::element_markdown(size = 7,
+                                           family = 'Arial'),
+    axis.title.x = element_text(size = 8,
+                                family = 'Arial'),
+    axis.title.y = element_blank(),
+    plot.title = element_blank(),
+    
+    axis.line = element_line(linewidth = 0.5),
+    axis.ticks = element_line(linewidth = 0.5)) +
+  coord_flip(
+    ylim = c(0, 60000))
+
+violin_layers <- vapply(
+  p2$layers,
+  function(layer) inherits(layer$geom, 'GeomViolin'),
+  logical(1))
+
+for (i in which(violin_layers)) {p2$layers[[i]]$aes_params$linewidth <- 0.25}
+
+quartz(
+  type = 'pdf',
+  file = 'output/FS3C_transcriptsexpressed.pdf',
+  width = 1.5,
+  height = 2.5,
+  family = 'Arial'
+)
+
+print(p2)
+dev.off()
+
+# QC plot by sort order ---------------------------------------------------------------
+
+all$sort_day <- dplyr::case_when(
+  all$orig.ident %in% c('dmPFC1', 'dmPFC2') ~ 'Sort_day_1',
+  all$orig.ident %in% c('dmPFC3', 'dmPFC4') ~ 'Sort_day_2',
+  all$orig.ident %in% c('vmPFC1', 'vmPFC2') ~ 'Sort_day_3',
+  all$orig.ident %in% c('vmPFC3', 'vmPFC4') ~ 'Sort_day_4',
+  TRUE ~ NA_character_
+)
+
+# Store sort_day in the intended order
+all$sort_day <- factor(
+  all$sort_day,
+  levels = paste0('Sort_day_', 1:4)
+)
+
+sortdays <- unique(all$sort_day)
+
+# Use the same limits for every sort-day plot
+gene_max <- 8000  # ceiling(max(all$nFeature_RNA, na.rm = TRUE) / 1000) * 1000
+transcript_max <- 60000
+
+for (day in sortdays) {
+  
+  # Subset the Seurat object
+  obj <- subset(all, subset = sort_day == day)
+  
+  # Create the Sample_tag-to-ratID lookup
+  sample_map <- unique(
+    data.frame(
+      Sample_tag = as.character(obj$Sample_tag),
+      ratID = as.character(obj$ratID)
+    )
+  )
+  
+  # Confirm that each Sample_tag maps to only one ratID
+  if (anyDuplicated(sample_map$Sample_tag)) {
+    stop('At least one Sample_tag is associated with multiple ratID values.')
+  }
+  
+  # Confirm Sample_tag format
+  valid_tags <- grepl(
+    '^SampleTag(0[1-9]|1[0-2])_mm$',
+    sample_map$Sample_tag
+  )
+  
+  if (any(!valid_tags)) {
+    stop(
+      'Unexpected Sample_tag values: ',
+      paste(
+        unique(sample_map$Sample_tag[!valid_tags]),
+        collapse = ', '
+      )
+    )
+  }
+  
+  # Extract the number from SampleTag##_mm
+  sample_map$sample_number <- as.integer(
+    sub(
+      '^SampleTag(0[1-9]|1[0-2])_mm$',
+      '\\1',
+      sample_map$Sample_tag
+    )
+  )
+  
+  # Sort SampleTags numerically
+  sample_map <- sample_map[
+    order(sample_map$sample_number),
+  ]
+  
+  sample_order <- sample_map$Sample_tag
+  
+  # Named label vector: Sample_tag -> ratID
+  rat_labels <- setNames(
+    sample_map$ratID,
+    sample_map$Sample_tag
+  )
+  
+  # Reverse factor levels so the lowest SampleTag appears at the top
+  obj$Sample_tag <- factor(
+    as.character(obj$Sample_tag),
+    levels = rev(sample_order)
+  )
+  
+  # Same violin color for every sample
+  sample_cols <- setNames(
+    rep('#808080', length(sample_order)),
+    sample_order
+  )
+  
+# Genes expressed
+  p_genes <- VlnPlot(
+    obj,
+    features = 'nFeature_RNA',
+    group.by = 'Sample_tag',
+    cols = sample_cols,
+    sort = FALSE,
+    pt.size = 0,
+    combine = FALSE
+  )[[1]] +
+    scale_x_discrete(
+      labels = rat_labels
+    ) +
+    scale_y_continuous(
+      breaks = seq(2000, 8000, by = 2000),
+      labels = function(x) x / 1000,
+      expand = expansion(mult = c(0, 0.05))
+    ) +
+    labs(
+      x = NULL,
+      y = 'Genes expressed (\u00D710\u00B3)'
+    ) +
+    theme(
+      legend.position = 'none',
+      
+      axis.text.x = element_text(
+        size = 7,
+        family = 'Arial',
+        angle = 0,
+        hjust = 0.5
+      ),
+      
+      axis.text.y = element_text(
+        size = 7,
+        family = 'Arial',
+        color = 'black'
+      ),
+      
+      axis.title.x = element_text(
+        size = 8,
+        family = 'Arial'
+      ),
+      
+      axis.title.y = element_blank(),
+      plot.title = element_blank(),
+      
+      axis.line = element_line(linewidth = 0.5),
+      axis.ticks = element_line(linewidth = 0.5)
+    ) +
+    coord_flip(
+      ylim = c(2000, gene_max)
+    )
+  
+  violin_layers <- vapply(
+    p_genes$layers,
+    function(layer) inherits(layer$geom, 'GeomViolin'),
+    logical(1)
+  )
+  
+  for (i in which(violin_layers)) {
+    p_genes$layers[[i]]$aes_params$linewidth <- 0.25
+  }
+  
+  quartz(
+    type = 'pdf',
+    file = paste0('output/', day, '_sample_genesexpressed.pdf'),
+    width = 1.5,
+    height = 2.5,
+    family = 'Arial'
+  )
+  
+  print(p_genes)
+  dev.off()
+}
+  
+# Transcripts expressed
+  p_counts <- VlnPlot(
+    obj,
+    features = 'nCount_RNA',
+    group.by = 'Sample_tag',
+    cols = sample_cols,
+    sort = FALSE,
+    pt.size = 0,
+    combine = FALSE
+  )[[1]] +
+    scale_x_discrete(
+      labels = rat_labels
+    ) +
+    scale_y_continuous(
+      breaks = seq(0, 60000, by = 15000),
+      labels = function(x) x / 1000,
+      expand = expansion(mult = c(0, 0))
+    ) +
+    labs(
+      x = NULL,
+      y = 'Transcripts expressed (\u00D710\u00B3)'
+    ) +
+    theme(
+      legend.position = 'none',
+      
+      axis.text.x = element_text(
+        size = 7,
+        family = 'Arial',
+        angle = 0,
+        hjust = 0.5
+      ),
+      
+      axis.text.y = element_text(
+        size = 7,
+        family = 'Arial',
+        color = 'black'
+      ),
+      
+      axis.title.x = element_text(
+        size = 8,
+        family = 'Arial'
+      ),
+      
+      axis.title.y = element_blank(),
+      plot.title = element_blank(),
+      
+      axis.line = element_line(linewidth = 0.5),
+      axis.ticks = element_line(linewidth = 0.5)
+    ) +
+    coord_flip(
+      ylim = c(0, transcript_max)
+    )
+  
+  violin_layers <- vapply(
+    p_counts$layers,
+    function(layer) inherits(layer$geom, 'GeomViolin'),
+    logical(1)
+  )
+  
+  for (i in which(violin_layers)) {
+    p_counts$layers[[i]]$aes_params$linewidth <- 0.25
+  }
+  
+  quartz(
+    type = 'pdf',
+    file = paste0('output/', day, '_sample_transcriptsexpressed.pdf'),
+    width = 1.5,
+    height = 2.5,
+    family = 'Arial'
+  )
+  
+  print(p_counts)
+  dev.off()
