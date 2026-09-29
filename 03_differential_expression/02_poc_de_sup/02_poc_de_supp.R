@@ -14,7 +14,7 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
-source("03_differential_expression/functions/poc_de_functions.R")
+source("03_differential_expression/02_poc_de_sup/poc_de_functions.R")
 
 # Paths -------------------------------------------------------------------
 input_file <- "output/01_metadata_clustering_qc/poc_combined_annotated.rds"
