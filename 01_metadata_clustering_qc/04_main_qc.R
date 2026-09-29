@@ -1,10 +1,11 @@
 # QC for Main dataset
 
 # Loading -----------------------------------------------------------------------------
-
 library(ggplot2)
 library(Seurat)
 library(dplyr)
+
+output_dir <- 'output/01_metadata_clustering_qc'
 
 # Load in clustered Main object that is output of createobject_01.R
 load('dmvmPFC_annotated_07162026.RData')
@@ -27,21 +28,22 @@ cluster_colors <- c(
   'Sncg'       = '#D3408D'
 )
 
-cluster_order <- c('ITL23', 
-                 'ITL5', 
-                 'ITL6', 
-                 'ITvm', 
-                 'CTL6', 
-                 'CTL6b', 
-                 'ETL5', 
-                 'NPL5', 
-                 'Pvalb', 
-                 'Sst', 
-                 'PvalbChand', 
-                 'SstChodl', 
-                 'Vip', 
-                 'Lamp5', 
-                 'Sncg'
+cluster_order <- c(
+  'ITL23', 
+  'ITL5', 
+  'ITL6', 
+  'ITvm', 
+  'CTL6', 
+  'CTL6b', 
+  'ETL5', 
+  'NPL5', 
+  'Pvalb', 
+  'Sst', 
+  'PvalbChand', 
+  'SstChodl', 
+  'Vip', 
+  'Lamp5', 
+  'Sncg'
 ) 
 
 cluster_labels <- c(
@@ -62,13 +64,7 @@ cluster_labels <- c(
   'Sncg'       = 'Sncg'
 )
 
-all$cluster_name <- factor(
-  as.character(all$cluster_name),
-  levels = rev(cluster_order)
-)
-
 # QC plot by cluster ------------------------------------------------------------------
-
 # Genes expressed
 p <- VlnPlot(
   all,
@@ -115,7 +111,7 @@ for (i in which(violin_layers)) {p$layers[[i]]$aes_params$linewidth <- 0.25}
 
 quartz(
   type = 'pdf',
-  file = 'output/FS3C_genesexpressed.pdf',
+  file = file.path(output_dir, 'FS3C_genesexpressed.pdf'),
   width = 1.5,
   height = 2.5,
   family = 'Arial'
@@ -170,7 +166,7 @@ for (i in which(violin_layers)) {p2$layers[[i]]$aes_params$linewidth <- 0.25}
 
 quartz(
   type = 'pdf',
-  file = 'output/FS3C_transcriptsexpressed.pdf',
+  file = file.path(output_dir, 'FS3C_transcriptsexpressed.pdf'),
   width = 1.5,
   height = 2.5,
   family = 'Arial'
@@ -248,7 +244,6 @@ for (day in sortdays) {
   sample_map <- sample_map[
     order(sample_map$sample_number),
   ]
-  
   sample_order <- sample_map$Sample_tag
   
   # Named label vector: Sample_tag -> ratID
@@ -293,28 +288,23 @@ for (day in sortdays) {
     ) +
     theme(
       legend.position = 'none',
-      
       axis.text.x = element_text(
         size = 7,
         family = 'Arial',
         angle = 0,
         hjust = 0.5
       ),
-      
       axis.text.y = element_text(
         size = 7,
         family = 'Arial',
         color = 'black'
       ),
-      
       axis.title.x = element_text(
         size = 8,
         family = 'Arial'
       ),
-      
       axis.title.y = element_blank(),
       plot.title = element_blank(),
-      
       axis.line = element_line(linewidth = 0.5),
       axis.ticks = element_line(linewidth = 0.5)
     ) +
@@ -334,7 +324,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = paste0('output/', day, '_sample_genesexpressed.pdf'),
+    file = file.path(output_dir, (paste0(day, '_sample_genesexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
@@ -368,28 +358,23 @@ for (day in sortdays) {
     ) +
     theme(
       legend.position = 'none',
-      
       axis.text.x = element_text(
         size = 7,
         family = 'Arial',
         angle = 0,
         hjust = 0.5
       ),
-      
       axis.text.y = element_text(
         size = 7,
         family = 'Arial',
         color = 'black'
       ),
-      
       axis.title.x = element_text(
         size = 8,
         family = 'Arial'
       ),
-      
       axis.title.y = element_blank(),
       plot.title = element_blank(),
-      
       axis.line = element_line(linewidth = 0.5),
       axis.ticks = element_line(linewidth = 0.5)
     ) +
@@ -409,7 +394,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = paste0('output/', day, '_sample_transcriptsexpressed.pdf'),
+    file = file.path(output_dir, (paste0(day, '_sample_transcriptsexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
