@@ -421,7 +421,7 @@ summarize_within_xpose_doublets <- function(
           "orig_ratID",
           "experience",
           "sex",
-          "group",
+          "population",
           "region"
         )
       ) {
