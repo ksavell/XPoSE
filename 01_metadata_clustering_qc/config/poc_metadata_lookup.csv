@@ -1,4 +1,4 @@
-capture,ratID,experience,sex,xpose_tag,group
+capture,ratID,experience,sex,xpose_tag,population
 C1,HC-3,HC,M,2,all
 C2,HC-3,HC,M,2,all
 C1,NC-4,NC,M,3,non-active
