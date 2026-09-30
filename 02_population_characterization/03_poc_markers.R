@@ -1,21 +1,21 @@
-# Marker expression and tables
-# This script generates marker gene expression figures and tables for the POC dataset
+# Marker expression figures and tables for the POC dataset
 
 # Loading -----------------------------------------------------------------------------
-
 library(Seurat)
 library(dplyr)
 library(writexl)
 
-# Load in clustered object that is output of createobject_01.R
-load('hc_annotated_07202026')
+# Paths -------------------------------------------------------------------------------
+poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
+
+output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Excitatory/Inhibitory marker expression ---------------------------------------------
-
 legend_colors <- c('#D1D1D1', '#2D00FF')
 
 # Create the DimPlot for Slc17a7
-FeaturePlot(all, features = c('Slc17a7'), 
+FeaturePlot(poc_hc, features = c('Slc17a7'), 
             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -23,7 +23,7 @@ FeaturePlot(all, features = c('Slc17a7'),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-Slc17a7_umap <- FeaturePlot(all, features = c('Slc17a7'), 
+Slc17a7_umap <- FeaturePlot(poc_hc, features = c('Slc17a7'), 
                             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -31,10 +31,10 @@ Slc17a7_umap <- FeaturePlot(all, features = c('Slc17a7'),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-ggsave('output/Slc17a7.svg', Slc17a7_umap, width = 10, height = 10)
+ggsave(file.path(output_dir, 'Slc17a7.svg'), Slc17a7_umap, width = 10, height = 10)
 
 # Create the DimPlot for Gad1
-FeaturePlot(all, features = c('Gad1'), 
+FeaturePlot(poc_hc, features = c('Gad1'), 
             cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -42,7 +42,7 @@ FeaturePlot(all, features = c('Gad1'),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-Gad1_umap <- FeaturePlot(all, features = c('Gad1'), 
+Gad1_umap <- FeaturePlot(poc_hc, features = c('Gad1'), 
                          cols = legend_colors, min.cutoff = 'q1') +
   theme_void() +   # Removes the background grid
   theme(axis.title = element_blank(),  # Removes axis titles
@@ -50,10 +50,9 @@ Gad1_umap <- FeaturePlot(all, features = c('Gad1'),
         #legend.title = element_blank(), # Optional: Remove legend title
         plot.title = element_blank())
 
-ggsave('output/Gad1.svg', Gad1_umap, width = 10, height = 10)
+ggsave(file.path(output_dir, 'Gad1.svg'), Gad1_umap, width = 10, height = 10)
 
 # Marker gene expression --------------------------------------------------------------
-
 marker_genes <- c('Rfx3', 'Cux2', # 'ITL23'
                   'Rorb', 'Slc7a11', # 'ITL5'
                   'Col6a1', 'Col6a2', # 'ITL6'
@@ -71,25 +70,27 @@ marker_genes <- c('Rfx3', 'Cux2', # 'ITL23'
                   'Htr3a', 'Frem1' # 'Sncg'
 )
 
-cluster_order <- c('ITL23', 
-                   'ITL5', 
-                   'ITL6', 
-                   'ITvm', 
-                   'CTL6', 
-                   'CTL6b', 
-                   'ETL5', 
-                   'NPL5', 
-                   'Pvalb', 
-                   'Sst', 
-                   'PvalbChand', 
-                   'SstChodl', 
-                   'Vip', 
-                   'Lamp5', 
-                   'Sncg')
+cluster_order <- c(
+            'ITL23', 
+            'ITL5', 
+            'ITL6', 
+            'ITvm', 
+            'CTL6', 
+            'CTL6b', 
+            'ETL5', 
+            'NPL5', 
+            'Pvalb', 
+            'Sst', 
+            'PvalbChand', 
+            'SstChodl', 
+            'Vip', 
+            'Lamp5', 
+            'Sncg'
+)
 
 # Compute average expression per cluster
 marker_genes <- marker_genes
-avg_expr <- AverageExpression(all, features = marker_genes, group.by = 'cluster_name')$RNA
+avg_expr <- AverageExpression(poc_hc, features = marker_genes, group.by = 'cluster_name')$RNA
 expr_matrix <- as.matrix(avg_expr)
 expr_matrix <- expr_matrix[marker_genes, cluster_order, drop = FALSE]
 
@@ -97,12 +98,10 @@ expr_matrix <- expr_matrix[marker_genes, cluster_order, drop = FALSE]
 scaled_expr_matrix <- t(apply(expr_matrix, 1, scale))
 colnames(scaled_expr_matrix) <- colnames(expr_matrix)
 
-write.csv(scaled_expr_matrix,'output/poc_scaled_expr_matrix.csv', row.names = TRUE) 
+write.csv(scaled_expr_matrix, file.path(output_dir, 'poc_scaled_expr_matrix.csv'), row.names = TRUE) 
 
 # General marker table ----------------------------------------------------------------
-
-seurat_obj <- all
-
+seurat_obj <- poc_hc
 print(levels(Idents(seurat_obj)))
 
 # Find all marker genes
@@ -155,5 +154,5 @@ marker_table <- top20_markers %>%
   )
 
 # Save table
-write_xlsx(marker_table, 'output/Seurat_marker_table.xlsx')
+write_xlsx(marker_table, file.path(output_dir, 'Seurat_marker_table.xlsx'))
 
