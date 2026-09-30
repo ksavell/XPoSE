@@ -151,7 +151,7 @@ summarize_celltype_by_capture_rat <- function(seur_obj) {
   sample_key <- paste(meta$capture, meta$ratID, sep = "||")
   summary_key <- paste(summary_df$capture, summary_df$ratID, sep = "||")
   
-  for (metadata_col in c("experience", "group", "sex")) {
+  for (metadata_col in c("experience", "population", "sex")) {
     if (metadata_col %in% names(meta)) {
       lookup <- tapply(
         meta[[metadata_col]],
@@ -163,7 +163,7 @@ summarize_celltype_by_capture_rat <- function(seur_obj) {
   }
   
   column_order <- c(
-    "capture", "ratID", "experience", "group", "sex",
+    "capture", "ratID", "experience", "population", "sex",
     "celltype", "n_nuclei", "percent"
   )
   column_order <- column_order[column_order %in% names(summary_df)]
