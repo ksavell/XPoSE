@@ -1,7 +1,6 @@
 # Characterization for POC dataset
 
 # Loading -----------------------------------------------------------------------------
-
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
@@ -10,14 +9,16 @@ suppressPackageStartupMessages({
   library(scales)
 })
 
-source('functions/calc_prop.R')
-source('functions/make_stdf.R')
+source('02_population_characterization/functions/calc_prop.R')
+source('02_population_characterization/functions/make_stdf.R')
+
+# Paths -------------------------------------------------------------------------------
+poc_hc <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
 
 output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-# Load in clustered POC object that is output of createobject_01.R
-load('hc_annotated_07202026.RData')
-
+# Settings ----------------------------------------------------------------------------
 cluster_colors <- c(
   'ITL23'      = '#2EBF5E',
   'ITL5'       = '#50B2AD',
@@ -54,35 +55,35 @@ cluster_labels <- c(
   'Sncg'       = 'Sncg'
 )
 
-cluster_order <- c('ITL23', 
-                   'ITL5', 
-                   'ITL6', 
-                   'ITvm', 
-                   'CTL6', 
-                   'CTL6b', 
-                   'ETL5', 
-                   'NPL5', 
-                   'Pvalb', 
-                   'Sst', 
-                   'PvalbChand', 
-                   'SstChodl', 
-                   'Vip', 
-                   'Lamp5', 
-                   'Sncg'
+cluster_order <- c(
+  'ITL23', 
+  'ITL5', 
+  'ITL6', 
+  'ITvm', 
+  'CTL6', 
+  'CTL6b', 
+  'ETL5', 
+  'NPL5', 
+  'Pvalb', 
+  'Sst', 
+  'PvalbChand', 
+  'SstChodl', 
+  'Vip', 
+  'Lamp5', 
+  'Sncg'
 )
 
 # Cell type verification --------------------------------------------------------------
 
-obj_celltype <- calc_prop(seur_obj = obj, 
+poc_hc_celltype <- calc_prop(seur_obj = poc_hc, 
                           fact1 = 'ratID',
                           fact2 = 'celltype',
-                          fact3 = 'orig.ident')
+                          fact3 = 'capture')
 
-write.csv(obj_celltype, file = file.path(output_dir, "F1H_celltype_by_rat_capture.csv"))
+write.csv(poc_hc_celltype, file.path(output_dir, 'F1H_celltype_by_rat_capture.csv'))
 
 # Mean reads by XPoSE-tag -------------------------------------------------------------
-
-df <- make_stdf(obj)
+df <- make_stdf(poc_hc)
 
 # Splitting the dataframe by both 'st' and 'cart'
 IDslist <- split(df, list(df$st, df$cart))
@@ -96,26 +97,26 @@ mean <- sapply(IDslist, function(x) {
   return(means)
 })
 
-write.csv(mean, file = file.path(output_dir, 'F1I_stReadsMean_bycart.csv'))
+write.csv(mean, file.path(output_dir, 'F1I_stReadsMean_bycart.csv'))
 
 # Stats 
 wilcox_results <- list()
 
 # Define samples and corresponding incorrect tags
 samples <- list(
-  "SampleTag08" = c("SampleTag02_reads", "SampleTag04_reads", "SampleTag06_reads"),
-  "SampleTag04" = c("SampleTag02_reads", "SampleTag06_reads", "SampleTag08_reads"),
-  "SampleTag02" = c("SampleTag04_reads", "SampleTag06_reads", "SampleTag08_reads"),
-  "SampleTag06" = c("SampleTag02_reads", "SampleTag04_reads", "SampleTag08_reads")
+  'xpose_tag_08' = c('xpose_tag_02_reads', 'xpose_tag_04_reads', 'xpose_tag_06_reads'),
+  'xpose_tag_04' = c('xpose_tag_02_reads', 'xpose_tag_06_reads', 'xpose_tag_08_reads'),
+  'xpose_tag_02' = c('xpose_tag_04_reads', 'xpose_tag_06_reads', 'xpose_tag_08_reads'),
+  'xpose_tag_06' = c('xpose_tag_02_reads', 'xpose_tag_04_reads', 'xpose_tag_08_reads')
 )
 
 for (sample_base in names(samples)) {
-  assigned_tag <- paste0(sample_base, "_mm")   # Assigned Sample_tag
-  correct_reads_var <- paste0(sample_base, "_reads")  # Correct reads column
-  cells <- WhichCells(obj, expression = Sample_tag == assigned_tag)
-  correct <- FetchData(obj, vars = correct_reads_var)[cells, 1]
-  incorrect <- rowMeans(FetchData(obj, vars = samples[[sample_base]])[cells, ])
-  test <- wilcox.test(correct, incorrect, paired = TRUE, alternative = "greater")
+  assigned_tag <- paste0(sample_base, '_mm')   # Assigned Sample_tag
+  correct_reads_var <- paste0(sample_base, '_reads')  # Correct reads column
+  cells <- WhichCells(poc_hc, expression = Sample_tag == assigned_tag)
+  correct <- FetchData(poc_hc, vars = correct_reads_var)[cells, 1]
+  incorrect <- rowMeans(FetchData(poc_hc, vars = samples[[sample_base]])[cells, ])
+  test <- wilcox.test(correct, incorrect, paired = TRUE, alternative = 'greater')
   
   # Save the results
   wilcox_results[[sample_base]] <- data.frame(
@@ -128,19 +129,19 @@ for (sample_base in names(samples)) {
 }
 
 wilcox_summary <- do.call(rbind, wilcox_results)
-write.csv(wilcox_summary, file.path(output_dir, "F1I_stats.csv"), row.names = FALSE)
+write.csv(wilcox_summary, file.path(output_dir, 'F1I_stats.csv'), row.names = FALSE)
 
 # Sample_tag contribution / bias score per cluster ------------------------------------
 
 date_tag <- format(Sys.Date(), '_%m%d%Y')
 
 # Pull metadata 
-md <- obj@meta.data %>%
-  dplyr::select(cluster_name, Sample_tag, orig.ident) %>%
+md <- poc_hc@meta.data %>%
+  dplyr::select(cluster_name, Sample_tag, capture) %>%
   dplyr::mutate(
     cluster_name = as.character(cluster_name),
     Sample_tag   = as.character(Sample_tag),
-    orig.ident   = as.character(orig.ident)
+    capture   = as.character(capture)
   )
 tags     <- sort(unique(md$Sample_tag))
 n_tags   <- length(tags)
@@ -163,7 +164,7 @@ axis_labels <- setNames(paste0("<span style='color:", cluster_colors[cluster_ord
 
 # Pooled stacked bar
 p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = Sample_tag)) +
-  geom_col(width = 0.72, color = "white", linewidth = 0.75) +
+  geom_col(width = 0.72, color = 'white', linewidth = 0.75) +
   scale_fill_grey(start = 0, end = 0.7) +
   scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.25, 0.50, 0.75, 1),
                      labels = percent_format(accuracy = 1), expand = c(0, 0)) +
