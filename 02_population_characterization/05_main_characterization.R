@@ -5,6 +5,7 @@
 library(ggplot2)
 library(Seurat)
 library(dplyr)
+library(scales)
 
 source('functions/calc_prop.R')
 
