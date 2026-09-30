@@ -65,7 +65,7 @@ for (d in c(tally_dir, summary_dir, plot_dir, if (opt$save_raw) raw_dir)) {
 # For each NC rat, subsample active and non-active nuclei to the requested
 # active fraction. The HC pool is then downsampled to the same total number of
 # nuclei as the resulting NC pool.
-group_downsample_percentage <- function(cl_obj, target_percentage, seed = NULL) {
+population_downsample_percentage <- function(cl_obj, target_percentage, seed = NULL) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -78,8 +78,8 @@ group_downsample_percentage <- function(cl_obj, target_percentage, seed = NULL) 
   nc_cells <- character(0)
 
   for (rat in nc_rats) {
-    active <- md$cell[md$ratID == rat & md$group == "active"]
-    non_active <- md$cell[md$ratID == rat & md$group == "non-active"]
+    active <- md$cell[md$ratID == rat & md$population == "active"]
+    non_active <- md$cell[md$ratID == rat & md$population == "non-active"]
 
     n_active <- length(active)
     n_non_active <- length(non_active)
@@ -153,7 +153,7 @@ for (iteration in seq_len(n_iterations)) {
   iteration_seed <- sample.int(10000, 1)
   all_seeds[iteration] <- iteration_seed
 
-  chosen_cells <- group_downsample_percentage(
+  chosen_cells <- population_downsample_percentage(
     cl_obj,
     pct,
     seed = iteration_seed
