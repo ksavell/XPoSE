@@ -1,17 +1,20 @@
 # Characterization for Main dataset
 
 # Loading -----------------------------------------------------------------------------
-
 library(ggplot2)
 library(Seurat)
 library(dplyr)
 library(scales)
 
-source('functions/calc_prop.R')
+source('02_population_characterization/functions/calc_prop.R')
 
-# Load in clustered Main object that is output of createobject_01.R
-load('dmvmPFC_annotated_07162026.RData')
+# Paths -------------------------------------------------------------------------------
+main <- 'output/02_population_characterization/main_annotated.rds'
 
+output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Settings ----------------------------------------------------------------------------
 cluster_colors <- c(
   'ITL23'      = '#2EBF5E',
   'ITL5'       = '#50B2AD',
@@ -48,35 +51,35 @@ cluster_labels <- c(
   'Sncg'       = 'Sncg'
 )
 
-cluster_order <- c('ITL23', 
-                   'ITL5', 
-                   'ITL6', 
-                   'ITvm', 
-                   'CTL6', 
-                   'CTL6b', 
-                   'ETL5', 
-                   'NPL5', 
-                   'Pvalb', 
-                   'Sst', 
-                   'PvalbChand', 
-                   'SstChodl', 
-                   'Vip', 
-                   'Lamp5', 
-                   'Sncg')
+cluster_order <- c(
+  'ITL23', 
+  'ITL5', 
+  'ITL6', 
+  'ITvm', 
+  'CTL6', 
+  'CTL6b', 
+  'ETL5', 
+  'NPL5', 
+  'Pvalb', 
+  'Sst', 
+  'PvalbChand', 
+  'SstChodl', 
+  'Vip', 
+  'Lamp5', 
+  'Sncg'
+)
 
 # Counts by experience ----------------------------------------------------------------
-
-obj_counts <- calc_prop(seur_obj = all, 
+obj_counts <- calc_prop(seur_obj = main, 
                           fact1 = 'ratID',
                           fact2 = 'experience')
 
 obj_counts <- obj_counts[obj_counts$count != 0, ]
 
-write.csv(obj_counts, file = 'output/F3E_counts_by_experience.csv')
+write.csv(obj_counts, file.path(output_dir, 'F3E_counts_by_experience.csv'))
 
 # Activity defined captures -----------------------------------------------------------
-
-experience_set <- subset(all, subset = experience == 'NC' | experience == 'RT')
+experience_set <- subset(main, subset = experience == 'NC' | experience == 'RT')
 
 activity_percent <- calc_prop(seur_obj = experience_set, 
                         fact1 = 'ratID',
@@ -89,36 +92,34 @@ activity_percent <- activity_percent %>%
   mutate(percent = count / sum(count) * 100) %>%
   ungroup()
 
-write.csv(activity_percent, file = 'output/F3F_activity_defined_captures.csv')
+write.csv(activity_percent, file.path(output_dir, 'F3F_activity_defined_captures.csv'))
 
 # XPoSE-tag composition across capture ------------------------------------------------
-
-tag_composition <- calc_prop(seur_obj = all, 
+tag_composition <- calc_prop(seur_obj = main, 
                         fact1 = 'ratID',
-                        fact2 = 'orig.ident')
+                        fact2 = 'capture')
 
 tag_composition <- tag_composition %>%
   filter(count != 0) %>%
-  group_by(orig.ident) %>%
+  group_by(capture) %>%
   mutate(percent = count / sum(count) * 100) %>%
   ungroup()
 
-write.csv(tag_composition, file = 'output/F3G_tag_composition_capture.csv')
+write.csv(tag_composition, file.path(output_dir, 'F3G_tag_composition_capture.csv'))
 
 # Individual contribution / bias score per cluster ------------------------------------
-
 # Subset by experience
-exp_subset <- subset(x = all, subset = experience == 'NT')
+exp_subset <- subset(x = main, subset = experience == 'NT')
 
 date_tag <- format(Sys.Date(), '_%m%d%Y')
 
 # Pull metadata 
 md <- exp_subset@meta.data %>%
-  dplyr::select(cluster_name, ratID, orig.ident) %>%
+  dplyr::select(cluster_name, ratID, capture) %>%
   dplyr::mutate(
     cluster_name = as.character(cluster_name),
     ratID   = as.character(ratID),
-    orig.ident   = as.character(orig.ident)
+    capture   = as.character(capture)
   )
 tags     <- sort(unique(md$ratID))
 n_tags   <- length(tags)
@@ -132,7 +133,6 @@ counts <- md %>%
   dplyr::mutate(cluster_total = sum(n), prop = n / cluster_total) %>%
   dplyr::ungroup()
 
-# Plots 
 counts$cluster_name      <- factor(counts$cluster_name,      levels = cluster_order)
 
 # Formatted colored labels
@@ -157,5 +157,5 @@ p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = ratID)) +
     axis.ticks.length = unit(0.3, 'cm'),
     legend.position = 'none',
     plot.margin = margin(t = 15, r = 50, b = 15, l = 50))
-ggsave(paste0('output/stacked_bar_rat', date_tag, '.pdf'),
+ggsave(file.path(output_dir, 'stacked_bar_rat', date_tag, '.pdf')),
        p_stack, width = 7, height = 5)
