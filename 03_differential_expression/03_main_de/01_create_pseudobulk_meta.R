@@ -120,7 +120,7 @@ all <- readRDS(input_file)
 
 factors <- c(
   "region",
-  "group",
+  "population",
   "experience",
   "sex",
   "cluster_name",
