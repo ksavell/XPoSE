@@ -60,8 +60,6 @@ eligible_clusters <- eligibility %>%
 
 all_rats <- sort(unique(all$ratID[all$de_population %in% c("Active", "Homecage")]))
 
-# The shared single_factor_DESeq() uses counts > min_cell; therefore
-# min_cell = 9 corresponds to the required minimum of 10 nuclei per rat.
 min_cell_threshold <- 9
 
 # Logs --------------------------------------------------------------------
@@ -113,10 +111,10 @@ for (cl in eligible_clusters) {
       # Pseudobulk DESeq2 --------------------------------------------------
       de_results <- single_factor_DESeq(
         object = subset_data,
-        comp_vect = c("population", "Active", "Homecage"),
+        comp_vect = c("de_population", "Active", "Homecage"),
         cluster = cl,
         min_cell = 10,
-        min_rat = 2,
+        min_rat = min_rats,
         keep_dds = TRUE
       )$results
       
