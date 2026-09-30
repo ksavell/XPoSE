@@ -11,8 +11,11 @@ suppressPackageStartupMessages({
 })
 
 source('functions/calc_prop.R')
+source('functions/make_stdf.R')
 
-# Load in clustered Main object that is output of createobject_01.R
+output_dir <- 'output/02_population_characterization'
+
+# Load in clustered POC object that is output of createobject_01.R
 load('hc_annotated_07202026.RData')
 
 cluster_colors <- c(
@@ -70,16 +73,16 @@ cluster_order <- c('ITL23',
 
 # Cell type verification --------------------------------------------------------------
 
-obj_celltype <- calc_prop(seur_obj = all, 
+obj_celltype <- calc_prop(seur_obj = obj, 
                           fact1 = 'ratID',
                           fact2 = 'celltype',
                           fact3 = 'orig.ident')
 
-write.csv(obj_celltype, file = "output/F1H_celltype_by_rat_capture.csv")
+write.csv(obj_celltype, file = file.path(output_dir, "F1H_celltype_by_rat_capture.csv"))
 
 # Mean reads by XPoSE-tag -------------------------------------------------------------
 
-df <- make_stdf(all)
+df <- make_stdf(obj)
 
 # Splitting the dataframe by both 'st' and 'cart'
 IDslist <- split(df, list(df$st, df$cart))
@@ -92,8 +95,8 @@ mean <- sapply(IDslist, function(x) {
   names(means) <- names(x)[numeric_cols]
   return(means)
 })
-c
-write.csv(mean, 'output/F1I_stReadsMean_bycart.csv')
+
+write.csv(mean, file = file.path(output_dir, 'F1I_stReadsMean_bycart.csv'))
 
 # Stats 
 wilcox_results <- list()
@@ -125,14 +128,14 @@ for (sample_base in names(samples)) {
 }
 
 wilcox_summary <- do.call(rbind, wilcox_results)
-write.csv(wilcox_summary, "output/F1I_stats.csv", row.names = FALSE)
+write.csv(wilcox_summary, file.path(output_dir, "F1I_stats.csv"), row.names = FALSE)
 
 # Sample_tag contribution / bias score per cluster ------------------------------------
 
 date_tag <- format(Sys.Date(), '_%m%d%Y')
 
 # Pull metadata 
-md <- all@meta.data %>%
+md <- obj@meta.data %>%
   dplyr::select(cluster_name, Sample_tag, orig.ident) %>%
   dplyr::mutate(
     cluster_name = as.character(cluster_name),
@@ -142,13 +145,6 @@ md <- all@meta.data %>%
 tags     <- sort(unique(md$Sample_tag))
 n_tags   <- length(tags)
 expected <- 1 / n_tags          # equal-contribution null: 1/n_tags
-
-# Helper: bias score (1 - normalized Shannon entropy) from a count vector
-bias_from_counts <- function(n, k = n_tags) {
-  p <- n / sum(n)
-  H <- -sum(ifelse(p > 0, p * log(p), 0))
-  1 - H / log(k)
-}
 
 # POOLED: Calculate counts + proportions per cluster 
 counts <- md %>%
@@ -163,7 +159,7 @@ counts$cluster_name      <- factor(counts$cluster_name,      levels = cluster_or
 
 # Formatted colored labels
 axis_labels <- setNames(paste0("<span style='color:", cluster_colors[cluster_order], "; '>", 
-                        cluster_labels[cluster_order], "</span>"), cluster_order)
+                               cluster_labels[cluster_order], "</span>"), cluster_order)
 
 # Pooled stacked bar
 p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = Sample_tag)) +
@@ -183,5 +179,5 @@ p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = Sample_tag)) +
     axis.ticks.length = unit(0.3, 'cm'),
     legend.position = 'none',
     plot.margin = margin(t = 15, r = 50, b = 15, l = 50))
-ggsave(paste0('output/stacked_bar_sampletag', date_tag, '.pdf'),
+ggsave(file.path(output_dir, paste0('stacked_bar_sampletag', date_tag, '.pdf')),
        p_stack, width = 7, height = 5)
