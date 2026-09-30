@@ -1,4 +1,4 @@
-#' Run single-factor pseudobulk DE across cell populations and summarize DEGs
+# Run single-factor pseudobulk DE across cell populations and summarize DEGs
 single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
                                 min_rat = 3, keep_dds = FALSE) {
   library(Seurat)
@@ -16,8 +16,8 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     )
   }
   
-  # Require at least 2 biological replicates per group.
-  # Default is 3 rats/group for primary DE analyses, but min_rat = 2 can be
+  # Require at least 2 biological replicates per population.
+  # Default is 3 rats/population for primary DE analyses, but min_rat = 2 can be
   # explicitly supplied for leave-one-out sensitivity analyses.
   if (min_rat < 2) {
     min_rat <- 2
@@ -44,14 +44,14 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     )
   }
   
-  # Subset to cluster and comparison groups
+  # Subset to cluster and comparison populations
   Idents(object) <- "cluster_name"
   sub_obj <- subset(object, idents = cluster)
   
   Idents(sub_obj) <- comp_vect[1]
   sub_obj <- subset(sub_obj, idents = comp_vect[2:3])
   
-  # Build table of nuclei counts per rat and comparison group
+  # Build table of nuclei counts per rat and comparison population
   t_tbl <- data.frame(matrix(nrow = 1, ncol = 4))
   
   rat_g_c <- table(
@@ -148,7 +148,7 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
   
   if (low_samp_flag) {
     warning(
-      "One or more groups contain fewer than ",
+      "One or more populations contain fewer than ",
       min_rat,
       " included rats.\n",
       immediate. = TRUE
@@ -215,7 +215,7 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     drop = FALSE
   ]
   
-  # Check that both comparison groups remain
+  # Check that both comparison populations remain
   for (cmp in comp_vect[2:3]) {
     
     if (!(cmp %in% temp[, comp_vect[1]])) {
@@ -237,7 +237,7 @@ single_factor_DESeq <- function(object, comp_vect, cluster, min_cell = 10,
     low <- names(grp_counts)[grp_counts < min_rat]
     
     stop(
-      "SKIP: group(s) ",
+      "SKIP: population(s) ",
       paste(low, collapse = ", "),
       " have < ",
       min_rat,
