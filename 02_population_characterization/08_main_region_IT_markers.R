@@ -1,5 +1,6 @@
 # IT cell-type marker dot plot (vmPFC naive subset)
 
+# Loading ----------------------------------------------------------------------------
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -7,11 +8,13 @@ suppressPackageStartupMessages({
   library(scales)
 })
 
-# Load in clustered Main object that is output of createobject_01.R
-load('dmvmPFC_annotated_07162026.RData')
+# Paths -------------------------------------------------------------------------------
+main <- 'output/02_population_characterization/main_annotated.rds'
+
+output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # User settings -----------------------------------------------------------------------
-
 cluster_col <- 'cluster_name'
 assay_use   <- 'RNA'
 it_order <- c('ITvm', 'ITL6', 'ITL5', 'ITL23')
@@ -28,8 +31,6 @@ expression_mid    <- '#FFFFFF'
 expression_high   <- '#000080'
 expression_limits <- c(-2.5, 2.5)
 expression_breaks <- c(-2.5, 0, 2.5)
-
-output_root <- 'output'
 save_png <- TRUE
 
 pt <- function(x) x / 2.835
@@ -51,9 +52,8 @@ theme_pub <- theme_classic(base_size = 7, base_family = 'Arial') +
   )
 
 # Plot data ---------------------------------------------------------------------------
-
 # Subset naive vmPFC 
-naive <- subset(all, subset = experience == 'N')
+naive <- subset(main, subset = experience == 'N')
 vm <- subset(naive, subset = region == 'vmPFC')
 
 DefaultAssay(vm) <- assay_use
@@ -162,9 +162,8 @@ p <- ggplot(
   )
 
 # Save Quartz vector PDF + PNG --------------------------------------------------------
-
 today <- format(Sys.Date(), '%m%d%Y')
-out_dir <- file.path(output_root, paste0('IT_marker_dotplot_', today))
+out_dir <- file.path(output_dir, paste0('IT_marker_dotplot_', today))
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 n <- length(genes_plot)
