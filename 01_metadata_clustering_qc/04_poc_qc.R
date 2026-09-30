@@ -6,11 +6,9 @@ suppressPackageStartupMessages({
   library(cluster)
   library(ggplot2)
   library(patchwork)
+  library(RANN)
+  library(vegan)
 })
-if (!requireNamespace('RANN',  quietly = TRUE)) install.packages('RANN')
-if (!requireNamespace('vegan', quietly = TRUE)) install.packages('vegan')
-library(RANN)
-library(vegan)
 
 # Paths -------------------------------------------------------------------------------
 poc_combined <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
@@ -35,7 +33,7 @@ pal_group <- c('capture' = '#999999', 'cell type' = '#2d8cb8', 'ratID' = '#4d4d4
 set.seed(seed)
 emb  <- Embeddings(poc_hc, reduction)[, 1:n_dims]
 meta <- poc_hc@meta.data
-stopifnot(poc_hc(rownames(emb) == rownames(meta)))
+stopifnot(identical(rownames(emb) == rownames(meta)))
 
 # Shared distance matrix
 d <- dist(emb)   # euclidean on PCA dims (~780MB for ~9.9k cells)
