@@ -1,40 +1,41 @@
 # Population proportion calculations and statistics for POC dataset
 
 # Loading -----------------------------------------------------------------------------
-
 library(Seurat)
 library(dplyr)
 library(tidyr)
 library(purrr)
 
-source('functions/calc_prop.R')
+source('02_population_characterization/functions/calc_prop.R')
 
-# Load in clustered POC object that is output of createobject_01.R
-load('hc_annotated_07202026.RData')
+# Paths -------------------------------------------------------------------------------
+poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
+
+output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Cluster proportions by capture ------------------------------------------------------
-
-clust_prop_cart <- calc_prop(obj, 
+clust_prop_cart <- calc_prop(poc_hc, 
                              fact1 = 'ratID',
                              fact2 = 'cluster_name',
-                             fact3 = 'orig.ident') 
+                             fact3 = 'capture') 
 
-write.csv(clust_prop_cart, file = 'output/poc_clust_prop_capture.csv')
+write.csv(clust_prop_cart, file.path(output_dir, 'poc_clust_prop_capture.csv'))
 
 # Cluster proportions by population ----------------------------------------------------
 
 load('combined_annotated_07202026.RData')
 
-clust_prop_pop <- calc_prop(obj, 
+clust_prop_pop <- calc_prop(poc_hc, 
                             fact1 = 'ratID',
                             fact2 = 'cluster_name',
                             fact3 = 'population') 
 
-write.csv(clust_prop_pop, file = 'output/poc_clust_prop_population.csv')
+write.csv(clust_prop_pop, file.path(output_dir, 'poc_clust_prop_population.csv')
 
 # Build per-rat/population proportions ------------------------------------------------
 
-prop_df <- obj@meta.data %>%          # or just `obj` if it's already a data.frame
+prop_df <- poc_hc@meta.data %>%          # or just `poc_hc` if it's already a data.frame
   count(ratID, population, cluster_name, name = 'n') %>%
   group_by(ratID, population) %>%
   mutate(prop = n / sum(n)) %>%
@@ -93,7 +94,7 @@ run_paired <- function(df, g1, g2) {
 
 res1 <- run_unpaired(prop_df, 'all', 'non-active')
 res2 <- run_unpaired(prop_df, 'all', 'active')
-res3 <- run_paired  (prop_df, 'active', 'non-active')
+res3 <- run_paired(prop_df, 'active', 'non-active')
 
 # FDR correction ----------------------------------------------------------------------
 
@@ -108,4 +109,4 @@ results <- bind_rows(res1, res2, res3) %>%
   arrange(comparison, padj)
 
 print(results, n = Inf)
-write.csv(results, 'output/xpose_proportion_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'xpose_proportion_stats_summary.csv')
