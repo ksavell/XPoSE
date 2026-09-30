@@ -13,7 +13,7 @@
 #'                  Active and Non-active within your object, this vector would
 #'                  look like:
 #'                  
-#'                  comp_vect <- c("group", "Active", "Non-active")
+#'                  comp_vect <- c("population", "Active", "Non-active")
 #'                  
 #' @param cluster the cluster within your object you want to analyze
 #' @param min_cell mimimum count that a cluster of each rat must have for that 
