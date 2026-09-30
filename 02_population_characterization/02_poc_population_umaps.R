@@ -1,16 +1,20 @@
-# Data visualization for POC dataset
+# Population UMAP generation for POC dataset
 
 # Loading -----------------------------------------------------------------------------
-
 library(Seurat)
 library(tidyverse)
 
-source('functions/save_dimplot.R')
-source('functions/calc_prop.R')
+source('02_population_characterization/functions/calc_prop.R')
+source('02_population_characterization/functions/make_stdf.R')
 
-# Load in clustered POC object that is output of createobject_01.R
-load('hc_annotated_07202026')
+# Paths -------------------------------------------------------------------------------
+poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
+poc_combined <- 'output/02_population_characterization/poc_combined_annotated.rds'
 
+output_dir <- 'output/02_population_characterization'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Settings ----------------------------------------------------------------------------
 # Define colors
 hex_list <- list(
   'cluster_name' = c('CTL6' = '#2D8CB8',
@@ -37,32 +41,26 @@ hex_list <- list(
 )
 
 # UMAP generation ---------------------------------------------------------------------
-
-save_dimplot(obj, 
+save_dimplot(poc_hc, 
              groupby = 'cluster_name',
              file_n = 'poc',
              hex_list = hex_list)
 
 # UMAP by capture per subject ---------------------------------------------------------
-
-save_dimplot(obj, 
-             groupby = 'orig.ident',
+save_dimplot(poc_hc, 
+             groupby = 'capture',
              splitby = 'ratID',
              file_n = 'poc',
              hex_list = hex_list)
 
 # UMAP by experience ------------------------------------------------------------------
-
-load('combined_annotated_07202026')
-
-save_dimplot(obj, 
+save_dimplot(poc_combined, 
              groupby = 'experience',
-             file_n = 'POC',
+             file_n = 'poc',
              hex_list = hex_list)
 
 # UMAP by population ------------------------------------------------------------------
-
-NC <- subset(obj, subset = experience == 'NC')
+NC <- subset(poc_combined, subset = experience == 'NC')
 
 save_dimplot(NC, 
              groupby = 'population',
