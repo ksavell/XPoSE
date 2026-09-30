@@ -29,18 +29,18 @@ if (inherits(all[["RNA"]], "Assay5")) {
   all <- JoinLayers(all, assay = "RNA")
 }
 
-# Standardize the groups used for POC DE without modifying the source object.
-all$de_group <- case_when(
+# Standardize the populations used for POC DE without modifying the source object.
+all$de_population <- case_when(
   all$experience == "HC" ~ "Homecage",
-  all$experience == "NC" & tolower(all$group) == "active" ~ "Active",
+  all$experience == "NC" & tolower(all$population) == "active" ~ "Active",
   TRUE ~ NA_character_
 )
 
 # Retain populations meeting the primary POC DE inclusion requirement:
 # >= 10 nuclei per rat and >= 3 rats in both Active and Homecage.
 eligibility <- all@meta.data %>%
-  filter(de_group %in% c("Active", "Homecage")) %>%
-  count(cluster_name, de_group, ratID, name = "n_nuclei") %>%
+  filter(de_population %in% c("Active", "Homecage")) %>%
+  count(cluster_name, de_population, ratID, name = "n_nuclei") %>%
   mutate(included = n_nuclei >= 10)
 
 write.csv(
@@ -51,14 +51,14 @@ write.csv(
 
 eligible_clusters <- eligibility %>%
   filter(included) %>%
-  group_by(cluster_name, de_group) %>%
+  group_by(cluster_name, de_population) %>%
   summarise(n_rats = n_distinct(ratID), .groups = "drop") %>%
   filter(n_rats >= 3) %>%
-  count(cluster_name, name = "n_groups") %>%
-  filter(n_groups == 2) %>%
+  count(cluster_name, name = "n_populations") %>%
+  filter(n_populations == 2) %>%
   pull(cluster_name)
 
-all_rats <- sort(unique(all$ratID[all$de_group %in% c("Active", "Homecage")]))
+all_rats <- sort(unique(all$ratID[all$de_population %in% c("Active", "Homecage")]))
 
 # The shared single_factor_DESeq() uses counts > min_cell; therefore
 # min_cell = 9 corresponds to the required minimum of 10 nuclei per rat.
@@ -104,8 +104,8 @@ for (cl in eligible_clusters) {
       subset(all, subset = ratID != excluded_rat)
     }
     
-    # The full-data analysis requires >=3 rats/group. After leaving one rat
-    # out, >=2 rats/group is expected and is required for the robustness run.
+    # The full-data analysis requires >=3 rats/population. After leaving one rat
+    # out, >=2 rats/population is expected and is required for the robustness run.
     min_rats <- if (excluded_rat == "none") 3 else 2
     
     tryCatch({
@@ -113,7 +113,7 @@ for (cl in eligible_clusters) {
       # Pseudobulk DESeq2 --------------------------------------------------
       de_results <- single_factor_DESeq(
         object = subset_data,
-        comp_vect = c("group", "Active", "Homecage"),
+        comp_vect = c("population", "Active", "Homecage"),
         cluster = cl,
         min_cell = 10,
         min_rat = 2,
@@ -153,9 +153,9 @@ for (cl in eligible_clusters) {
       # Single-nucleus Wilcoxon -------------------------------------------
       cluster_subset <- subset(
         subset_data,
-        subset = cluster_name == cl & de_group %in% c("Active", "Homecage")
+        subset = cluster_name == cl & de_population %in% c("Active", "Homecage")
       )
-      Idents(cluster_subset) <- "de_group"
+      Idents(cluster_subset) <- "de_population"
       
       wilcoxon_results <- FindMarkers(
         cluster_subset,
