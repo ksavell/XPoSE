@@ -101,7 +101,7 @@ build_nuclei_audit <- function(meta_df, cluster, case_pair, ctrl_pair,
       cond,
       sample_id,
       n_nuclei,
-      any_of(c("sex", "experience", "group", "region"))
+      any_of(c("sex", "experience", "population", "region"))
     ) %>%
     mutate(
       ratID = as.character(ratID),
@@ -191,7 +191,7 @@ build_nuclei_audit <- function(meta_df, cluster, case_pair, ctrl_pair,
       comparison_group,
       cond,
       ratID,
-      any_of(c("sex", "experience", "group", "region")),
+      any_of(c("sex", "experience", "population", "region")),
       sample_id,
       n_nuclei,
       meets_min_nuclei,
