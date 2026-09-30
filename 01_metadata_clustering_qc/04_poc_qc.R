@@ -7,18 +7,20 @@ suppressPackageStartupMessages({
   library(ggplot2)
   library(patchwork)
 })
-if (!requireNamespace('RANN',  quietly = TRUE)) instobj.packages('RANN')
-if (!requireNamespace('vegan', quietly = TRUE)) instobj.packages('vegan')
+if (!requireNamespace('RANN',  quietly = TRUE)) install.packages('RANN')
+if (!requireNamespace('vegan', quietly = TRUE)) install.packages('vegan')
 library(RANN)
 library(vegan)
 
-output_dir <- 'output/01_metadata_clustering_qc'
+# Paths -------------------------------------------------------------------------------
+poc_combined <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
+poc_hc <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
 
-# Load in clustered POC object that is output of createobject_01.R
-load('input/combined_annotated_07202026.RData')
+output_dir <- 'output/01_metadata_clustering_qc'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
-batch_col      <- 'orig.ident'     # capture: C1 / C2
+batch_col      <- 'capture'        # capture: C1 / C2
 celltype_col   <- 'cluster_name'   # 15 fine types
 ratid_col      <- 'ratID'          # animal
 reduction      <- 'pca'
@@ -31,9 +33,9 @@ date_tag       <- format(Sys.Date(), '_%m%d%Y')
 pal_group <- c('capture' = '#999999', 'cell type' = '#2d8cb8', 'ratID' = '#4d4d4d')
 
 set.seed(seed)
-emb  <- Embeddings(obj, reduction)[, 1:n_dims]
-meta <- obj@meta.data
-stopifnot(obj(rownames(emb) == rownames(meta)))
+emb  <- Embeddings(poc_hc, reduction)[, 1:n_dims]
+meta <- poc_hc@meta.data
+stopifnot(poc_hc(rownames(emb) == rownames(meta)))
 
 # Shared distance matrix
 d <- dist(emb)   # euclidean on PCA dims (~780MB for ~9.9k cells)
@@ -73,15 +75,15 @@ cluster_order <- c('ITL23',
                    'Sncg'
 ) 
 
-obj$cluster_name <- factor(
-  as.character(obj$cluster_name),
+poc_hc$cluster_name <- factor(
+  as.character(poc_hc$cluster_name),
   levels = rev(cluster_order)
 )
 
 # QC plot by cluster ------------------------------------------------------------------
 # Genes expressed
 p <- VlnPlot(
-  obj,
+  poc_combined,
   features = 'nFeature_RNA',
   group.by = 'cluster_name',
   cols = cluster_colors,
@@ -135,7 +137,7 @@ dev.off()
 
 # Transcripts expressed
 p2 <- VlnPlot(
-  obj,
+  poc_combined,
   features = 'nCount_RNA',
   group.by = 'cluster_name',
   cols = cluster_colors,
@@ -189,18 +191,18 @@ print(p2)
 dev.off()
 
 # QC plot by sort order ---------------------------------------------------------------
-obj$sort_day <- dplyr::case_when(
-  obj$orig.ident %in% c('C1', 'C2') ~ 'Sort_day_1',
+poc_combined$sort_day <- dplyr::case_when(
+  poc_combined$orig.ident %in% c('C1', 'C2') ~ 'Sort_day_1',
   TRUE ~ NA_character_
 )
 
 # Store sort_day in the intended order
-obj$sort_day <- factor(
-  obj$sort_day,
+poc_combined$sort_day <- factor(
+  poc_combined$sort_day,
   levels = paste0('Sort_day_', 1)
 )
 
-sortdays <- unique(obj$sort_day)
+sortdays <- unique(poc_combined$sort_day)
 
 # Use the same limits for every sort-day plot
 gene_max <- 5000  
@@ -209,77 +211,77 @@ transcript_max <- 15000
 for (day in sortdays) {
   
   # Subset the Seurat object
-  obj <- subset(obj, subset = sort_day == day)
+  poc_combined <- subset(poc_combined, subset = sort_day == day)
   
-  # Create the Sample_tag-to-ratID lookup
-  sample_map <- unique(
+  # Create the xpose_tag-to-ratID lookup
+  xpose_map <- unique(
     data.frame(
-      Sample_tag = as.character(obj$Sample_tag),
-      ratID = as.character(obj$ratID)
+      xpose_tag = as.character(poc_combined$xpose_tag),
+      ratID = as.character(poc_combined$ratID)
     )
   )
   
-  # Confirm that each Sample_tag maps to only one ratID
-  if (anyDuplicated(sample_map$Sample_tag)) {
-    stop('At least one Sample_tag is associated with multiple ratID values.')
+  # Confirm that each xpose_tag maps to only one ratID
+  if (anyDuplicated(xpose_map$xpose_tag)) {
+    stop('At least one xpose_tag is associated with multiple ratID values.')
   }
   
-  # Confirm Sample_tag format
+  # Confirm xpose_tag format
   valid_tags <- grepl(
-    "^SampleTag(0[1-9]|1[0-2])_mm$",
-    sample_map$Sample_tag
+    "^xposeTag(0[1-9]|1[0-2])_mm$",
+    xpose_map$xpose_tag
   )
   
   if (any(!valid_tags)) {
     stop(
-      'Unexpected Sample_tag values: ',
+      'Unexpected xpose_tag values: ',
       paste(
-        unique(sample_map$Sample_tag[!valid_tags]),
+        unique(xpose_map$xpose_tag[!valid_tags]),
         collapse = ', '
       )
     )
   }
   
-  # Extract the number from SampleTag##_mm
-  sample_map$sample_number <- as.integer(
+  # Extract the number from xposeTag##_mm
+  xpose_map$xpose_number <- as.integer(
     sub(
-      "^SampleTag(0[1-9]|1[0-2])_mm$",
+      "^xposeTag(0[1-9]|1[0-2])_mm$",
       '\\1',
-      sample_map$Sample_tag
+      xpose_map$xpose_tag
     )
   )
   
-  # Sort SampleTags numericobjy
-  sample_map <- sample_map[
-    order(sample_map$sample_number),
+  # Sort xposeTags numerically
+  xpose_map <- xpose_map[
+    order(xpose_map$xpose_number),
   ]
   
-  sample_order <- sample_map$Sample_tag
+  xpose_order <- xpose_map$xpose_tag
   
-  # Named label vector: Sample_tag -> ratID
+  # Named label vector: xpose_tag -> ratID
   rat_labels <- setNames(
-    sample_map$ratID,
-    sample_map$Sample_tag
+    xpose_map$ratID,
+    xpose_map$xpose_tag
   )
   
-  # Reverse factor levels so the lowest SampleTag appears at the top
-  obj$Sample_tag <- factor(
-    as.character(obj$Sample_tag),
-    levels = rev(sample_order)
+  # Reverse factor levels so the lowest xposeTag appears at the top
+  poc_combined$xpose_tag <- factor(
+    as.character(poc_combined$xpose_tag),
+    levels = rev(xpose_order)
   )
   
-  # Same violin color for every sample
-  sample_cols <- setNames(
-    rep('#808080', length(sample_order)),
-    sample_order
+  # Same violin color for every xpose tag
+  xpose_cols <- setNames(
+    rep('#808080', length(xpose_order)),
+    xpose_order
   )
   
   # Genes expressed
   p_genes <- VlnPlot(
-    obj,
+    poc_combined,
     features = 'nFeature_RNA',
-    group.by = 'Sample_tag',
-    cols = sample_cols,
+    group.by = 'xpose_tag',
+    cols = xpose_cols,
     sort = FALSE,
     pt.size = 0,
     combine = FALSE
@@ -334,7 +336,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = file.path(output_dir, (paste0(day, '_sample_genesexpressed.pdf'))),
+    file = file.path(output_dir, (paste0(day, '_xpose_genesexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
@@ -345,10 +347,10 @@ for (day in sortdays) {
   
   # Transcripts expressed
   p_counts <- VlnPlot(
-    obj,
+    poc_combined,
     features = 'nCount_RNA',
-    group.by = 'Sample_tag',
-    cols = sample_cols,
+    group.by = 'xpose_tag',
+    cols = xpose_cols,
     sort = FALSE,
     pt.size = 0,
     combine = FALSE
@@ -403,7 +405,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = file.path(output_dir, (paste0(day, '_sample_transcriptsexpressed.pdf'))),
+    file = file.path(output_dir, (paste0(day, '_xpose_transcriptsexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
@@ -414,9 +416,6 @@ for (day in sortdays) {
 }
 
 # Variance within/between captures per cluster ----------------------------------------
-
-load('hc_annotated_07202026.RData')
-
 batch <- as.character(meta[[batch_col]])
 ct    <- as.character(meta[[celltype_col]])
 caps  <- sort(unique(batch)); stopifnot(length(caps) == 2)
@@ -491,11 +490,10 @@ ggsave(file.path(output_dir, (paste0('distance_distributions')), date_tag, '.pdf
 ggsave(file.path(output_dir, (paste0('distance_distributions')), date_tag, '.png'), pD, width = 11, height = 6, dpi = 300)
 
 # Per-PC variance explained by grouping -----------------------------------------------
-
-pc_obj <- Embeddings(obj, reduction)[, 1:n_dims]
+pc_poc_hc <- Embeddings(poc_hc, reduction)[, 1:n_dims]
 r2_for <- function(col) {
   f <- factor(meta[[col]])
-  apply(pc_obj, 2, function(pc) summary(lm(pc ~ f))$r.squared)
+  apply(pc_poc_hc, 2, function(pc) summary(lm(pc ~ f))$r.squared)
 }
 r2_df <- data.frame(
   PC          = factor(paste0('PC', 1:n_dims), levels = paste0('PC', 1:n_dims)),
