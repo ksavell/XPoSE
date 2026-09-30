@@ -5,11 +5,13 @@ library(ggplot2)
 library(Seurat)
 library(dplyr)
 
+# Paths -------------------------------------------------------------------------------
+main <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+
 output_dir <- 'output/01_metadata_clustering_qc'
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-# Load in clustered Main object that is output of createobject_01.R
-load('dmvmPFC_annotated_07162026.RData')
-
+# Settings ----------------------------------------------------------------------------
 cluster_colors <- c(
   'ITL23'      = '#2EBF5E',
   'ITL5'       = '#50B2AD',
@@ -67,7 +69,7 @@ cluster_labels <- c(
 # QC plot by cluster ------------------------------------------------------------------
 # Genes expressed
 p <- VlnPlot(
-  all,
+  main,
   features = 'nFeature_RNA',
   group.by = 'cluster_name',
   cols = cluster_colors,
@@ -122,7 +124,7 @@ dev.off()
 
 # Transcripts expressed
 p2 <- VlnPlot(
-  all,
+  main,
   features = 'nCount_RNA',
   group.by = 'cluster_name',
   cols = cluster_colors,
@@ -177,99 +179,99 @@ dev.off()
 
 # QC plot by sort order ---------------------------------------------------------------
 
-all$sort_day <- dplyr::case_when(
-  all$orig.ident %in% c('dmPFC1', 'dmPFC2') ~ 'Sort_day_1',
-  all$orig.ident %in% c('dmPFC3', 'dmPFC4') ~ 'Sort_day_2',
-  all$orig.ident %in% c('vmPFC1', 'vmPFC2') ~ 'Sort_day_3',
-  all$orig.ident %in% c('vmPFC3', 'vmPFC4') ~ 'Sort_day_4',
+main$sort_day <- dplyr::case_when(
+  main$capture %in% c('dmPFC1', 'dmPFC2') ~ 'Sort_day_1',
+  main$capture %in% c('dmPFC3', 'dmPFC4') ~ 'Sort_day_2',
+  main$capture %in% c('vmPFC1', 'vmPFC2') ~ 'Sort_day_3',
+  main$capture %in% c('vmPFC3', 'vmPFC4') ~ 'Sort_day_4',
   TRUE ~ NA_character_
 )
 
 # Store sort_day in the intended order
-all$sort_day <- factor(
-  all$sort_day,
+main$sort_day <- factor(
+  main$sort_day,
   levels = paste0('Sort_day_', 1:4)
 )
 
-sortdays <- unique(all$sort_day)
+sortdays <- unique(main$sort_day)
 
 # Use the same limits for every sort-day plot
-gene_max <- 8000  # ceiling(max(all$nFeature_RNA, na.rm = TRUE) / 1000) * 1000
+gene_max <- 8000  # ceiling(max(main$nFeature_RNA, na.rm = TRUE) / 1000) * 1000
 transcript_max <- 60000
 
 for (day in sortdays) {
   
   # Subset the Seurat object
-  obj <- subset(all, subset = sort_day == day)
+  main <- subset(main, subset = sort_day == day)
   
-  # Create the Sample_tag-to-ratID lookup
-  sample_map <- unique(
+  # Create the xpose_tag-to-ratID lookup
+  xpose_map <- unique(
     data.frame(
-      Sample_tag = as.character(obj$Sample_tag),
-      ratID = as.character(obj$ratID)
+      xpose_tag = as.character(main$xpose_tag),
+      ratID = as.character(main$ratID)
     )
   )
   
-  # Confirm that each Sample_tag maps to only one ratID
-  if (anyDuplicated(sample_map$Sample_tag)) {
-    stop('At least one Sample_tag is associated with multiple ratID values.')
+  # Confirm that each xpose_tag maps to only one ratID
+  if (anyDuplicated(xpose_map$xpose_tag)) {
+    stop('At least one xpose_tag is associated with multiple ratID values.')
   }
   
-  # Confirm Sample_tag format
+  # Confirm xpose_tag format
   valid_tags <- grepl(
-    '^SampleTag(0[1-9]|1[0-2])_mm$',
-    sample_map$Sample_tag
+    '^xposeTag(0[1-9]|1[0-2])_mm$',
+    xpose_map$xpose_tag
   )
   
   if (any(!valid_tags)) {
     stop(
-      'Unexpected Sample_tag values: ',
+      'Unexpected xpose_tag values: ',
       paste(
-        unique(sample_map$Sample_tag[!valid_tags]),
+        unique(xpose_map$xpose_tag[!valid_tags]),
         collapse = ', '
       )
     )
   }
   
-  # Extract the number from SampleTag##_mm
-  sample_map$sample_number <- as.integer(
+  # Extract the number from xposeTag##_mm
+  xpose_map$xpose_number <- as.integer(
     sub(
-      '^SampleTag(0[1-9]|1[0-2])_mm$',
+      '^xposeTag(0[1-9]|1[0-2])_mm$',
       '\\1',
-      sample_map$Sample_tag
+      xpose_map$xpose_tag
     )
   )
   
-  # Sort SampleTags numerically
-  sample_map <- sample_map[
-    order(sample_map$sample_number),
+  # Sort xposeTags numerically
+  xpose_map <- xpose_map[
+    order(xpose_map$xpose_number),
   ]
-  sample_order <- sample_map$Sample_tag
+  xpose_order <- xpose_map$xpose_tag
   
-  # Named label vector: Sample_tag -> ratID
+  # Named label vector: xpose_tag -> ratID
   rat_labels <- setNames(
-    sample_map$ratID,
-    sample_map$Sample_tag
+    xpose_map$ratID,
+    xpose_map$xpose_tag
   )
   
-  # Reverse factor levels so the lowest SampleTag appears at the top
-  obj$Sample_tag <- factor(
-    as.character(obj$Sample_tag),
-    levels = rev(sample_order)
+  # Reverse factor levels so the lowest xposeTag appears at the top
+  main$xpose_tag <- factor(
+    as.character(main$xpose_tag),
+    levels = rev(xpose_order)
   )
   
-  # Same violin color for every sample
-  sample_cols <- setNames(
-    rep('#808080', length(sample_order)),
-    sample_order
+  # Same violin color for every xpose tag
+  xpose_cols <- setNames(
+    rep('#808080', length(xpose_order)),
+    xpose_order
   )
   
 # Genes expressed
   p_genes <- VlnPlot(
-    obj,
+    main,
     features = 'nFeature_RNA',
-    group.by = 'Sample_tag',
-    cols = sample_cols,
+    group.by = 'xpose_tag',
+    cols = xpose_cols,
     sort = FALSE,
     pt.size = 0,
     combine = FALSE
@@ -324,7 +326,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = file.path(output_dir, (paste0(day, '_sample_genesexpressed.pdf'))),
+    file = file.path(output_dir, (paste0(day, '_xpose_genesexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
@@ -336,10 +338,10 @@ for (day in sortdays) {
   
 # Transcripts expressed
   p_counts <- VlnPlot(
-    obj,
+    main,
     features = 'nCount_RNA',
-    group.by = 'Sample_tag',
-    cols = sample_cols,
+    group.by = 'xpose_tag',
+    cols = xpose_cols,
     sort = FALSE,
     pt.size = 0,
     combine = FALSE
@@ -394,7 +396,7 @@ for (day in sortdays) {
   
   quartz(
     type = 'pdf',
-    file = file.path(output_dir, (paste0(day, '_sample_transcriptsexpressed.pdf'))),
+    file = file.path(output_dir, (paste0(day, '_xpose_transcriptsexpressed.pdf'))),
     width = 1.5,
     height = 2.5,
     family = 'Arial'
