@@ -1,4 +1,4 @@
-capture,ratID,orig_ratID,experience,sex,xpose_tag,group
+capture,ratID,orig_ratID,experience,sex,xpose_tag,population
 dmPFC1,NT-1,mRFP05R02,NT,F,1,all
 dmPFC1,RT-3,mRFP07R04,RT,F,2,non-active
 dmPFC1,NC-2,mRFP05R09,NC,F,3,active
