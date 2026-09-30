@@ -104,7 +104,7 @@ if (!is.matrix(counts_all_input) && !inherits(counts_all_input, "Matrix")) {
 }
 if (!is.data.frame(meta)) meta <- as.data.frame(meta)
 
-required_meta <- c("sample_id", "region", "group", "experience", "sex", "cluster_name", "ratID")
+required_meta <- c("sample_id", "region", "population", "experience", "sex", "cluster_name", "ratID")
 missing_meta <- setdiff(required_meta, names(meta))
 if (length(missing_meta) > 0) {
   stop("Metadata is missing required columns: ", paste(missing_meta, collapse = ", "))
@@ -116,11 +116,11 @@ meta_use <- meta %>%
     region == opt$region,
     cluster_name == opt$cluster,
     experience %in% c(case_label, control_label),
-    group %in% c(active_label, nonactive_label)
+    population %in% c(active_label, nonactive_label)
   ) %>%
   mutate(
     decoder_experience = as.character(experience),
-    decoder_group = as.character(group),
+    decoder_population = as.character(population),
     decoder_rat = as.character(ratID),
     decoder_sex = as.character(sex)
   )
@@ -151,10 +151,10 @@ if (!all(c(case_label, control_label) %in% colnames(sex_exp)) || any(sex_exp[, c
 }
 
 completeness <- meta_all %>%
-  count(decoder_rat, decoder_group, name = "n") %>%
+  count(decoder_rat, decoder_population, name = "n") %>%
   complete(
     decoder_rat = rat_meta$decoder_rat,
-    decoder_group = c(active_label, nonactive_label),
+    decoder_population = c(active_label, nonactive_label),
     fill = list(n = 0L)
   )
 if (any(completeness$n != 1L)) {
@@ -195,11 +195,11 @@ run_subset_deseq <- function(rats) {
   sub_meta <- meta_all %>%
     filter(
       decoder_rat %in% rats,
-      decoder_group %in% c(active_label, nonactive_label)
+      decoder_population %in% c(active_label, nonactive_label)
     ) %>%
     arrange(
       match(decoder_rat, sort(rats)),
-      match(decoder_group, c(nonactive_label, active_label))
+      match(decoder_population, c(nonactive_label, active_label))
     )
 
   if (nrow(sub_meta) != 10L) {
@@ -208,7 +208,7 @@ run_subset_deseq <- function(rats) {
 
   sub_counts <- counts_all[, sub_meta$sample_id, drop = FALSE]
   coldata <- data.frame(
-    decoder_cond = factor(sub_meta$decoder_group, levels = c(nonactive_label, active_label)),
+    decoder_cond = factor(sub_meta$decoder_population, levels = c(nonactive_label, active_label)),
     decoder_rat = factor(sub_meta$decoder_rat),
     row.names = sub_meta$sample_id
   )
@@ -439,7 +439,7 @@ finalize_matrix <- function(train_mat, test_mat, adjusted_flag) {
 }
 
 sample_key <- meta_all %>%
-  select(sample_id, decoder_rat, decoder_experience, decoder_sex, decoder_group)
+  select(sample_id, decoder_rat, decoder_experience, decoder_sex, decoder_population)
 
 prepare_activity_difference <- function(train_rats, test_rats) {
   ordered_rats <- c(train_rats, test_rats)
@@ -447,13 +447,13 @@ prepare_activity_difference <- function(train_rats, test_rats) {
   samples <- sample_key %>%
     filter(
       decoder_rat %in% ordered_rats,
-      decoder_group %in% c(active_label, nonactive_label)
+      decoder_population %in% c(active_label, nonactive_label)
     ) %>%
     mutate(
       rat_order = match(decoder_rat, ordered_rats),
-      group_order = match(decoder_group, c(active_label, nonactive_label))
+      population_order = match(decoder_population, c(active_label, nonactive_label))
     ) %>%
-    arrange(rat_order, group_order)
+    arrange(rat_order, population_order)
 
   all_counts <- counts_all[, samples$sample_id, drop = FALSE]
   train_mask <- samples$decoder_rat %in% train_rats
@@ -470,8 +470,8 @@ prepare_activity_difference <- function(train_rats, test_rats) {
   rownames(expr) <- samples$sample_id
 
   make_delta <- function(rat) {
-    active_id <- samples$sample_id[samples$decoder_rat == rat & samples$decoder_group == active_label]
-    nonactive_id <- samples$sample_id[samples$decoder_rat == rat & samples$decoder_group == nonactive_label]
+    active_id <- samples$sample_id[samples$decoder_rat == rat & samples$decoder_population == active_label]
+    nonactive_id <- samples$sample_id[samples$decoder_rat == rat & samples$decoder_population == nonactive_label]
     if (length(active_id) != 1L || length(nonactive_id) != 1L) {
       stop("Incomplete Active/Non-active pair for ", rat)
     }
