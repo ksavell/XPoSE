@@ -8,16 +8,16 @@
 #' @examples
 make_stdf <- function(seur_obj) {
   IDs <- seur_obj@meta.data[, c(
-    "orig.ident",
+    "capture",
     "ratID",
-    "Sample_tag",
-    "SampleTag02_reads",
+    "xpose_tag",
+    "xpose_tag_02_reads",
     # "SampleTag03_reads",
-    "SampleTag04_reads",
+    "xpose_tag_04_reads",
     # "SampleTag05_reads",
-    "SampleTag06_reads",
+    "xpose_tag_06_reads",
     # "SampleTag07_reads",
-    "SampleTag08_reads"
+    "xpose_tag_08_reads"
     # "SampleTag09_reads"
   )]
   
