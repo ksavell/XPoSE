@@ -46,7 +46,7 @@ validate_one <- function(job) {
   counts <- pb$RNA
   if (!is.data.frame(meta)) meta <- as.data.frame(meta)
 
-  required_meta <- c("sample_id", "region", "group", "experience", "sex", "cluster_name", "ratID")
+  required_meta <- c("sample_id", "region", "population", "experience", "sex", "cluster_name", "ratID")
   missing_meta <- setdiff(required_meta, names(meta))
   if (length(missing_meta) > 0) {
     stop(region, " / ", cluster, ": metadata missing: ", paste(missing_meta, collapse = ", "))
@@ -58,7 +58,7 @@ validate_one <- function(job) {
       .data$region == region,
       .data$cluster_name == cluster,
       .data$experience %in% c("RT", "NC"),
-      .data$group %in% c("active", "non-active")
+      .data$population %in% c("active", "non-active")
     )
 
   if (anyDuplicated(sub$sample_id)) stop(region, " / ", cluster, ": duplicate sample IDs")
@@ -75,8 +75,8 @@ validate_one <- function(job) {
   }
 
   completeness <- sub %>%
-    count(ratID, group, name = "n") %>%
-    complete(ratID = rat_meta$ratID, group = c("active", "non-active"), fill = list(n = 0L))
+    count(ratID, population, name = "n") %>%
+    complete(ratID = rat_meta$ratID, population = c("active", "non-active"), fill = list(n = 0L))
   if (any(completeness$n != 1L)) {
     stop(region, " / ", cluster, ": every rat must have exactly one Active and one Non-active sample")
   }
