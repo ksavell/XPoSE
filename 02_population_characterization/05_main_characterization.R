@@ -156,5 +156,5 @@ p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = ratID)) +
     axis.ticks.length = unit(0.3, 'cm'),
     legend.position = 'none',
     plot.margin = margin(t = 15, r = 50, b = 15, l = 50))
-ggsave(p_stack, file.path(output_dir, 'stacked_bar_rat.pdf'),
-        width = 7, height = 5)
+ggsave(file.path(output_dir, 'stacked_bar_rat.pdf'), p_stack, 
+       width = 7, height = 5)
