@@ -11,10 +11,13 @@ suppressPackageStartupMessages({
 })
 
 # Paths -------------------------------------------------------------------------------
-poc_combined <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
-poc_hc <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
+input_file2 <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
 
-output_dir <- 'output/01_metadata_clustering_qc'
+poc_combined <- readRDS(input_file)
+poc_hc <- readRDS(input_file2)
+
+output_dir <- 'output/01_metadata_clustering_qc/poc_qc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
@@ -33,7 +36,7 @@ pal_group <- c('capture' = '#999999', 'cell type' = '#2d8cb8', 'ratID' = '#4d4d4
 set.seed(seed)
 emb  <- Embeddings(poc_hc, reduction)[, 1:n_dims]
 meta <- poc_hc@meta.data
-stopifnot(identical(rownames(emb) == rownames(meta)))
+stopifnot(identical(rownames(emb), rownames(meta)))
 
 # Shared distance matrix
 d <- dist(emb)   # euclidean on PCA dims (~780MB for ~9.9k cells)
@@ -226,7 +229,7 @@ for (day in sortdays) {
   
   # Confirm xpose_tag format
   valid_tags <- grepl(
-    "^xposeTag(0[1-9]|1[0-2])_mm$",
+    "^xpose_tag_(0[1-9]|1[0-2])_mm$",
     xpose_map$xpose_tag
   )
   
@@ -243,7 +246,7 @@ for (day in sortdays) {
   # Extract the number from xposeTag##_mm
   xpose_map$xpose_number <- as.integer(
     sub(
-      "^xposeTag(0[1-9]|1[0-2])_mm$",
+      "^xpose_tag_(0[1-9]|1[0-2])_mm$",
       '\\1',
       xpose_map$xpose_tag
     )
@@ -499,7 +502,7 @@ r2_df <- data.frame(
   `cell type` = r2_for(celltype_col),
   ratID       = r2_for(ratid_col),
   check.names = FALSE)
-write.csv(r2_df, paste0('output/PC_variance', date_tag, '.csv'), row.names = FALSE)
+write.csv(r2_df, file.path(output_dir, paste0('PC_variance', date_tag, '.csv')), row.names = FALSE)
 
 r2_long <- rbind(
   data.frame(PC = r2_df$PC, source = 'capture',   r2 = r2_df$capture),
