@@ -47,14 +47,16 @@ hex_list <- list(
 save_dimplot(main, 
              groupby = 'cluster_name',
              file_n = 'main',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # Split by experience
 save_dimplot(main, 
              groupby = 'cluster_name',
              splitby = 'experience',
              file_n = 'main',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # UMAP by experience and region -------------------------------------------------------
 # Subset by experience comparison of choice
@@ -66,7 +68,8 @@ save_dimplot(
   groupby = 'experience',
   splitby = 'region',
   file_n = 'N_vs_NT',
-  hex_list = hex_list
+  hex_list = hex_list,
+  output_dir = output_dir
 )
 
 # UMAP by population and region ------------------------------------------------------------
@@ -79,6 +82,7 @@ save_dimplot(
   groupby = 'population',
   splitby = 'region',
   file_n = 'NC_active_vs_NC_nonactive',
-  hex_list = hex_list
+  hex_list = hex_list,
+  output_dir = output_dir
 )
 
