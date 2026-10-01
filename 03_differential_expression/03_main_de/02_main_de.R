@@ -170,7 +170,7 @@ build_nuclei_audit <- function(meta_df, cluster, case_pair, ctrl_pair,
     NA_character_
   } else {
     paste0(
-      "Requires >=", min_rats, " rats per group with >=", min_nuclei,
+      "Requires >=", min_rats, " rats per population with >=", min_nuclei,
       " nuclei per pseudobulk sample; retained case=", n_case,
       ", control=", n_ctrl,
       if (paired_design) " after requiring complete pairs." else "."
