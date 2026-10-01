@@ -6,11 +6,11 @@ This directory contains the Biowulf portion of the POC active-fraction downsampl
 
 From the base XPoSE repository directory, run:
 
-Rscript 03_differential_expression/02_downsample_de/01_prep_split_clusters.R
+Rscript 03_differential_expression/01_poc_downsample_de/01_prep_split_clusters.R
 
 This creates:
 
-output/03_differential_expression/02_downsample_de/hpc_input/
+output/03_differential_expression/01_poc_downsample_de/hpc_input/
 
 with one .rds file for each population listed in hpc/clusters_kept.txt.
 
@@ -20,7 +20,7 @@ Create a working directory on Biowulf, for example:
 
 mkdir -p /data/$USER/xpose_downsample
 
-Transfer the local hpc_input/ directory plus the following files from 03_differential_expression/02_downsample_de/hpc/:
+Transfer the local hpc_input/ directory plus the following files from 03_differential_expression/01_poc_downsample_de/hpc/:
 
 02_make_swarm_downsample.sh
 
@@ -97,11 +97,11 @@ output/run_poc/
 
 back to:
 
-output/03_differential_expression/02_downsample_de/run_poc/
+output/03_differential_expression/01_poc_downsample_de/run_poc/
 
 in the local XPoSE repository.
 
 Generate the final Figure 5 downsampling panel locally on macOS with:
 
-Rscript 03_differential_expression/02_downsample_de/05_plot_downsample.R \
-  --out_dir output/03_differential_expression/02_downsample_de/run_poc
+Rscript 03_differential_expression/01_poc_downsample_de/05_plot_downsample.R \
+  --out_dir output/03_differential_expression/01_poc_downsample_de/run_poc
