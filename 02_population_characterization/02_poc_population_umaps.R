@@ -46,20 +46,23 @@ hex_list <- list(
 save_dimplot(poc_hc, 
              groupby = 'cluster_name',
              file_n = 'poc',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # UMAP by capture per subject ---------------------------------------------------------
 save_dimplot(poc_hc, 
              groupby = 'capture',
              splitby = 'ratID',
              file_n = 'poc',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # UMAP by experience ------------------------------------------------------------------
 save_dimplot(poc_combined, 
              groupby = 'experience',
              file_n = 'poc',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # UMAP by population ------------------------------------------------------------------
 NC <- subset(poc_combined, subset = experience == 'NC')
@@ -67,12 +70,14 @@ NC <- subset(poc_combined, subset = experience == 'NC')
 save_dimplot(NC, 
              groupby = 'population',
              file_n = 'NC', 
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
 # Split by individual
 save_dimplot(NC, 
              groupby = 'population',
              splitby = 'ratID',
              file_n = 'NC',
-             hex_list = hex_list)
+             hex_list = hex_list,
+             output_dir = output_dir)
 
