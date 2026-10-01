@@ -16,7 +16,7 @@ source('02_population_characterization/functions/make_stdf.R')
 input_file <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
 poc_hc <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization/poc/'
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
