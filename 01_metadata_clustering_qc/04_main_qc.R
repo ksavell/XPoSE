@@ -6,9 +6,10 @@ library(Seurat)
 library(dplyr)
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+main <- readRDS(input_file)
 
-output_dir <- 'output/01_metadata_clustering_qc'
+output_dir <- 'output/01_metadata_clustering_qc/main_qc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
@@ -219,7 +220,7 @@ for (day in sortdays) {
   
   # Confirm xpose_tag format
   valid_tags <- grepl(
-    '^xposeTag(0[1-9]|1[0-2])_mm$',
+    '^xpose_tag_(0[1-9]|1[0-2])_mm$',
     xpose_map$xpose_tag
   )
   
@@ -236,13 +237,13 @@ for (day in sortdays) {
   # Extract the number from xposeTag##_mm
   xpose_map$xpose_number <- as.integer(
     sub(
-      '^xposeTag(0[1-9]|1[0-2])_mm$',
+      '^xpose_tag_(0[1-9]|1[0-2])_mm$',
       '\\1',
       xpose_map$xpose_tag
     )
   )
   
-  # Sort xposeTags numerically
+  # Sort xpose tags numerically
   xpose_map <- xpose_map[
     order(xpose_map$xpose_number),
   ]
