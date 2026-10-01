@@ -9,7 +9,7 @@ library(writexl)
 input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
 main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization/main/'
+output_dir <- 'output/02_population_characterization/main'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Excitatory/Inhibitory marker expression ---------------------------------------------
