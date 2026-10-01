@@ -6,9 +6,10 @@ library(dplyr)
 library(writexl)
 
 # Paths -------------------------------------------------------------------------------
-poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
+poc_hc <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Excitatory/Inhibitory marker expression ---------------------------------------------
