@@ -6,9 +6,10 @@ library(dplyr)
 library(writexl)
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/02_population_characterization/main_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/main'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Excitatory/Inhibitory marker expression ---------------------------------------------
