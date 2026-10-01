@@ -13,9 +13,10 @@ source('02_population_characterization/functions/calc_prop.R')
 source('02_population_characterization/functions/make_stdf.R')
 
 # Paths -------------------------------------------------------------------------------
-poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
+poc_hc <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
@@ -102,55 +103,105 @@ write.csv(mean, file.path(output_dir, 'F1I_stReadsMean_bycart.csv'))
 # Stats 
 wilcox_results <- list()
 
-# Define samples and corresponding incorrect tags
-samples <- list(
-  'xpose_tag_08' = c('xpose_tag_02_reads', 'xpose_tag_04_reads', 'xpose_tag_06_reads'),
-  'xpose_tag_04' = c('xpose_tag_02_reads', 'xpose_tag_06_reads', 'xpose_tag_08_reads'),
-  'xpose_tag_02' = c('xpose_tag_04_reads', 'xpose_tag_06_reads', 'xpose_tag_08_reads'),
-  'xpose_tag_06' = c('xpose_tag_02_reads', 'xpose_tag_04_reads', 'xpose_tag_08_reads')
+# Explicit mapping between metadata tag labels and read-count columns
+tag_map <- list(
+  SampleTag08_mm = list(
+    correct = "xpose_tag_08_reads",
+    incorrect = c(
+      "xpose_tag_02_reads",
+      "xpose_tag_04_reads",
+      "xpose_tag_06_reads"
+    )
+  ),
+  SampleTag04_mm = list(
+    correct = "xpose_tag_04_reads",
+    incorrect = c(
+      "xpose_tag_02_reads",
+      "xpose_tag_06_reads",
+      "xpose_tag_08_reads"
+    )
+  ),
+  SampleTag02_mm = list(
+    correct = "xpose_tag_02_reads",
+    incorrect = c(
+      "xpose_tag_04_reads",
+      "xpose_tag_06_reads",
+      "xpose_tag_08_reads"
+    )
+  ),
+  SampleTag06_mm = list(
+    correct = "xpose_tag_06_reads",
+    incorrect = c(
+      "xpose_tag_02_reads",
+      "xpose_tag_04_reads",
+      "xpose_tag_08_reads"
+    )
+  )
 )
 
-for (sample_base in names(samples)) {
-  assigned_tag <- paste0(sample_base, '_mm')   # Assigned Sample_tag
-  correct_reads_var <- paste0(sample_base, '_reads')  # Correct reads column
-  cells <- WhichCells(poc_hc, expression = Sample_tag == assigned_tag)
-  correct <- FetchData(poc_hc, vars = correct_reads_var)[cells, 1]
-  incorrect <- rowMeans(FetchData(poc_hc, vars = samples[[sample_base]])[cells, ])
-  test <- wilcox.test(correct, incorrect, paired = TRUE, alternative = 'greater')
-  
-  # Save the results
-  wilcox_results[[sample_base]] <- data.frame(
-    sample = sample_base,
+for (assigned_tag in names(tag_map)) {
+  correct_reads_var <- tag_map[[assigned_tag]]$correct
+  incorrect_reads_vars <- tag_map[[assigned_tag]]$incorrect
+
+  # Cells assigned to this raw SampleTag label
+  cells <- WhichCells(
+    poc_hc,
+    expression = xpose_tag == assigned_tag
+  )
+
+  # Correct-tag reads
+  correct <- FetchData(
+    poc_hc,
+    vars = correct_reads_var
+  )[cells, 1]
+
+  # Mean reads across the three incorrect tags
+  incorrect <- rowMeans(
+    FetchData(
+      poc_hc,
+      vars = incorrect_reads_vars
+    )[cells, , drop = FALSE]
+  )
+
+  # Paired Wilcoxon test
+  test <- wilcox.test(
+    correct,
+    incorrect,
+    paired = TRUE,
+    alternative = "greater"
+  )
+
+  wilcox_results[[assigned_tag]] <- data.frame(
+    sample = assigned_tag,
+    correct_read_column = correct_reads_var,
+    n_cells = length(cells),
     p_value = test$p.value,
-    statistic = test$statistic,
+    statistic = unname(test$statistic),
     method = test$method,
     alternative = test$alternative
   )
 }
 
 wilcox_summary <- do.call(rbind, wilcox_results)
-write.csv(wilcox_summary, file.path(output_dir, 'F1I_stats.csv'), row.names = FALSE)
+write.csv(wilcox_summary, file.path(output_dir, "F1I_stats.csv"), row.names = FALSE)
 
-# Sample_tag contribution / bias score per cluster ------------------------------------
-
-date_tag <- format(Sys.Date(), '_%m%d%Y')
-
+# xpose_tag contribution / bias score per cluster ------------------------------------
 # Pull metadata 
 md <- poc_hc@meta.data %>%
-  dplyr::select(cluster_name, Sample_tag, capture) %>%
+  dplyr::select(cluster_name, xpose_tag, capture) %>%
   dplyr::mutate(
     cluster_name = as.character(cluster_name),
-    Sample_tag   = as.character(Sample_tag),
+    xpose_tag   = as.character(xpose_tag),
     capture   = as.character(capture)
   )
-tags     <- sort(unique(md$Sample_tag))
+tags     <- sort(unique(md$xpose_tag))
 n_tags   <- length(tags)
 expected <- 1 / n_tags          # equal-contribution null: 1/n_tags
 
 # POOLED: Calculate counts + proportions per cluster 
 counts <- md %>%
-  dplyr::count(cluster_name, Sample_tag, name = 'n') %>%
-  tidyr::complete(cluster_name, Sample_tag, fill = list(n = 0)) %>%
+  dplyr::count(cluster_name, xpose_tag, name = 'n') %>%
+  tidyr::complete(cluster_name, xpose_tag, fill = list(n = 0)) %>%
   dplyr::group_by(cluster_name) %>%
   dplyr::mutate(cluster_total = sum(n), prop = n / cluster_total) %>%
   dplyr::ungroup()
@@ -163,7 +214,7 @@ axis_labels <- setNames(paste0("<span style='color:", cluster_colors[cluster_ord
                                cluster_labels[cluster_order], "</span>"), cluster_order)
 
 # Pooled stacked bar
-p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = Sample_tag)) +
+p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = xpose_tag)) +
   geom_col(width = 0.72, color = 'white', linewidth = 0.75) +
   scale_fill_grey(start = 0, end = 0.7) +
   scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.25, 0.50, 0.75, 1),
@@ -180,5 +231,5 @@ p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = Sample_tag)) +
     axis.ticks.length = unit(0.3, 'cm'),
     legend.position = 'none',
     plot.margin = margin(t = 15, r = 50, b = 15, l = 50))
-ggsave(file.path(output_dir, paste0('stacked_bar_sampletag', date_tag, '.pdf')),
+ggsave(file.path(output_dir, 'stacked_bar_sampletag.pdf'),
        p_stack, width = 7, height = 5)
