@@ -27,7 +27,7 @@ analysis <- list(
   )
 )
 
-output_dir <- "output/04_relapse_transcriptional_characterization/01_response_correlation/"
+output_dir <- "output/04_relapse_transcriptional_characterization/01_response_correlation"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Plot settings ----------------------------------------------------------
