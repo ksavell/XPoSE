@@ -6,7 +6,7 @@
 #
 # Usage:
 #   Rscript 04_collect_downsample.R --out_dir \
-#     output/03_differential_expression/02_downsample_de/run_<run_id>
+#     output/03_differential_expression/01_poc_downsample_de/run_<run_id>
 
 suppressPackageStartupMessages({
   library(optparse)
