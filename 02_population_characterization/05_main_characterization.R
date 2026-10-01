@@ -9,9 +9,10 @@ library(scales)
 source('02_population_characterization/functions/calc_prop.R')
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/02_population_characterization/main_annotated.rds'
+input_file <- 'output/02_population_characterization/main_annotated.rds'
+main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/main'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
@@ -111,8 +112,6 @@ write.csv(tag_composition, file.path(output_dir, 'F3G_tag_composition_capture.cs
 # Subset by experience
 exp_subset <- subset(x = main, subset = experience == 'NT')
 
-date_tag <- format(Sys.Date(), '_%m%d%Y')
-
 # Pull metadata 
 md <- exp_subset@meta.data %>%
   dplyr::select(cluster_name, ratID, capture) %>%
@@ -157,5 +156,5 @@ p_stack <- ggplot(counts, aes(x = prop, y = cluster_name, fill = ratID)) +
     axis.ticks.length = unit(0.3, 'cm'),
     legend.position = 'none',
     plot.margin = margin(t = 15, r = 50, b = 15, l = 50))
-ggsave(file.path(output_dir, 'stacked_bar_rat', date_tag, '.pdf')),
-       p_stack, width = 7, height = 5)
+ggsave(p_stack, file.path(output_dir, 'stacked_bar_rat.pdf'),
+        width = 7, height = 5)
