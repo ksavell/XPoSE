@@ -11,8 +11,8 @@ suppressPackageStartupMessages({
 
 # Paths -------------------------------------------------------------------
 input_file <- "output/01_metadata_clustering_qc/poc_combined_annotated.rds"
-clusters_file <- "03_differential_expression/01_downsample_de/clusters_kept.txt"
-data_root <- "output/03_differential_expression/02_downsample_de/hpc_input"
+clusters_file <- "03_differential_expression/01_poc_downsample_de/clusters_kept.txt"
+data_root <- "output/03_differential_expression/01_poc_downsample_de/hpc_input"
 
 dir.create(data_root, showWarnings = FALSE, recursive = TRUE)
 
