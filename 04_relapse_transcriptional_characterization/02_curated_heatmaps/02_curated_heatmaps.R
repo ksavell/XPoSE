@@ -19,7 +19,7 @@ de_results_dirs <- c(
   vmPFC = "output/03_differential_expression/03_main_de/RT_active_RT_nonactive_vmPFC/results"
 )
 
-output_dir <- "output/04_relapse_transcriptional_characterization/02_curated_heatmaps"
+output_dir <- "output/04_relapse_transcriptional_characterization/02_curated_heatmaps/"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Choose one: main_compact, supplemental_up_only, supplemental_all
