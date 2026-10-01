@@ -12,7 +12,7 @@ source('02_population_characterization/functions/calc_prop.R')
 input_file <- 'output/02_population_characterization/main_annotated.rds'
 main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization/main'
+output_dir <- 'output/02_population_characterization/main/'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
