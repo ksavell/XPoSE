@@ -2,8 +2,8 @@
 # XPoSE-seq: generate Biowulf swarm for POC downsampling DE analysis
 #
 # Usage:
-#   bash 03_differential_expression/02_downsample_de/02_make_swarm_downsample.sh <run_id>
-#   bash 03_differential_expression/02_downsample_de/02_make_swarm_downsample.sh <run_id> --submit
+#   bash 03_differential_expression/01_poc_downsample_de/02_make_swarm_downsample.sh <run_id>
+#   bash 03_differential_expression/01_poc_downsample_de/02_make_swarm_downsample.sh <run_id> --submit
 #
 # Run from any location within a cloned XPoSE repository. The script resolves
 # repository paths relative to its own location.
@@ -23,8 +23,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Analysis paths ----------------------------------------------------------
-DATA_ROOT="${REPO_ROOT}/output/03_differential_expression/02_downsample_de/hpc_input"
-OUT_ROOT="${REPO_ROOT}/output/03_differential_expression/02_downsample_de"
+DATA_ROOT="${REPO_ROOT}/output/03_differential_expression/01_poc_downsample_de/hpc_input"
+OUT_ROOT="${REPO_ROOT}/output/03_differential_expression/01_poc_downsample_de"
 R_SCRIPT="${SCRIPT_DIR}/03_run_downsample_de_job.R"
 DE_SCRIPT="${SCRIPT_DIR}/functions/single_factor_DESeq.R"
 CLUSTERS_FILE="${SCRIPT_DIR}/clusters_kept.txt"
