@@ -15,7 +15,7 @@ input_file2 <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
 poc_hc <- readRDS(input_file)
 poc_combined <- readRDS(input_file2)
 
-output_dir <- 'output/02_population_characterization/poc'
+output_dir <- 'output/02_population_characterization/poc/'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Cluster proportions by capture ------------------------------------------------------
@@ -26,6 +26,7 @@ clust_prop_cart <- calc_prop(poc_hc,
 
 write.csv(clust_prop_cart, file.path(output_dir, 'poc_clust_prop_capture.csv'))
 
+# CAPTURE COMPARISONS =================================================================
 # Build per-rat/capture proportions ---------------------------------------------------
 prop_df <- poc_hc@meta.data %>%          # or just `poc_combined` if it's already a data.frame
   count(ratID, capture, cluster_name, name = 'n') %>%
@@ -82,7 +83,8 @@ clust_prop_pop <- calc_prop(poc_combined,
 
 write.csv(clust_prop_pop, file.path(output_dir, 'poc_clust_prop_population.csv'))
 
-# Build per-rat/population proportions ------------------------------------------------
+# POPULATION COMPARISONS ===============================================================                     
+# Build per-rat/population proportions -------------------------------------------------
 prop_df <- poc_combined@meta.data %>%          # or just `poc_combined` if it's already a data.frame
   count(ratID, population, cluster_name, name = 'n') %>%
   group_by(ratID, population) %>%
