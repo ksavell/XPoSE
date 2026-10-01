@@ -4,14 +4,16 @@
 library(Seurat)
 library(tidyverse)
 
-source('02_population_characterization/functions/calc_prop.R')
-source('02_population_characterization/functions/make_stdf.R')
+source('02_population_characterization/functions/save_dimplot.R')
 
 # Paths -------------------------------------------------------------------------------
-poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
-poc_combined <- 'output/02_population_characterization/poc_combined_annotated.rds'
+input_file <- 'output/02_population_characterization/poc_hc_annotated.rds'
+input_file2 <- 'output/02_population_characterization/poc_combined_annotated.rds'
 
-output_dir <- 'output/02_population_characterization'
+poc_hc <- readRDS(input_file)
+poc_combined <- readRDS(input_file2)
+
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
@@ -32,7 +34,7 @@ hex_list <- list(
                      'Sncg' = '#D3408D',
                      'Vip' = '#B864CC',
                      'Lamp5' = '#DA808C'),
-  'orig.ident' = c('C1' = '#5A9BC7',
+  'capture' = c('C1' = '#5A9BC7',
                    'C2' = '#E08A2D'),
   'experience' =  c('HC' = '#C0C0C0',
                     'NC' = '#3B958E'),
