@@ -13,7 +13,7 @@ input_file2 <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
 poc_hc <- readRDS(input_file)
 poc_combined <- readRDS(input_file2)
 
-output_dir <- 'output/02_population_characterization/poc/'
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Settings ----------------------------------------------------------------------------
