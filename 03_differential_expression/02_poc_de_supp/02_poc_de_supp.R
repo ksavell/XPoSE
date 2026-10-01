@@ -14,11 +14,11 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
-source("03_differential_expression/02_poc_de_sup/poc_de_functions.R")
+source("03_differential_expression/02_poc_de_supp/poc_de_functions.R")
 
 # Paths -------------------------------------------------------------------
 input_file <- "output/01_metadata_clustering_qc/poc_combined_annotated.rds"
-output_dir <- "output/03_differential_expression/02_poc_de_supp"
+output_dir <- "output/03_differential_expression/02_poc_de_supp/02_poc_de_supp/"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Load POC object ---------------------------------------------------------
@@ -59,8 +59,6 @@ eligible_clusters <- eligibility %>%
   pull(cluster_name)
 
 all_rats <- sort(unique(all$ratID[all$de_population %in% c("Active", "Homecage")]))
-
-min_cell_threshold <- 9
 
 # Logs --------------------------------------------------------------------
 skip_log <- data.frame(
