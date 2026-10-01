@@ -4,11 +4,11 @@
 library(Seurat)
 library(tidyverse)
 
-source('02_population_characterization/functions/calc_prop.R')
-source('02_population_characterization/functions/make_stdf.R')
+source('02_population_characterization/functions/save_dimplot.R')
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/02_population_characterization/main_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+main <- readRDS(input_file)
 
 output_dir <- 'output/02_population_characterization'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
