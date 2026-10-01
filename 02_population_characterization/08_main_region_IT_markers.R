@@ -9,9 +9,10 @@ suppressPackageStartupMessages({
 })
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/02_population_characterization/main_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/main'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # User settings -----------------------------------------------------------------------
@@ -162,22 +163,17 @@ p <- ggplot(
   )
 
 # Save Quartz vector PDF + PNG --------------------------------------------------------
-today <- format(Sys.Date(), '%m%d%Y')
-out_dir <- file.path(output_dir, paste0('IT_marker_dotplot_', today))
-dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
-
 n <- length(genes_plot)
 plot_width <- 4
 plot_height <- 1.5
 
 pdf_file <- file.path(
-  out_dir,
-  paste0('IT_marker_dotplot_', today, '.pdf')
-)
+  output_dir,
+  'IT_marker_dotplot_.pdf')
+
 png_file <- file.path(
-  out_dir,
-  paste0('IT_marker_dotplot_', today, '.png')
-)
+  output_dir,
+  'IT_marker_dotplot_.png')
 
 if (capabilities('aqua')) {
   quartz(
@@ -212,9 +208,8 @@ if (isTRUE(save_png)) {
 write.csv(
   dot_data,
   file.path(
-    out_dir,
-    paste0('IT_marker_dotplot_plot_data_', today, '.csv')
-  ),
+    output_dir,
+    'IT_marker_dotplot_plot_data_.csv'),
   row.names = FALSE
 )
 
