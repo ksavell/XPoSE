@@ -335,7 +335,8 @@ de_and_summary <- function(seur_obj,
         comp_vect = pair,
         cluster = cl,
         min_cell = min_cell,
-        min_rat = min_rat
+        min_rat = min_rat,
+        keep_dds = save_dds
       ),
       error = function(e) {
         message(
