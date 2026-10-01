@@ -9,10 +9,13 @@ library(purrr)
 source('02_population_characterization/functions/calc_prop.R')
 
 # Paths -------------------------------------------------------------------------------
-poc_hc <- 'output/02_population_characterization/poc_hc_annotated.rds'
-poc_combined <- 'output/02_population_characterization/poc_combined_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
+input_file2 <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
 
-output_dir <- 'output/02_population_characterization'
+poc_hc <- readRDS(input_file)
+poc_combined <- readRDS(input_file2)
+
+output_dir <- 'output/02_population_characterization/poc'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Cluster proportions by capture ------------------------------------------------------
@@ -23,22 +26,22 @@ clust_prop_cart <- calc_prop(poc_hc,
 
 write.csv(clust_prop_cart, file.path(output_dir, 'poc_clust_prop_capture.csv'))
 
-# Build per-rat/population proportions ------------------------------------------------
+# Build per-rat/capture proportions ---------------------------------------------------
 prop_df <- poc_hc@meta.data %>%          # or just `poc_combined` if it's already a data.frame
   count(ratID, capture, cluster_name, name = 'n') %>%
   group_by(ratID, capture) %>%
   mutate(prop = n / sum(n)) %>%
   ungroup() %>%
   # make sure zero-count clusters become prop = 0, not missing
-  complete(nesting(ratID, capture), cluster_name, fill = list(n = 0, prop = 0)) %>%
+  complete(nesting(ratID, capture), cluster_name, fill = list(n = 0, prop = 0))
 
 # Test runners ------------------------------------------------------------------------
 # PAIRED: active vs non-active within the SAME NC rat.
 run_paired <- function(df, g1, g2) {
   wide <- df %>%
-    filter(population %in% c(g1, g2)) %>%
-    select(ratID, population, cluster_name, prop) %>%
-    pivot_wider(names_from = population, values_from = prop)
+    filter(capture %in% c(g1, g2)) %>%
+    select(ratID, capture, cluster_name, prop) %>%
+    pivot_wider(names_from = capture, values_from = prop)
   
   wide %>%
     group_by(cluster_name) %>%
@@ -65,8 +68,11 @@ add_fdr <- function(x) mutate(x, padj = p.adjust(p, method = 'BH'))
 
 res1 <- add_fdr(res1)
 
+results <- bind_rows(res1) %>%
+  arrange(comparison, padj)
+
 print(results, n = Inf)
-write.csv(results, file.path(output_dir, 'xpose_population_prop_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'xpose_population_prop_stats_summary.csv'))
 
 # Cluster proportions by population ----------------------------------------------------
 clust_prop_pop <- calc_prop(poc_combined, 
@@ -74,7 +80,7 @@ clust_prop_pop <- calc_prop(poc_combined,
                             fact2 = 'cluster_name',
                             fact3 = 'population') 
 
-write.csv(clust_prop_pop, file.path(output_dir, 'poc_clust_prop_population.csv')
+write.csv(clust_prop_pop, file.path(output_dir, 'poc_clust_prop_population.csv'))
 
 # Build per-rat/population proportions ------------------------------------------------
 prop_df <- poc_combined@meta.data %>%          # or just `poc_combined` if it's already a data.frame
@@ -148,4 +154,4 @@ results <- bind_rows(res1, res2, res3) %>%
   arrange(comparison, padj)
 
 print(results, n = Inf)
-write.csv(results, file.path(output_dir, 'population_prop_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'population_prop_stats_summary.csv'))
