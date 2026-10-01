@@ -9,9 +9,10 @@ library(purrr)
 source('02_population_characterization/functions/calc_prop.R')
 
 # Paths -------------------------------------------------------------------------------
-main <- 'output/02_population_characterization/main_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/main_annotated.rds'
+main <- readRDS(input_file)
 
-output_dir <- 'output/02_population_characterization'
+output_dir <- 'output/02_population_characterization/main/'
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Cluster proportions by experience ---------------------------------------------------
@@ -23,7 +24,7 @@ clust_prop_region <- calc_prop(region_set,
                                      fact2 = 'cluster_name',
                                      fact3 = 'experience')
 
-write.csv(clust_prop_region, file.path(output_dir, 'main_experience_dmPFC.csv')
+write.csv(clust_prop_region, file.path(output_dir, 'main_experience_dmPFC.csv'))
 
 # Cluster proportions by region -------------------------------------------------------
 # Subset by experience 
@@ -34,7 +35,7 @@ clust_prop_exp_region <- calc_prop(region_set,
                                      fact2 = 'cluster_name',
                                      fact3 = 'region') 
 
-write.csv(clust_prop_exp_region, file.path(output_dir, 'main_experience_by_region.csv')
+write.csv(clust_prop_exp_region, file.path(output_dir, 'main_experience_by_region.csv'))
 
 # EXPERIENCE COMPARISONS ==============================================================
 # Build per-rat/experience proportions ------------------------------------------------
@@ -79,7 +80,7 @@ results <- bind_rows(res1) %>%
   arrange(comparison, padj)
 
 print(results, n = Inf)
-write.csv(results, file.path(output_dir, 'N_vs_NT_proportion_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'N_vs_NT_proportion_stats_summary.csv'))
 
 # WITHIN-EXPERIENCE POPULATION COMPARISONS ============================================
 # Build per-rat/group proportions -----------------------------------------------------
@@ -128,11 +129,10 @@ results <- bind_rows(res1) %>%
   arrange(comparison, padj)
 
 print(results, n = Inf)
-write.csv(results, file.path(output_dir, 'RT_A_vs_RT_NA_proportion_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'RT_A_vs_RT_NA_proportion_stats_summary.csv'))
 
 # REGION COMPARISONS ===================================================================
 # Build per-rat/region proportions -----------------------------------------------------
-
 region_comparison <- subset(main, subset = experience == 'N')
 
 region_prop_df <- region_comparison@meta.data %>%          
@@ -178,5 +178,5 @@ results <- bind_rows(res1) %>%
   arrange(comparison, padj)
 
 print(results, n = Inf)
-write.csv(results, file.path(output_dir, 'N_dmPFC_vs_vmPFC_proportion_stats_summary.csv')
+write.csv(results, file.path(output_dir, 'N_dmPFC_vs_vmPFC_proportion_stats_summary.csv'))
 
