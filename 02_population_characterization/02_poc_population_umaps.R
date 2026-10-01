@@ -7,8 +7,8 @@ library(tidyverse)
 source('02_population_characterization/functions/save_dimplot.R')
 
 # Paths -------------------------------------------------------------------------------
-input_file <- 'output/02_population_characterization/poc_hc_annotated.rds'
-input_file2 <- 'output/02_population_characterization/poc_combined_annotated.rds'
+input_file <- 'output/01_metadata_clustering_qc/poc_hc_annotated.rds'
+input_file2 <- 'output/01_metadata_clustering_qc/poc_combined_annotated.rds'
 
 poc_hc <- readRDS(input_file)
 poc_combined <- readRDS(input_file2)
