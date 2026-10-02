@@ -44,13 +44,29 @@ summary_table <- bind_rows(lapply(
 if (!setequal(summary_table$region, c("dmPFC", "vmPFC"))) {
   stop("Collected summaries must contain exactly dmPFC and vmPFC")
 }
+
 if (anyDuplicated(summary_table$region)) {
   stop("More than one summary row was found for a region")
 }
 
+# Write to requested collection directory
 write_csv(
   summary_table,
   file.path(opt$out_dir, "decoder_percent_correct.csv")
+)
+
+# Explicit HPC -> local handoff
+final_output_dir <- "output/05_experience_decoder"
+
+dir.create(
+  final_output_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+write_csv(
+  summary_table,
+  file.path(final_output_dir, "decoder_percent_correct.csv")
 )
 
 if (length(exact_files) == 2L) {
