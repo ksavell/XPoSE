@@ -6,7 +6,7 @@
 2. `00_validate_cache_inputs.R` verifies the pseudobulk/meta inputs and the complete 12-rat RT/NC Active/Non-active structure before expensive computation.
 3. `00_submit_cache.sh` submits the 18 Biowulf cache jobs. Each job runs `00_build_nested_deg_cache.R` for one region x cell type.
 4. `01_run_decoder.R` runs the final nested activity-difference decoder separately for dmPFC and vmPFC.
-5. `02_collect_decoder.R` combines the two regional decoder summaries.
+5. `02_collect_decoder.R` combines the two regional decoder summaries after both regional jobs have completed.
 6. `03_plot_decoder_accuracy.R` plots percent correct for dmPFC and vmPFC.
 
 ## Cache inputs
@@ -54,3 +54,35 @@ Cache construction is resumable at the DESeq2 chunk level. If a completed final 
 The final decoder uses only the `activity_difference` representation. Within each outer fold and exact RT/NC label assignment, it retrieves the Active-vs-Non-active DEG sets for the five rats assigned to the RT training class and the five rats assigned to the NC training class, takes their regional RT union NC union across configured cell types, and fits the nested hierarchical ridge decoder using only training-derived features and preprocessing.
 
 The exact assignment space contains 400 sex-balanced RT/NC label assignments. The observed assignment contains 18 eligible same-sex RT/NC held-out pairs. Percent correct is `100 x pair concordance`, where a held-out pair is correct when the RT rat receives a higher RT probability than the paired NC rat.
+
+## Run final decoder on Biowulf
+
+Run the final decoder separately for dmPFC and vmPFC.
+
+From the repository root:
+
+```bash
+sbatch --job-name=decoder_dmPFC \
+  --cpus-per-task=8 \
+  --mem=48g \
+  --time=48:00:00 \
+  --gres=lscratch:50 \
+  --wrap="module load R && Rscript 05_experience_decoder/01_run_decoder.R --region dmPFC"
+
+sbatch --job-name=decoder_vmPFC \
+  --cpus-per-task=8 \
+  --mem=48g \
+  --time=48:00:00 \
+  --gres=lscratch:50 \
+  --wrap="module load R && Rscript 05_experience_decoder/01_run_decoder.R --region vmPFC"
+
+Rscript 05_experience_decoder/02_collect_decoder.R
+Rscript 05_experience_decoder/03_plot_decoder_accuracy.R
+```
+
+## RUN ONCE AND THEN DELETE
+```bash
+rm 05_experience_decoder/submit_decoder.sh
+grep -R "decoder_worker.sbatch\|collect_worker.sbatch\|submit_decoder.sh" 05_experience_decoder
+```
+
