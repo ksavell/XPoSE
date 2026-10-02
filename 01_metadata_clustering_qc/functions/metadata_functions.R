@@ -261,9 +261,7 @@ assign_experimental_metadata <- function(
   )
   
   for (metadata_col in metadata_cols) {
-    seur_obj[[metadata_col]] <- capture_lookup[
-      [metadata_col]
-    ][idx]
+    seur_obj[[metadata_col]] <- capture_lookup[[metadata_col]][idx]
   }
   
   seur_obj$metadata_assigned <- !is.na(idx)
